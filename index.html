@@ -833,6 +833,17 @@ Vielen Dank!</div>
         const cloudConfigKey = 'fb_config_vertretungsstatistik';
         const cloudSchoolKey = 'fb_school_id_vertretungsstatistik';
 
+        // Standard-Projektkonfiguration für Statistik HBS Kahla
+        const DEFAULT_FIREBASE_CONFIG = {
+            apiKey: "AIzaSyCnleowgQT4XoMK5P5b_t1uWYGsWoYxT80",
+            authDomain: "statistik-91f25.firebaseapp.com",
+            projectId: "statistik-91f25",
+            storageBucket: "statistik-91f25.firebasestorage.app",
+            messagingSenderId: "277742289737",
+            appId: "1:277742289737:web:b87043732524cc283d5098"
+        };
+        const DEFAULT_SCHOOL_ID = "statistik-hbs-kahla";
+
         let appData = { schoolYear: "", lastRealYear: "", currentMonth: new Date().getMonth() + 1, teachers: [], years: {}, lastModified: 0 };
         const monthNames = { 8:"August", 9:"September", 10:"Oktober", 11:"November", 12:"Dezember", 1:"Januar", 2:"Februar", 3:"März", 4:"April", 5:"Mai", 6:"Juni", 7:"Juli" };
         const monthOrder = [8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6, 7];
@@ -1005,24 +1016,26 @@ Vielen Dank!</div>
         }
 
         function getSchoolDocId() {
-            return (localStorage.getItem(cloudSchoolKey) || "schule-standard").trim().toLowerCase().replace(/[^a-z0-9_-]/g, '-');
+            return (localStorage.getItem(cloudSchoolKey) || DEFAULT_SCHOOL_ID).trim().toLowerCase().replace(/[^a-z0-9_-]/g, '-');
         }
 
         function initFirebaseFromStorage() {
             const rawConfig = localStorage.getItem(cloudConfigKey);
-            const schoolId = localStorage.getItem(cloudSchoolKey) || "schule-standard";
+            const schoolId = localStorage.getItem(cloudSchoolKey) || DEFAULT_SCHOOL_ID;
             
-            if (!rawConfig) {
-                updateCloudUIStatus('local', 'Lokal (Offline)', 'Keine Firebase-Konfiguration hinterlegt. Daten werden nur im Browser gespeichert.');
-                return;
+            let config = DEFAULT_FIREBASE_CONFIG;
+            if (rawConfig) {
+                try {
+                    config = JSON.parse(rawConfig);
+                } catch (e) {
+                    console.error("Firebase Config ungültig, verwende Standard:", e);
+                }
             }
 
-            try {
-                const config = JSON.parse(rawConfig);
+            if (config && config.apiKey) {
                 startFirebase(config, schoolId);
-            } catch (e) {
-                console.error("Firebase Config ungültig:", e);
-                updateCloudUIStatus('error', 'Konfig-Fehler', 'Die gespeicherte Firebase-Konfiguration ist fehlerhaft.');
+            } else {
+                updateCloudUIStatus('local', 'Lokal (Offline)', 'Keine Firebase-Konfiguration hinterlegt.');
             }
         }
 
@@ -1078,7 +1091,10 @@ Vielen Dank!</div>
                     const remoteTs = remoteData.lastModified || 0;
                     const localTs = appData.lastModified || 0;
 
-                    if (remoteTs > localTs || !appData.teachers || appData.teachers.length === 0) {
+                    let remoteHasRealData = remoteData.teachers && (remoteData.teachers.length > 1 || (remoteData.teachers.length === 1 && remoteData.teachers[0].name !== "Mustermann"));
+                    let localHasRealData = appData.teachers && (appData.teachers.length > 1 || (appData.teachers.length === 1 && appData.teachers[0].name !== "Mustermann"));
+
+                    if (remoteHasRealData && (!localHasRealData || remoteTs >= localTs)) {
                         isSyncingFromRemote = true;
                         appData = remoteData;
                         localStorage.setItem(storageKey, JSON.stringify(appData));
@@ -1086,10 +1102,25 @@ Vielen Dank!</div>
                         renderCurrentView();
                         isSyncingFromRemote = false;
                         showToast(`Daten mit Cloud synchronisiert (${nowStr})`, "☁️");
+                    } else if (localHasRealData && !remoteHasRealData) {
+                        // Lokaler Stand hat echte Daten (z. B. auf dem Mac), Cloud war noch leer -> In Cloud hochladen!
+                        console.log("Lokale Daten sind vollständiger als Cloud-Stand. Synchronisiere zur Cloud...");
+                        docRef.set({ ...appData, lastModified: Date.now() });
+                        showToast(`Lokaler Stand in Cloud übertragen!`, "☁️");
+                    } else if (remoteTs > localTs) {
+                        isSyncingFromRemote = true;
+                        appData = remoteData;
+                        localStorage.setItem(storageKey, JSON.stringify(appData));
+                        populateYearDropdown();
+                        renderCurrentView();
+                        isSyncingFromRemote = false;
                     }
                 } else {
                     console.log("Schul-Dokument existiert noch nicht in Firestore. Erstelle neu...");
-                    docRef.set({ ...appData, lastModified: Date.now() });
+                    let localHasRealData = appData.teachers && (appData.teachers.length > 1 || (appData.teachers.length === 1 && appData.teachers[0].name !== "Mustermann"));
+                    if (localHasRealData) {
+                        docRef.set({ ...appData, lastModified: Date.now() });
+                    }
                 }
 
                 updateCloudUIStatus('connected', 'Live-Sync aktiv', `Echtzeit-Synchronisation aktiv für Mandant: "${schoolId}"`);
@@ -1123,8 +1154,8 @@ Vielen Dank!</div>
 
         // --- CLOUD MODAL FUNKTIONEN ---
         function openCloudModal() {
-            const rawConfig = localStorage.getItem(cloudConfigKey) || '';
-            const schoolId = localStorage.getItem(cloudSchoolKey) || 'schule-standard';
+            const rawConfig = localStorage.getItem(cloudConfigKey) || JSON.stringify(DEFAULT_FIREBASE_CONFIG, null, 2);
+            const schoolId = localStorage.getItem(cloudSchoolKey) || DEFAULT_SCHOOL_ID;
             document.getElementById('fb-school-id').value = schoolId;
             document.getElementById('fb-config-raw').value = rawConfig;
             
@@ -1222,18 +1253,18 @@ Vielen Dank!</div>
         }
 
         function loadSampleFirebaseConfig() {
-            document.getElementById('fb-config-raw').value = JSON.stringify({
-                apiKey: "HIER_API_KEY_EINFUEGEN",
-                authDomain: "dein-projekt.firebaseapp.com",
-                projectId: "dein-projekt-id",
-                storageBucket: "dein-projekt.appspot.com",
-                messagingSenderId: "123456789012",
-                appId: "1:123456789012:web:abcdef123456"
-            }, null, 2);
+            document.getElementById('fb-config-raw').value = JSON.stringify(DEFAULT_FIREBASE_CONFIG, null, 2);
+            document.getElementById('fb-school-id').value = DEFAULT_SCHOOL_ID;
+            showToast("Projekt-Konfiguration geladen!", "📋");
         }
 
         // --- TABS & NAVIGATION ---
         function renderCurrentView() {
+            let portalEl = document.getElementById('view-portal');
+            if (portalEl && !portalEl.classList.contains('hidden')) {
+                if (!portalUser) renderPortalLogin();
+                else renderPortalDashboard();
+            }
             if (activeTab === 'month') renderMonthView();
             else if (activeTab === 'dashboard') renderDashboardView();
             else if (activeTab === 'staff') renderStaffView();

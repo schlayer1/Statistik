@@ -462,10 +462,14 @@ Vielen Dank!</div>
                 <div class="space-y-4 text-left">
                     <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase mb-1">1. Bitte deinen Namen wählen:</label>
-                        <select id="portal-user-select" class="w-full border-2 border-slate-200 rounded-xl p-3 bg-slate-50 font-bold text-slate-800 outline-none focus:border-teal-500 text-base"></select>
+                        <select id="portal-user-select" class="w-full border-2 border-slate-200 rounded-xl p-3 bg-slate-50 font-bold text-slate-800 outline-none focus:border-teal-500 text-base" onchange="updatePortalLoginYears()"></select>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">2. 4-stellige PIN:</label>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">2. Schuljahr wählen:</label>
+                        <select id="portal-login-year-select" class="w-full border-2 border-slate-200 rounded-xl p-3 bg-slate-50 font-bold text-slate-800 outline-none focus:border-teal-500 text-sm"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">3. 4-stellige PIN:</label>
                         <input type="password" maxlength="4" id="portal-user-pin" class="w-full border-2 border-slate-200 rounded-xl p-3 text-center font-black tracking-widest text-2xl text-slate-800 outline-none focus:border-teal-500" placeholder="••••" onkeyup="if(event.key==='Enter') loginPortal()">
                     </div>
                     <button onclick="loginPortal()" class="w-full bg-teal-600 hover:bg-teal-500 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg transition text-base flex items-center justify-center gap-2 mt-2">
@@ -520,6 +524,18 @@ Vielen Dank!</div>
                         <div id="portal-year-totals-box" class="space-y-1 my-1 text-xs"></div>
                         <button onclick="printTeacherReportForPortal()" class="mt-2 text-xs text-teal-700 hover:text-teal-900 font-bold underline flex items-center gap-1">🖨️ Persönlichen Bericht drucken</button>
                     </div>
+                </div>
+
+                <!-- MEHRJAHRESVERGLEICH (LETZTE 3 AKTIVE SCHULJAHRE) -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 gap-2">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">📈 Mehrjahresvergleich (letzte aktive Schuljahre)</h3>
+                            <p class="text-xs text-slate-500">Übersicht deiner Fehlzeiten, Vertretungsstunden und AZV-Salden im Zeitverlauf</p>
+                        </div>
+                        <span class="text-xs font-bold px-2.5 py-1 bg-teal-50 text-teal-700 rounded-lg border border-teal-200">Bis zu 3 Schuljahre</span>
+                    </div>
+                    <div id="portal-multiyear-comparison" class="overflow-x-auto"></div>
                 </div>
 
                 <!-- MONATSKALENDER DETAILS -->
@@ -3058,6 +3074,39 @@ Vielen Dank!</div>
             switchTab('month');
         }
 
+        function getActiveSchoolYearsForTeacher(tId) {
+            let allYears = Object.keys(appData.years || {});
+            if (appData.schoolYear && !allYears.includes(appData.schoolYear)) {
+                allYears.push(appData.schoolYear);
+            }
+            
+            let activeYears = allYears.filter(y => isTeacherActiveInYear(tId, y) || hasTeacherRecordsInYear(tId, y));
+            
+            if (activeYears.length === 0) {
+                activeYears = [appData.schoolYear || "25/26"];
+            }
+
+            return activeYears.sort().reverse();
+        }
+
+        function updatePortalLoginYears() {
+            const userSelect = document.getElementById('portal-user-select');
+            const yearSelect = document.getElementById('portal-login-year-select');
+            if (!userSelect || !yearSelect) return;
+
+            const tId = userSelect.value;
+            const years = getActiveSchoolYearsForTeacher(tId);
+
+            yearSelect.innerHTML = '';
+            years.forEach(y => {
+                let opt = document.createElement('option');
+                opt.value = y;
+                opt.text = `Schuljahr ${y}`;
+                if (y === appData.schoolYear) opt.selected = true;
+                yearSelect.appendChild(opt);
+            });
+        }
+
         function renderPortalLogin() {
             document.getElementById('portal-login-screen').classList.remove('hidden');
             document.getElementById('portal-dashboard-screen').classList.add('hidden');
@@ -3065,8 +3114,7 @@ Vielen Dank!</div>
             const select = document.getElementById('portal-user-select');
             select.innerHTML = '';
             
-            let sorted = [...appData.teachers].filter(t => isTeacherActiveInYear(t.id, appData.schoolYear) || hasTeacherRecordsInYear(t.id, appData.schoolYear)).sort((a,b) => a.name.localeCompare(b.name));
-            if (sorted.length === 0) sorted = [...appData.teachers].sort((a,b) => a.name.localeCompare(b.name));
+            let sorted = [...appData.teachers].sort((a,b) => a.name.localeCompare(b.name));
 
             sorted.forEach(t => {
                 let opt = document.createElement('option');
@@ -3075,12 +3123,15 @@ Vielen Dank!</div>
                 select.appendChild(opt);
             });
 
+            updatePortalLoginYears();
+
             document.getElementById('portal-user-pin').value = '';
             document.getElementById('portal-user-pin').focus();
         }
 
         function loginPortal() {
             const tId = document.getElementById('portal-user-select').value;
+            const chosenYear = document.getElementById('portal-login-year-select')?.value || appData.schoolYear;
             const pin = document.getElementById('portal-user-pin').value.trim();
             const teacher = appData.teachers.find(t => t.id === tId);
 
@@ -3094,7 +3145,7 @@ Vielen Dank!</div>
 
             if (pin === teacherPin || pin === masterPin) {
                 portalUser = teacher;
-                portalYear = appData.schoolYear;
+                portalYear = chosenYear;
                 showToast(`Willkommen, ${teacher.name}!`, "👋");
                 renderPortalDashboard();
             } else {
@@ -3115,6 +3166,78 @@ Vielen Dank!</div>
             renderPortalDashboard();
         }
 
+        function renderPortalMultiYearComparison(tId) {
+            const container = document.getElementById('portal-multiyear-comparison');
+            if (!container) return;
+
+            let activeYears = getActiveSchoolYearsForTeacher(tId);
+            let compareList = activeYears.slice(0, 3); // Max. die letzten 3 aktiven Schuljahre
+
+            if (compareList.length <= 1) {
+                let singleYear = compareList[0] || appData.schoolYear;
+                container.innerHTML = `
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 text-center text-xs text-slate-500">
+                        <div class="text-xl mb-1">📅</div>
+                        <div class="font-bold text-slate-700">Bisher Daten für Schuljahr ${singleYear} vorhanden</div>
+                        <div class="mt-1 text-[11px] text-slate-400">Sobald weitere Schuljahre für dich erfasst sind, werden dir hier bis zu 3 Schuljahre im direkten Vergleich gegenübergestellt.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <table class="w-full text-xs text-left">
+                    <thead>
+                        <tr class="border-b font-bold text-slate-600 bg-slate-50">
+                            <th class="py-2.5 px-3 rounded-l-lg">Schuljahr</th>
+                            <th class="py-2.5 px-3 text-center">Krankheit (K)</th>
+                            <th class="py-2.5 px-3 text-center">Kind krank (KK)</th>
+                            <th class="py-2.5 px-3 text-center">AZV-Tage</th>
+                            <th class="py-2.5 px-3 text-center">Vertretung (V)</th>
+                            <th class="py-2.5 px-3 text-center">Rest / Extra (R/E)</th>
+                            <th class="py-2.5 px-3 text-right rounded-r-lg">AZV-Saldo</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 font-medium">
+            `;
+
+            compareList.forEach(yStr => {
+                let isCurrentViewYear = yStr === portalYear;
+                let { tStats } = calculateStatsForYear(yStr) || { tStats: {} };
+                let st = tStats[tId] || { K: 0, KK: 0, AZV: 0, R: 0, V: 0, E: 0, AZVgeh: 0 };
+                let azvBal = getTeacherAzvBalance(tId, yStr);
+                let isPlus = azvBal >= 0;
+
+                html += `
+                    <tr class="${isCurrentViewYear ? 'bg-teal-50/70 font-bold' : 'hover:bg-slate-50'} transition">
+                        <td class="py-3 px-3">
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-sm font-black text-slate-800">SJ ${yStr}</span>
+                                ${isCurrentViewYear ? '<span class="bg-teal-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">Ausgewählt</span>' : ''}
+                            </div>
+                        </td>
+                        <td class="py-3 px-3 text-center"><span class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded font-bold">${st.K} Tage</span></td>
+                        <td class="py-3 px-3 text-center"><span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-bold">${st.KK} Tage</span></td>
+                        <td class="py-3 px-3 text-center"><span class="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded font-bold">${st.AZV} Tage</span></td>
+                        <td class="py-3 px-3 text-center"><span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-bold">${st.V} h</span></td>
+                        <td class="py-3 px-3 text-center text-slate-600">${st.R} h / ${st.E} h</td>
+                        <td class="py-3 px-3 text-right">
+                            <span class="font-black px-2.5 py-1 rounded-lg ${isPlus ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+                                ${isPlus ? '+' : ''}${azvBal} h
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                    </tbody>
+                </table>
+            `;
+
+            container.innerHTML = html;
+        }
+
         function renderPortalDashboard() {
             if (!portalUser) {
                 renderPortalLogin();
@@ -3128,12 +3251,13 @@ Vielen Dank!</div>
             document.getElementById('portal-greeting-name').innerText = portalUser.name;
             document.getElementById('portal-year-label').innerText = portalYear;
 
-            // Populate year select
+            // Dynamische Schuljahres-Auswahl: Nur Schuljahre anzeigen, in denen diese Lehrkraft aktiv war!
             let ySelect = document.getElementById('portal-year-select');
             ySelect.innerHTML = '';
-            let years = Object.keys(appData.years).sort().reverse();
-            if (!years.includes(appData.schoolYear)) years.unshift(appData.schoolYear);
-            years.forEach(y => {
+            let activeTeacherYears = getActiveSchoolYearsForTeacher(portalUser.id);
+            if (!activeTeacherYears.includes(portalYear)) portalYear = activeTeacherYears[0];
+            
+            activeTeacherYears.forEach(y => {
                 let opt = document.createElement('option');
                 opt.value = y;
                 opt.text = `SJ ${y}`;
@@ -3211,7 +3335,10 @@ Vielen Dank!</div>
                 <div class="flex justify-between"><span>Vertretung gesamt:</span> <b class="text-blue-700">${stats.V} h</b></div>
             `;
 
-            // 4. Month Details Table
+            // 4. Mehrjahresvergleich (letzte 3 aktive Schuljahre)
+            renderPortalMultiYearComparison(tId);
+
+            // 5. Month Details Table
             let dtTable = document.getElementById('portal-month-details-table');
             let y = getYearForMonth(selMonth, portalYear);
             let daysInM = getDaysInMonth(selMonth, y);
@@ -3241,7 +3368,7 @@ Vielen Dank!</div>
                 dtTable.innerHTML = dtHtml;
             }
 
-            // 5. AZV History Table
+            // 6. AZV History Table
             let azvTable = document.getElementById('portal-azv-history-table');
             let teacherAzv = (yd.azv || []).filter(a => a.tId === tId);
             if (teacherAzv.length === 0) {

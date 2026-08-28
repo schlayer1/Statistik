@@ -1,0 +1,3200 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Statistik HBS Kahla</title>
+    
+    <!-- Tailwind CSS (Modernes Design) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js für die Diagramme -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS zum direkten Einlesen kompletter .xlsx Excel-Dateien -->
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    
+    <!-- Firebase SDKs (v10 Compat für Standalone HTML ohne Buildschritt) -->
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+    
+    <!-- 🎨 FARBANPASSUNG -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        school: {
+                            50: '#f0fdfa', 100: '#ccfbf1', 500: '#14b8a6', 
+                            600: '#0d9488', 800: '#115e59', 900: '#134e4a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #e5e7eb; padding: 6px 4px; text-align: center; white-space: nowrap; }
+        th { background-color: #f8fafc; font-size: 0.75rem; font-weight: 600; color: #475569; }
+        .cell-hover:hover { background-color: #e0f2fe; cursor: pointer; }
+        
+        .entry-K { background-color: #fee2e2; color: #991b1b; font-weight: 800; border-radius: 4px; }
+        .entry-KK { background-color: #ffedd5; color: #9a3412; font-weight: 800; border-radius: 4px; }
+        .entry-AZV { background-color: #f3e8ff; color: #6b21a8; font-weight: 800; border-radius: 4px; }
+        .entry-AZVgeh { color: #0d9488; font-weight: 800; }
+        .entry-V { color: #1d4ed8; font-weight: 800; }
+        .entry-R { color: #047857; font-weight: 800; }
+        .entry-E { color: #b91c1c; font-weight: 800; }
+        
+        .weekend-header { background-color: #e2e8f0; color: #64748b; }
+        .weekend-cell { background-color: #f1f5f9; }
+        .day-header:hover { background-color: #cbd5e1; cursor: pointer; color: #0f172a; transition: 0.2s; }
+        
+        .modal-bg { background-color: rgba(15, 23, 42, 0.75); backdrop-filter: blur(2px); }
+        .dash-table th { background-color: #f8fafc; text-align: left; padding: 10px 8px; border-bottom: 2px solid #e2e8f0; }
+        .dash-table td { text-align: left; padding: 10px 8px; border-bottom: 1px solid #e2e8f0; }
+        .sticky-col { position: sticky; left: 0; background-color: white; z-index: 10; box-shadow: 2px 0 5px -2px rgba(0,0,0,0.1); }
+
+        @keyframes pulse-red { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.1); } }
+        .bem-alert { display: inline-block; animation: pulse-red 2s infinite; cursor: help; margin-left: 6px; }
+
+        @keyframes pulse-sync { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.9); } }
+        .sync-active { animation: pulse-sync 1.5s infinite ease-in-out; }
+
+        @media print {
+            @page { 
+                size: A4 portrait; 
+                margin: 1.4cm 1.2cm 1.4cm 1.2cm; 
+            }
+            html, body { 
+                background-color: white !important; 
+                color: black !important; 
+                height: auto !important; 
+                min-height: 0 !important; 
+                max-height: none !important;
+                overflow: visible !important; 
+                display: block !important; 
+                position: static !important; 
+                margin: 0 !important; 
+                padding: 0 !important; 
+                font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif !important;
+            }
+            main { 
+                overflow: visible !important; 
+                display: block !important; 
+                position: static !important; 
+                padding: 0 !important; 
+                margin: 0 !important; 
+                height: auto !important; 
+                min-height: 0 !important; 
+                max-height: none !important;
+                flex: none !important;
+            }
+            nav, main > div:not(#view-print), .no-print, #toast, #modal-cloud, #modal-holiday, #modal-cal-entry, #modal-azv-form, #modal-teacher, #modal-confirm { 
+                display: none !important; 
+            }
+            #view-print { 
+                display: block !important; 
+                position: static !important; 
+                width: 100% !important; 
+                height: auto !important; 
+                overflow: visible !important; 
+                padding: 0 !important; 
+                margin: 0 !important; 
+                color: black !important; 
+            }
+            #view-print h1 { 
+                font-size: 16pt !important; 
+                font-weight: 800 !important; 
+                margin: 0 0 4px 0 !important; 
+                break-after: avoid !important; 
+                page-break-after: avoid !important; 
+            }
+            #view-print h2 { 
+                font-size: 12pt !important; 
+                font-weight: 700 !important; 
+                margin: 2px 0 6px 0 !important; 
+                color: #334155 !important; 
+                break-after: avoid !important; 
+                page-break-after: avoid !important; 
+            }
+            #view-print h3 { 
+                font-size: 11pt !important; 
+                font-weight: 700 !important; 
+                margin: 16px 0 6px 0 !important; 
+                color: #0f172a !important; 
+                break-after: avoid !important; 
+                page-break-after: avoid !important; 
+            }
+            #view-print hr { 
+                border: none !important; 
+                border-top: 1.5px solid #94a3b8 !important; 
+                margin: 8px 0 14px 0 !important; 
+            }
+            #view-print table { 
+                width: 100% !important; 
+                border-collapse: collapse !important; 
+                margin-bottom: 16px !important; 
+                font-size: 8.5pt !important; 
+                page-break-inside: auto !important; 
+                break-inside: auto !important; 
+            }
+            #view-print thead { 
+                display: table-header-group !important; 
+            }
+            #view-print tr { 
+                page-break-inside: avoid !important; 
+                break-inside: avoid !important; 
+            }
+            #view-print th, #view-print td { 
+                border: 1px solid #64748b !important; 
+                padding: 4px 6px !important; 
+                text-align: left !important; 
+                white-space: normal !important; 
+                font-size: 8.5pt !important; 
+                color: #0f172a !important; 
+                line-height: 1.3 !important; 
+            }
+            #view-print th { 
+                background-color: #f1f5f9 !important; 
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important; 
+                font-weight: 700 !important; 
+            }
+            #view-print .print-num { 
+                text-align: center !important; 
+            }
+            #view-print .signature-block { 
+                page-break-inside: avoid !important; 
+                break-inside: avoid !important; 
+                margin-top: 35px !important; 
+                width: 100% !important; 
+                border: none !important; 
+            }
+            #view-print .signature-block td { 
+                border: none !important; 
+                padding: 0 !important; 
+                font-size: 9.5pt !important; 
+                vertical-align: bottom !important; 
+            }
+            .print-text-center { text-align: center !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col selection:bg-school-100">
+
+    <!-- HAUPTNAVIGATION -->
+    <nav class="bg-school-800 text-white shadow-lg p-3 md:p-4 flex flex-col md:flex-row justify-between items-center gap-3">
+        <div class="flex items-center justify-between w-full md:w-auto">
+            <div class="flex items-center gap-3">
+                <div class="bg-white p-1 rounded shadow-sm">
+                    <img src="image.png" alt="Logo" class="h-8 md:h-10 w-auto object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <span class="text-school-800 font-bold hidden px-2">LOGO</span>
+                </div>
+                <h1 class="text-lg md:text-xl font-extrabold tracking-wide hidden sm:block">Statistik HBS Kahla</h1>
+            </div>
+            
+            <div class="flex md:hidden gap-2 items-center">
+                <button onclick="openCloudModal()" id="mobile-cloud-btn" class="bg-school-700 hover:bg-school-600 px-2.5 py-1.5 rounded-lg text-xs font-bold shadow flex items-center gap-1.5 border border-school-500/50" title="Cloud Sync">
+                    <span id="mobile-cloud-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                    <span>Cloud</span>
+                </button>
+                <button onclick="exportData()" class="bg-school-600 hover:bg-school-500 p-2 rounded-lg text-sm shadow flex items-center" title="Backup">💾</button>
+                <label class="bg-slate-600 hover:bg-slate-500 p-2 rounded-lg text-sm shadow cursor-pointer flex items-center" title="Laden">📂<input type="file" class="hidden" accept=".json" onchange="importData(event)"></label>
+            </div>
+        </div>
+
+        <div class="flex overflow-x-auto w-full md:w-auto space-x-1 md:space-x-2 pb-1 md:pb-0 hide-scrollbar" id="nav-tabs-container">
+            <button onclick="switchTab('month')" id="tab-month" class="whitespace-nowrap px-4 py-2 text-sm font-semibold rounded-lg bg-school-600 shadow-inner transition">Monatsansicht</button>
+            <button onclick="switchTab('dashboard')" id="tab-dashboard" class="whitespace-nowrap px-4 py-2 text-sm font-semibold rounded-lg hover:bg-school-600/50 transition">Dashboard</button>
+            <button onclick="switchTab('azv')" id="tab-azv" class="whitespace-nowrap px-4 py-2 text-sm font-semibold rounded-lg hover:bg-school-600/50 transition">AZV-Konto</button>
+            <button onclick="switchTab('staff')" id="tab-staff" class="whitespace-nowrap px-4 py-2 text-sm font-semibold rounded-lg hover:bg-school-600/50 transition">Kollegium</button>
+            <button onclick="switchTab('survey')" id="tab-survey" class="whitespace-nowrap px-4 py-2 text-sm font-semibold rounded-lg hover:bg-school-600/50 transition text-amber-300">Jahresstart</button>
+            <button onclick="switchTab('reports')" id="tab-reports" class="whitespace-nowrap px-4 py-2 text-sm font-semibold rounded-lg hover:bg-school-600/50 transition">Berichte</button>
+            <button onclick="openPortalView()" id="tab-portal" class="whitespace-nowrap px-3.5 py-2 text-sm font-bold rounded-lg bg-teal-600 hover:bg-teal-500 text-white shadow transition flex items-center gap-1.5 border border-teal-400/50">🧑‍🏫 Kollegenzugang</button>
+        </div>
+
+        <div class="hidden md:flex space-x-3 items-center" id="nav-admin-actions">
+            <!-- CLOUD SYNC STATUS BUTTON -->
+            <button onclick="openCloudModal()" id="cloud-sync-btn" class="bg-school-700 hover:bg-school-600 border border-school-500/50 px-3 py-2 rounded-lg text-xs font-bold shadow flex items-center gap-2 transition cursor-pointer" title="Cloud-Synchronisation & Einstellungen">
+                <span id="cloud-sync-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                <span id="cloud-sync-label">Lokal (Offline)</span>
+            </button>
+            
+            <span id="save-indicator" class="text-xs text-school-100 font-medium"></span>
+            <button onclick="exportData()" class="bg-school-600 hover:bg-school-500 px-3 py-2 rounded-lg text-xs font-semibold shadow flex items-center gap-1.5" title="Datensicherung als JSON">💾 Backup</button>
+            <label class="bg-slate-600 hover:bg-slate-500 px-3 py-2 rounded-lg text-xs font-semibold shadow cursor-pointer flex items-center gap-1.5" title="Datensicherung laden">📂 Laden<input type="file" class="hidden" accept=".json" onchange="importData(event)"></label>
+        </div>
+    </nav>
+
+    <main class="flex-grow p-3 md:p-6 overflow-hidden flex flex-col relative">
+        
+        <!-- Ansicht: MONAT -->
+        <div id="view-month" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 md:p-6 hidden flex-col flex-grow h-full">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
+                <h2 class="text-xl md:text-2xl font-bold text-slate-800">Monatsansicht</h2>
+                
+                <div class="flex flex-wrap items-center gap-2 bg-slate-50 p-2 rounded-lg border border-slate-200 w-full md:w-auto">
+                    <button onclick="openHolidayModal()" class="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 font-bold px-3 py-1.5 rounded-md text-sm shadow-sm transition mr-1 flex items-center gap-1">
+                        🏖️ Ferien
+                    </button>
+                    <button onclick="openRolloverWizard()" class="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 font-bold px-3 py-1.5 rounded-md text-sm shadow-sm transition flex items-center gap-1" title="Schuljahreswechsel-Assistent">
+                        🔄 Jahreswechsel
+                    </button>
+                    <div class="flex items-center gap-1.5 border-l pl-3 border-slate-300">
+                        <select id="school-year" class="border-slate-300 rounded-md p-1.5 min-w-[5.5rem] text-center font-bold bg-white text-school-800 shadow-sm outline-none" onchange="changeYear()"></select>
+                        <button onclick="promptAddNewSchoolYear()" title="Neues oder älteres Schuljahr manuell anlegen" class="bg-white hover:bg-school-50 text-school-700 border border-slate-300 px-2 py-1.5 rounded-md text-xs font-bold shadow-sm transition" type="button">➕</button>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <select id="month-select" class="border-slate-300 rounded-md p-1.5 bg-white font-bold text-slate-800 shadow-sm outline-none" onchange="changeMonth()">
+                            <option value="8">August</option><option value="9">September</option><option value="10">Oktober</option>
+                            <option value="11">November</option><option value="12">Dezember</option><option value="1">Januar</option>
+                            <option value="2">Februar</option><option value="3">März</option><option value="4">April</option>
+                            <option value="5">Mai</option><option value="6">Juni</option><option value="7">Juli</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="overflow-x-auto flex-grow rounded-lg border border-slate-200 shadow-inner bg-slate-50">
+                <table id="month-table" class="w-full text-xs md:text-sm bg-white"></table>
+            </div>
+        </div>
+
+        <!-- Ansicht: DASHBOARD -->
+        <div id="view-dashboard" class="hidden flex-col gap-6">
+            <h2 class="text-xl md:text-2xl font-bold text-slate-800 flex items-center gap-3">
+                Jahresübersicht 
+                <span class="dash-year-title text-school-600 bg-school-50 px-2 py-1 rounded-lg border border-school-100 text-lg"></span>
+            </h2>
+            
+            <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center gap-3">
+                <span class="text-sm font-bold text-slate-600 uppercase tracking-wider">Vergleichsjahre (Langzeit):</span>
+                <div id="dash-compare-toggles" class="flex flex-wrap gap-2"></div>
+                <span class="text-xs text-slate-400 italic md:ml-auto">Tipp: Klicken Sie auf alte Schuljahre, um deren Kurven einzublenden.</span>
+            </div>
+            
+            <!-- CHARTS ROW 1: LANGZEIT & BELASTUNG -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+                    <h3 class="font-bold text-slate-700 text-sm mb-3 uppercase tracking-wider">📈 Fieberkurve (Krankentage Schule)</h3>
+                    <div class="relative h-56 w-full"><canvas id="chart-illness"></canvas></div>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+                    <h3 class="font-bold text-slate-700 text-sm mb-3 uppercase tracking-wider">📊 Vertretungsbelastung nach Monaten</h3>
+                    <div class="relative h-56 w-full"><canvas id="chart-extra"></canvas></div>
+                </div>
+            </div>
+
+            <!-- CHARTS ROW 2: WOCHENTAGS- & TRENDANALYSE -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 lg:col-span-2">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-bold text-slate-700 text-sm uppercase tracking-wider flex items-center gap-2">
+                            <span>📅</span> Wochentags-Analyse (Mo – Fr)
+                        </h3>
+                        <span class="text-xs text-slate-400">Aufteilung im aktuellen Schuljahr</span>
+                    </div>
+                    <div class="relative h-60 w-full"><canvas id="chart-weekday"></canvas></div>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-sm uppercase tracking-wider mb-4 flex items-center gap-2">
+                            <span>💡</span> Belastungserkenntnisse
+                        </h3>
+                        <div class="space-y-3">
+                            <div class="p-3 bg-red-50 rounded-xl border border-red-100">
+                                <div class="text-xs font-bold text-red-800 uppercase tracking-wide">Häufigster Ausfalltag</div>
+                                <div id="dash-peak-ill-day" class="text-lg font-black text-red-600 mt-0.5">–</div>
+                                <div id="dash-peak-ill-desc" class="text-[11px] text-red-700 mt-0.5">Keine Daten verfügbar</div>
+                            </div>
+                            <div class="p-3 bg-blue-50 rounded-xl border border-blue-100">
+                                <div class="text-xs font-bold text-blue-800 uppercase tracking-wide">Spitzentag für Vertretungen</div>
+                                <div id="dash-peak-sub-day" class="text-lg font-black text-blue-600 mt-0.5">–</div>
+                                <div id="dash-peak-sub-desc" class="text-[11px] text-blue-700 mt-0.5">Keine Daten verfügbar</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-[11px] text-slate-400 border-t pt-3 mt-3 italic">
+                        Hilft bei der vorausschauenden Planung von Vertretungsreserven an kritischen Wochentagen.
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 md:p-6">
+                    <h3 class="text-lg font-bold text-slate-800 mb-4 pb-2 flex items-center gap-2"><span class="bg-red-100 text-red-600 p-1.5 rounded-md leading-none">🤒</span> Fehlzeiten pro Person</h3>
+                    <div class="overflow-x-auto rounded-lg border border-slate-100"><table class="w-full text-sm dash-table whitespace-nowrap" id="dash-absences"></table></div>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 md:p-6">
+                    <h3 class="text-lg font-bold text-slate-800 mb-4 pb-2 flex items-center gap-2"><span class="bg-green-100 text-green-600 p-1.5 rounded-md leading-none">💪</span> Mehrleistungen pro Person</h3>
+                    <div class="overflow-x-auto rounded-lg border border-slate-100"><table class="w-full text-sm dash-table whitespace-nowrap" id="dash-extra"></table></div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 md:p-6">
+                <h3 class="text-lg font-bold text-slate-800 mb-2 pb-2">📋 Schule Gesamt: Monats-Zusammenfassung</h3>
+                <div class="overflow-x-auto rounded-lg border border-slate-100"><table class="w-full text-sm dash-table text-center whitespace-nowrap" id="dash-months"></table></div>
+            </div>
+        </div>
+
+        <!-- Ansicht: JAHRESSTART -->
+        <div id="view-survey" class="hidden flex-col gap-6">
+            <h2 class="text-xl md:text-2xl font-bold text-slate-800">Jahresstart-Assistent <span class="dash-year-title text-school-600 bg-school-50 px-2 py-1 rounded-lg border border-school-100 ml-2"></span></h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                    <h3 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2"><span class="text-2xl">1.</span> Daten vom Kollegium abfragen</h3>
+                    <p class="text-sm text-slate-500 mb-4">Nutzen Sie diesen Text, um die Kollegen nach ihren geplanten Stunden zu fragen.</p>
+                    <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 mb-4 whitespace-pre-wrap font-mono" id="survey-text-template">Liebe Kolleginnen und Kollegen,
+
+für die Einsatzplanung des neuen Schuljahres benötige ich eure aktuellen Rahmendaten. Bitte teilt mir kurz mit:
+
+1. Gewünschte Reststunden (R) pro Woche: ___ h
+2. Geplante Vertretungsstunden (V) pro Monat: ___ h
+
+Vielen Dank!</div>
+                    <button onclick="copySurveyText()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 px-4 rounded-lg shadow transition">📋 Text kopieren</button>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                    <h3 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2"><span class="text-2xl">2.</span> Schnellerfassung</h3>
+                    <p class="text-sm text-slate-500 mb-4">Hier tippen Sie die Antworten als neuen Standard ein.</p>
+                    <div class="overflow-x-auto rounded-lg border border-slate-200 shadow-inner bg-slate-50 max-h-[400px]">
+                        <table class="w-full text-sm text-left bg-white whitespace-nowrap">
+                            <thead class="sticky top-0 z-10 shadow-sm"><tr class="bg-slate-100 text-slate-600"><th class="p-3 font-semibold">Name</th><th class="p-3 text-center font-semibold text-green-700 bg-green-50/50">R-Stunden (Wo)</th><th class="p-3 text-center font-semibold text-blue-700 bg-blue-50/50">V-Stunden (Mo)</th></tr></thead>
+                            <tbody id="survey-table-body" class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ansicht: BERICHTE & EXPORT -->
+        <div id="view-reports" class="hidden flex-col gap-6">
+            <h2 class="text-xl md:text-2xl font-bold text-slate-800">Berichte, Export & Import</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- EXPORT BEREICH -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                    <h3 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2">🏫 Für Schulamt & Personalrat <span class="dash-year-title text-school-600 bg-school-50 px-2 py-1 rounded-lg border border-school-100 ml-2 text-sm"></span></h3>
+                    <p class="text-sm text-slate-500 mb-6">Generiert eine Gesamtabrechnung aller geleisteten Stunden und Fehlzeiten des aktuellen Schuljahres.</p>
+                    <div class="space-y-4">
+                        <button onclick="exportCSVReport()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 px-4 rounded-lg shadow transition flex items-center justify-center gap-2"><span>📄</span> Als CSV-Tabelle exportieren</button>
+                        <button onclick="printSchoolReport()" class="w-full bg-school-600 hover:bg-school-500 text-white font-bold py-3 px-4 rounded-lg shadow transition flex items-center justify-center gap-2"><span>🖨️</span> Schul-Bericht drucken (PDF)</button>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                    <h3 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2">🧑‍🏫 Für einzelne Kollegen <span class="dash-year-title text-school-600 bg-school-50 px-2 py-1 rounded-lg border border-school-100 ml-2 text-sm"></span></h3>
+                    <p class="text-sm text-slate-500 mb-6">Generiert einen personalisierten Jahres-Auszug inkl. AZV-Historie zur Vorlage beim Mitarbeiter.</p>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Lehrkraft auswählen:</label>
+                            <select id="report-teacher-select" class="w-full border-2 border-slate-200 rounded-lg p-2.5 bg-slate-50 focus:outline-none focus:border-school-500 font-semibold"></select>
+                        </div>
+                        <button onclick="printTeacherReport()" class="w-full bg-school-600 hover:bg-school-500 text-white font-bold py-3 px-4 rounded-lg shadow transition flex items-center justify-center gap-2 mt-2"><span>🖨️</span> Personal-Bericht drucken</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EXCEL (.XLSX) IMPORT BEREICH -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mt-4 border-l-4 border-l-amber-400">
+                <h3 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2">📥 Ganze alte Excel-Datei importieren</h3>
+                <p class="text-sm text-slate-500 mb-4">Laden Sie hier direkt Ihre historische <b>.xlsx</b> Datei hoch (z. B. <i>Vertretungsberichte SJ2526.xlsx</i>). Die App liest alle Monats-Reiter (August bis Juli) auf einen Schlag vollautomatisch ein und übernimmt Ihre Kollegen und Eintragungen!</p>
+                <div class="bg-amber-50 p-4 rounded-lg border border-amber-200 text-sm font-medium text-amber-900 mb-5">
+                    <b>Tipp:</b> Sie müssen nichts als CSV exportieren. Die App kann das Excel-Format nativ lesen. Das Kürzel "AZV GEH" wird vom Importer erkannt und automatisch als positiver Wert in Ihr AZV-Konto gebucht.
+                </div>
+                <label class="w-full bg-white hover:bg-slate-50 text-slate-700 font-bold py-4 px-4 rounded-lg border-2 border-dashed border-slate-300 cursor-pointer flex items-center justify-center gap-3 transition hover:border-school-500 hover:text-school-600">
+                    <span class="text-2xl">📊</span>
+                    <span>Excel-Datei (.xlsx) auswählen & importieren</span>
+                    <input type="file" id="excel-import" accept=".xlsx, .xls, .csv" class="hidden" onchange="importOldExcel(event)">
+                </label>
+            </div>
+        </div>
+
+        <!-- Ansicht: AZV / Mehrarbeit -->
+        <div id="view-azv" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 md:p-6 hidden flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-slate-800">AZV-Konto <span class="dash-year-title text-school-600"></span></h2>
+                <button onclick="openAzvForm()" class="bg-school-600 hover:bg-school-700 text-white px-4 py-2 rounded-lg font-semibold shadow">➕ Manuell</button>
+            </div>
+            <div class="mb-6 border-b pb-4"><h3 class="font-bold text-slate-700 mb-3 text-sm">💰 Salden</h3><div id="azv-summary" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div></div>
+            <div class="overflow-x-auto rounded-lg border border-slate-200"><table class="w-full text-sm text-left bg-white whitespace-nowrap"><tbody id="azv-table-body" class="divide-y divide-slate-100"></tbody></table></div>
+        </div>
+
+        <!-- Ansicht: KOLLEGIUM -->
+        <div id="view-staff" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 md:p-6 hidden flex-col">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800">Kollegium <span class="dash-year-title text-school-600"></span></h2>
+                    <p class="text-xs text-slate-500">Verwalten Sie hier Lehrkräfte, PINs für den Kollegenzugang und den Aktivitätsstatus für das ausgewählte Schuljahr.</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <button onclick="printTeacherPinList()" class="px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold shadow-sm transition flex items-center gap-1.5" title="PIN-Liste für das Kollegium ausdrucken">🖨️ PIN-Liste drucken</button>
+                    <div class="inline-flex rounded-lg border border-slate-200 p-1 bg-slate-50 text-xs font-semibold">
+                        <button onclick="setStaffFilter('active')" id="staff-filter-active" class="px-3 py-1 rounded-md bg-white text-school-800 shadow-sm transition">Nur Aktiv <span class="dash-year-title font-bold"></span></button>
+                        <button onclick="setStaffFilter('all')" id="staff-filter-all" class="px-3 py-1 rounded-md text-slate-500 hover:text-slate-800 transition">Alle (inkl. Archiv)</button>
+                    </div>
+                    <button onclick="openTeacherForm()" class="bg-school-600 hover:bg-school-500 text-white px-4 py-2 rounded-lg font-semibold shadow flex items-center gap-1.5 transition">🧑‍🏫 Neu</button>
+                </div>
+            </div>
+            <div class="overflow-x-auto rounded-lg border border-slate-200"><table class="w-full text-sm text-left bg-white"><tbody id="staff-table-body" class="divide-y divide-slate-100"></tbody></table></div>
+        </div>
+
+        <!-- Ansicht: KOLLEGENZUGANG (READ-ONLY PORTAL) -->
+        <div id="view-portal" class="hidden flex-col gap-6 max-w-5xl mx-auto w-full">
+            <!-- PORTAL LOGIN SCREEN -->
+            <div id="portal-login-screen" class="bg-white rounded-2xl shadow-md border border-slate-200 p-6 md:p-10 max-w-md mx-auto w-full text-center my-6">
+                <div class="w-16 h-16 bg-teal-100 text-teal-700 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 shadow-sm">🧑‍🏫</div>
+                <h2 class="text-2xl font-black text-slate-800 mb-1">Mein Stundenkonto</h2>
+                <p class="text-xs text-slate-500 mb-6">Persönlicher Kollegenzugang (Read-Only) für die Schule</p>
+                
+                <div class="space-y-4 text-left">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">1. Bitte deinen Namen wählen:</label>
+                        <select id="portal-user-select" class="w-full border-2 border-slate-200 rounded-xl p-3 bg-slate-50 font-bold text-slate-800 outline-none focus:border-teal-500 text-base"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">2. 4-stellige PIN:</label>
+                        <input type="password" maxlength="4" id="portal-user-pin" class="w-full border-2 border-slate-200 rounded-xl p-3 text-center font-black tracking-widest text-2xl text-slate-800 outline-none focus:border-teal-500" placeholder="••••" onkeyup="if(event.key==='Enter') loginPortal()">
+                    </div>
+                    <button onclick="loginPortal()" class="w-full bg-teal-600 hover:bg-teal-500 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg transition text-base flex items-center justify-center gap-2 mt-2">
+                        <span>🔓</span> Anmelden
+                    </button>
+                </div>
+
+                <div class="mt-8 pt-4 border-t border-slate-100 flex justify-between items-center text-xs text-slate-400">
+                    <span>Nur eigene Daten sichtbar</span>
+                    <button onclick="promptAdminLogin()" class="text-slate-500 hover:text-slate-800 font-semibold underline">🔐 Schulleitungs-Login</button>
+                </div>
+            </div>
+
+            <!-- PORTAL DASHBOARD SCREEN (LOGGED IN) -->
+            <div id="portal-dashboard-screen" class="hidden flex-col gap-6 w-full">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 md:p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <div class="text-xs font-bold text-teal-600 uppercase tracking-wider mb-0.5">Angemeldet als:</div>
+                        <h2 class="text-2xl font-black text-slate-800" id="portal-greeting-name">Lehrkraft</h2>
+                        <div class="text-xs text-slate-500">Persönliche Übersicht für Schuljahr <span id="portal-year-label" class="font-bold text-slate-700"></span></div>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <select id="portal-year-select" class="border-2 border-slate-200 rounded-lg p-2 font-bold text-slate-800 bg-slate-50 text-sm outline-none focus:border-teal-500" onchange="changePortalYear()"></select>
+                        <button onclick="logoutPortal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-2 rounded-lg text-xs transition flex items-center gap-1">🚪 Abmelden</button>
+                        <button onclick="promptAdminLogin()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold px-3 py-2 rounded-lg text-xs shadow transition flex items-center gap-1">🔐 Schulleitung</button>
+                    </div>
+                </div>
+
+                <!-- 3 SUMMARY TILES FOR LOGGED IN TEACHER -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Kachel 1: Monatssaldo -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col justify-between">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Monatsübersicht</span>
+                            <select id="portal-month-select" class="text-xs font-bold border border-slate-200 rounded p-1 bg-slate-50 outline-none" onchange="renderPortalDashboard()"></select>
+                        </div>
+                        <div id="portal-month-summary-box" class="my-2"></div>
+                        <div class="text-[11px] text-slate-400 border-t pt-2 mt-2">Gehaltene Stunden vs. Monatssoll</div>
+                    </div>
+
+                    <!-- Kachel 2: AZV Saldo -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col justify-between">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">AZV- & Mehrarbeitskonto</span>
+                        <div id="portal-azv-saldo-box" class="my-2"></div>
+                        <div class="text-[11px] text-slate-400 border-t pt-2 mt-2">Gesamtsaldo für das Schuljahr</div>
+                    </div>
+
+                    <!-- Kachel 3: Jahressummen -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col justify-between">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Jahresübersicht</span>
+                        <div id="portal-year-totals-box" class="space-y-1 my-1 text-xs"></div>
+                        <button onclick="printTeacherReportForPortal()" class="mt-2 text-xs text-teal-700 hover:text-teal-900 font-bold underline flex items-center gap-1">🖨️ Persönlichen Bericht drucken</button>
+                    </div>
+                </div>
+
+                <!-- MONATSKALENDER DETAILS -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+                    <h3 class="text-base font-bold text-slate-800 mb-3 flex items-center gap-2">📅 Eintragungen im ausgewählten Monat</h3>
+                    <div id="portal-month-details-table" class="overflow-x-auto"></div>
+                </div>
+
+                <!-- AZV PROTOKOLL TABELLE -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+                    <h3 class="text-base font-bold text-slate-800 mb-3 flex items-center gap-2">⏳ AZV-Buchungshistorie</h3>
+                    <div id="portal-azv-history-table" class="overflow-x-auto"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="view-print" class="hidden"></div>
+    </main>
+
+    <!-- --- MODALS & FENSTER --- -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-slate-800 text-white font-medium px-5 py-3 rounded-xl shadow-2xl hidden z-[100] border border-slate-700 flex items-center gap-3"></div>
+    
+    <!-- MODAL: CLOUD-SYNC EINSTELLUNGEN -->
+    <div id="modal-cloud" class="fixed inset-0 hidden items-center justify-center z-50 modal-bg p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-xl max-h-[90vh] overflow-y-auto hide-scrollbar">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h3 class="text-2xl font-black text-slate-800 flex items-center gap-2">☁️ Firebase Cloud-Sync</h3>
+                    <p class="text-xs text-slate-500">Echtzeit-Synchronisation für dezentrales Arbeiten im Kollegium</p>
+                </div>
+                <button onclick="closeCloudModal()" class="text-slate-400 hover:text-slate-800 text-2xl font-bold">&times;</button>
+            </div>
+
+            <!-- Status Banner -->
+            <div id="cloud-modal-status" class="p-4 rounded-xl mb-5 flex items-center justify-between border bg-slate-50 border-slate-200">
+                <div class="flex items-center gap-3">
+                    <span id="cloud-status-indicator-dot" class="w-3.5 h-3.5 rounded-full bg-amber-400"></span>
+                    <div>
+                        <div id="cloud-status-title" class="font-bold text-slate-800 text-sm">Lokal (Offline-Modus)</div>
+                        <div id="cloud-status-desc" class="text-xs text-slate-500">Daten werden ausschließlich in diesem Browser gespeichert.</div>
+                    </div>
+                </div>
+                <span id="cloud-last-sync" class="text-[11px] text-slate-400 font-mono"></span>
+            </div>
+
+            <!-- Schul-ID / Mandant -->
+            <div class="mb-4">
+                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">🏫 Schul-Kennung / Dokument-ID:</label>
+                <input type="text" id="fb-school-id" class="w-full border-2 border-slate-200 rounded-lg p-2.5 font-bold text-slate-800 outline-none focus:border-school-500" placeholder="z. B. schule-mitte-erfurt">
+                <p class="text-[11px] text-slate-400 mt-1">Alle Kollegen mit derselben Kennung arbeiten auf demselben gemeinsamen Datenbestand.</p>
+            </div>
+
+            <!-- Firebase Config Input -->
+            <div class="mb-5">
+                <div class="flex justify-between items-center mb-1">
+                    <label class="block text-xs font-bold text-slate-600 uppercase">🔑 Firebase Konfiguration (JSON oder Snippet):</label>
+                    <button type="button" onclick="loadSampleFirebaseConfig()" class="text-xs text-school-600 hover:text-school-800 font-bold underline">Vorlage einfügen</button>
+                </div>
+                <textarea id="fb-config-raw" rows="6" class="w-full border-2 border-slate-200 rounded-lg p-2.5 font-mono text-xs text-slate-700 outline-none focus:border-school-500" placeholder='{
+  "apiKey": "AIzaSy...",
+  "authDomain": "dein-projekt.firebaseapp.com",
+  "projectId": "dein-projekt",
+  "storageBucket": "dein-projekt.appspot.com",
+  "messagingSenderId": "123456789",
+  "appId": "1:123456789:web:abcdef"
+}'></textarea>
+            </div>
+
+            <!-- Buttons & Actions -->
+            <div class="space-y-3 pt-2 border-t border-slate-100">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <button onclick="saveAndConnectFirebase()" class="bg-school-600 hover:bg-school-700 text-white font-bold py-2.5 px-4 rounded-lg shadow transition flex items-center justify-center gap-2">
+                        <span>⚡</span> <span>Verbinden & Speichern</span>
+                    </button>
+                    <button onclick="disconnectFirebase()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 px-4 rounded-lg transition flex items-center justify-center gap-2">
+                        <span>📴</span> <span>Cloud trennen (Nur Lokal)</span>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <button onclick="forcePushToCloud()" class="border-2 border-school-600 text-school-700 hover:bg-school-50 font-bold py-2 px-3 rounded-lg text-xs transition flex items-center justify-center gap-1.5" title="Überschreibt die Cloud mit dem aktuellen lokalen Stand">
+                        <span>⬆️</span> <span>Lokalen Stand in Cloud hochladen</span>
+                    </button>
+                    <button onclick="forcePullFromCloud()" class="border-2 border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-2 px-3 rounded-lg text-xs transition flex items-center justify-center gap-1.5" title="Lädt den Stand aus der Cloud herunter">
+                        <span>⬇️</span> <span>Aus Cloud neu laden</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Hilfe Akkordeon / Kurzanleitung -->
+            <details class="mt-5 bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-600">
+                <summary class="font-bold cursor-pointer text-slate-700">ℹ️ Wie richte ich Firebase kostenlos ein?</summary>
+                <div class="mt-3 space-y-2 leading-relaxed">
+                    <p><b>1.</b> Gehe auf <a href="https://console.firebase.google.com" target="_blank" class="text-school-600 underline font-bold">console.firebase.google.com</a> und erstelle ein kostenloses Projekt.</p>
+                    <p><b>2.</b> Klicke im Menü auf <b>Firestore Database</b> &rarr; <i>Datenbank erstellen</i> (im Testmodus oder mit den bereitgestellten Regeln).</p>
+                    <p><b>3.</b> Klicke auf das <b>Zahnrad ⚙️ (Projekteinstellungen)</b> &rarr; App hinzufügen (Web <code>&lt;/&gt;</code>) und kopiere das <code>firebaseConfig</code>-Objekt.</p>
+                    <p><b>4.</b> Füge den Code hier in das Textfeld ein und klicke auf <i>Verbinden & Speichern</i>. Fertig!</p>
+                </div>
+            </details>
+        </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div id="modal-confirm" class="fixed inset-0 hidden items-center justify-center z-50 modal-bg p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm">
+            <h3 class="text-xl font-bold text-slate-800 mb-2">Sicher?</h3>
+            <p id="confirm-msg" class="text-slate-600 mb-6">Wirklich löschen?</p>
+            <div class="flex justify-end space-x-3"><button onclick="closeConfirmModal()" class="px-4 py-2 bg-slate-100 rounded font-semibold">Abbruch</button><button id="confirm-btn" class="px-4 py-2 bg-red-600 text-white rounded font-bold">Löschen</button></div>
+        </div>
+    </div>
+
+    <!-- Feiertags-Assistent -->
+    <div id="modal-holidays" class="fixed inset-0 hidden items-center justify-center z-50 modal-bg p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto hide-scrollbar">
+            <div class="flex justify-between items-start mb-4">
+                <h3 class="text-2xl font-black text-slate-800 flex items-center gap-2">🏖️ Ferien-Zentrale</h3>
+                <button onclick="closeHolidayModal()" class="text-slate-400 hover:text-slate-800 text-xl font-bold">&times;</button>
+            </div>
+            
+            <div class="bg-indigo-50 border border-indigo-200 p-4 rounded-xl mb-6 shadow-sm">
+                <h4 class="font-bold text-indigo-900 mb-2">1. Automatisch abrufen</h4>
+                <p class="text-xs text-indigo-700 mb-3">Zieht offizielle Schulferien für Thüringen aus der Datenbank und berechnet gesetzliche Feiertage.</p>
+                <button id="api-fetch-btn" onclick="fetchHolidaysAPI()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-lg shadow-md transition flex justify-center items-center gap-2">🌐 Daten online laden (Thüringen)</button>
+            </div>
+
+            <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl">
+                <h4 class="font-bold text-slate-800 mb-2">2. Manuell eintragen (Fallback)</h4>
+                <p class="text-xs text-slate-500 mb-4">Tragen Sie hier abweichende Schulferien oder freie Tage ein.</p>
+                <div class="space-y-3 text-sm">
+                    <div class="flex items-center justify-between gap-2"><span class="w-24 font-bold text-slate-600">Herbst:</span><input type="date" id="hol-herbst-start" class="border rounded p-1 w-full"><span class="text-slate-400">bis</span><input type="date" id="hol-herbst-end" class="border rounded p-1 w-full"></div>
+                    <div class="flex items-center justify-between gap-2"><span class="w-24 font-bold text-slate-600">Weihnachten:</span><input type="date" id="hol-weihnacht-start" class="border rounded p-1 w-full"><span class="text-slate-400">bis</span><input type="date" id="hol-weihnacht-end" class="border rounded p-1 w-full"></div>
+                    <div class="flex items-center justify-between gap-2"><span class="w-24 font-bold text-slate-600">Winter:</span><input type="date" id="hol-winter-start" class="border rounded p-1 w-full"><span class="text-slate-400">bis</span><input type="date" id="hol-winter-end" class="border rounded p-1 w-full"></div>
+                    <div class="flex items-center justify-between gap-2"><span class="w-24 font-bold text-slate-600">Ostern:</span><input type="date" id="hol-ostern-start" class="border rounded p-1 w-full"><span class="text-slate-400">bis</span><input type="date" id="hol-ostern-end" class="border rounded p-1 w-full"></div>
+                    <div class="flex items-center justify-between gap-2"><span class="w-24 font-bold text-slate-600">Sommer:</span><input type="date" id="hol-sommer-start" class="border rounded p-1 w-full"><span class="text-slate-400">bis</span><input type="date" id="hol-sommer-end" class="border rounded p-1 w-full"></div>
+                    <hr class="my-2 border-slate-200">
+                    <div class="flex items-center justify-between gap-2"><span class="w-24 font-bold text-slate-600">Frei 1:</span><input type="date" id="hol-var1" class="border rounded p-1 w-full flex-grow"></div>
+                    <div class="flex items-center justify-between gap-2"><span class="w-24 font-bold text-slate-600">Frei 2:</span><input type="date" id="hol-var2" class="border rounded p-1 w-full flex-grow"></div>
+                </div>
+                <button onclick="saveManualHolidays()" class="w-full mt-5 bg-school-600 hover:bg-school-700 text-white font-bold py-2.5 rounded-lg shadow-md transition">Manuelle Daten eintragen</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Lehrer Anlegen Modal -->
+    <div id="modal-teacher" class="fixed inset-0 hidden items-center justify-center z-50 modal-bg p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm">
+            <h3 class="text-xl font-bold text-slate-800 mb-4">Lehrkraft anlegen</h3>
+            <input type="text" id="new-teacher-name" class="w-full border-2 border-slate-200 rounded-lg p-3 mb-4 font-bold" placeholder="z.B. Müller">
+            <div class="flex justify-end space-x-3"><button onclick="closeTeacherModal()" class="px-4 py-2 bg-slate-100 rounded font-semibold">Abbruch</button><button onclick="saveTeacher()" class="px-4 py-2 bg-school-600 text-white rounded font-bold">Speichern</button></div>
+        </div>
+    </div>
+
+    <!-- AZV Modal -->
+    <div id="modal-azv-form" class="fixed inset-0 hidden items-center justify-center z-50 modal-bg p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto hide-scrollbar">
+            <h3 class="text-xl font-bold text-slate-800 mb-4">Manuelle AZV-Buchung</h3>
+            <div class="space-y-3 mb-6">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Lehrkraft:</label>
+                    <select id="azv-teacher" class="w-full border-2 p-2 rounded-lg font-bold outline-none focus:border-school-500"></select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Zeitraum:</label>
+                    <div class="flex items-center gap-2">
+                        <input type="date" id="azv-date-from" class="w-full border-2 p-2 rounded-lg font-medium text-slate-700 outline-none focus:border-school-500" onchange="updateAzvHours()">
+                        <span class="text-sm font-bold text-slate-400">bis</span>
+                        <input type="date" id="azv-date-to" class="w-full border-2 p-2 rounded-lg font-medium text-slate-700 outline-none focus:border-school-500" onchange="updateAzvHours()">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Buchungstyp:</label>
+                    <select id="azv-type" class="w-full border-2 p-2 rounded-lg font-bold outline-none focus:border-school-500" onchange="updateAzvHours()">
+                        <option value="genommen">AZV genommen (Schulden -)</option>
+                        <option value="abgegolten">Abgegolten (Ausgleich +)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Stunden:</label>
+                    <input type="number" id="azv-hours" value="5" class="w-full border-2 p-2 rounded-lg font-bold outline-none focus:border-school-500">
+                </div>
+            </div>
+            <div class="flex justify-end space-x-3"><button onclick="closeAzvForm()" class="px-4 py-2 bg-slate-100 rounded font-semibold">Abbruch</button><button onclick="saveAzvEntry()" class="px-4 py-2 bg-school-600 text-white rounded font-bold">Buchen</button></div>
+        </div>
+    </div>
+
+    <!-- Kalendereintrag Modal -->
+    <div id="modal-cal-entry" class="fixed inset-0 hidden items-center justify-center z-50 modal-bg p-3">
+        <div class="bg-white rounded-2xl shadow-2xl p-5 w-full max-w-[450px]">
+            <div class="mb-4"><h3 class="text-2xl font-black" id="cal-modal-title">Eintrag</h3></div>
+            <div class="bg-school-50 p-2 rounded-lg mb-4 flex items-center justify-between">
+                <span class="font-bold text-school-900">Zeitraum:</span>
+                <div class="flex items-center space-x-2 bg-white px-2 py-1 rounded">
+                    <span class="font-bold w-8 text-center" id="cal-modal-day-display">15.</span> <span>bis</span>
+                    <input type="number" id="cal-modal-day-end" class="w-12 text-center font-bold outline-none">
+                </div>
+            </div>
+            <input type="hidden" id="cal-modal-tId"><input type="hidden" id="cal-modal-day">
+
+            <div class="space-y-4">
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="saveCalEntry('K')" class="bg-red-100 text-red-700 py-3 rounded font-black text-sm">Krank</button>
+                        <button onclick="saveCalEntry('KK')" class="bg-orange-100 text-orange-700 py-3 rounded font-black text-sm">Kind K.</button>
+                        <button onclick="saveCalEntry('AZV')" class="bg-purple-100 text-purple-700 py-3 rounded font-black text-sm">AZV</button>
+                    </div>
+                </div>
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <div class="flex items-center justify-between bg-white rounded p-2 mb-3 border">
+                        <span class="font-bold text-sm">Stunden:</span>
+                        <input type="number" id="cal-modal-hours" value="1" min="1" max="10" class="w-16 text-center font-bold bg-slate-100 rounded outline-none p-1">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 mb-2">
+                        <button onclick="saveCalEntry('V', document.getElementById('cal-modal-hours').value)" class="bg-blue-100 text-blue-700 py-2 rounded font-black text-sm">Vertretung (V)</button>
+                        <button onclick="saveCalEntry('R', document.getElementById('cal-modal-hours').value)" class="bg-emerald-100 text-emerald-700 py-2 rounded font-black text-sm">Reststunde (R)</button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="saveCalEntry('E', document.getElementById('cal-modal-hours').value)" class="bg-rose-100 text-rose-700 py-2 rounded font-black text-sm">Extra (E)</button>
+                        <button onclick="saveCalEntry('AZVgeh', document.getElementById('cal-modal-hours').value)" class="bg-teal-100 text-teal-700 py-2 rounded font-black text-sm">AZVgeh</button>
+                    </div>
+                </div>
+                <button onclick="saveCalEntry('')" class="w-full bg-white text-slate-500 py-3 rounded font-bold border-2">🗑️ Leeren</button>
+            </div>
+            <div class="mt-4 text-center"><button onclick="closeCalModal()" class="text-slate-400 font-bold px-6 py-2">Schließen</button></div>
+        </div>
+    </div>
+
+    <!-- MODAL: SCHULJAHRESWECHSEL-ASSISTENT -->
+    <div id="modal-rollover" class="fixed inset-0 hidden items-center justify-center z-50 modal-bg p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-xl max-h-[90vh] overflow-y-auto hide-scrollbar">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h3 class="text-2xl font-black text-slate-800 flex items-center gap-2">🔄 Schuljahreswechsel-Assistent</h3>
+                    <p class="text-xs text-slate-500">Übergabe ins neue Schuljahr inklusive Kollegiums- und AZV-Saldenübertrag</p>
+                </div>
+                <button onclick="closeRolloverWizard()" class="text-slate-400 hover:text-slate-800 text-2xl font-bold">&times;</button>
+            </div>
+
+            <!-- Wizard Step Indicator -->
+            <div class="flex items-center justify-between mb-6 bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-xs font-bold">
+                <div id="step-ind-1" class="text-amber-600 font-extrabold flex items-center gap-1">1. Schuljahr</div>
+                <span class="text-slate-300">➔</span>
+                <div id="step-ind-2" class="text-slate-400 flex items-center gap-1">2. Kollegium</div>
+                <span class="text-slate-300">➔</span>
+                <div id="step-ind-3" class="text-slate-400 flex items-center gap-1">3. AZV-Salden</div>
+                <span class="text-slate-300">➔</span>
+                <div id="step-ind-4" class="text-slate-400 flex items-center gap-1">4. Starten</div>
+            </div>
+
+            <!-- STEP 1: Schuljahr wählen -->
+            <div id="rollover-step-1" class="space-y-4">
+                <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl text-sm text-amber-900">
+                    <b>Ausgangs-Schuljahr:</b> <span id="rollover-source-year" class="font-black"></span><br>
+                    <span class="text-xs text-amber-800">Die Daten dieses Schuljahres bleiben vollständig im Archiv erhalten.</span>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Neues Ziel-Schuljahr:</label>
+                    <input type="text" id="rollover-target-year" class="w-full border-2 border-slate-200 rounded-xl p-3 font-black text-xl text-school-800 outline-none focus:border-school-500" placeholder="z. B. 26/27">
+                    <p class="text-[11px] text-slate-400 mt-1">Format: YY/YY (z. B. 26/27)</p>
+                </div>
+                <div class="flex justify-end pt-4"><button onclick="goToRolloverStep(2)" class="bg-school-600 hover:bg-school-500 text-white font-bold px-5 py-2.5 rounded-xl shadow transition">Weiter: Kollegium ➔</button></div>
+            </div>
+
+            <!-- STEP 2: Kollegium abgleichen -->
+            <div id="rollover-step-2" class="hidden space-y-4">
+                <div class="flex justify-between items-center">
+                    <span class="text-xs font-bold text-slate-600 uppercase">Wer ist im neuen Schuljahr aktiv?</span>
+                    <button onclick="toggleAllRolloverTeachers()" class="text-xs text-school-600 font-bold underline">Alle wählen / abwählen</button>
+                </div>
+                <div id="rollover-teachers-list" class="max-h-60 overflow-y-auto border rounded-xl divide-y p-1 bg-slate-50"></div>
+                <div class="flex justify-between pt-4">
+                    <button onclick="goToRolloverStep(1)" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 font-semibold rounded-xl text-xs">⬅️ Zurück</button>
+                    <button onclick="goToRolloverStep(3)" class="bg-school-600 hover:bg-school-500 text-white font-bold px-5 py-2.5 rounded-xl shadow transition text-xs">Weiter: AZV-Salden ➔</button>
+                </div>
+            </div>
+
+            <!-- STEP 3: AZV-Restsalden übertragen -->
+            <div id="rollover-step-3" class="hidden space-y-4">
+                <label class="flex items-center gap-3 p-3 bg-teal-50 border border-teal-200 rounded-xl cursor-pointer">
+                    <input type="checkbox" id="rollover-transfer-azv" checked class="w-5 h-5 accent-teal-600" onchange="renderRolloverAzvPreview()">
+                    <span class="text-sm font-bold text-teal-900">Restsalden aus dem Vorjahr als Startsaldo ins neue Schuljahr übertragen</span>
+                </label>
+                <div id="rollover-azv-preview" class="max-h-48 overflow-y-auto border rounded-xl p-2 bg-slate-50 text-xs"></div>
+                <div class="flex justify-between pt-4">
+                    <button onclick="goToRolloverStep(2)" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 font-semibold rounded-xl text-xs">⬅️ Zurück</button>
+                    <button onclick="goToRolloverStep(4)" class="bg-school-600 hover:bg-school-500 text-white font-bold px-5 py-2.5 rounded-xl shadow transition text-xs">Weiter: Bestätigen ➔</button>
+                </div>
+            </div>
+
+            <!-- STEP 4: Zusammenfassung & Start -->
+            <div id="rollover-step-4" class="hidden space-y-4">
+                <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl text-xs space-y-2" id="rollover-summary-box"></div>
+                <div class="space-y-2">
+                    <label class="block text-xs font-bold text-slate-600 uppercase">Basis-Stunden (R / V):</label>
+                    <label class="flex items-center gap-2 text-xs font-medium cursor-pointer"><input type="radio" name="rollover-quota" value="keep" checked class="accent-school-600"> Aktuelle Basis-Werte (R / V) für neues Schuljahr übernehmen</label>
+                    <label class="flex items-center gap-2 text-xs font-medium cursor-pointer"><input type="radio" name="rollover-quota" value="reset" class="accent-school-600"> Alle Basis-Werte auf 0 setzen (neu abfragen via Jahresstart)</label>
+                </div>
+                <div class="flex justify-between pt-4">
+                    <button onclick="goToRolloverStep(3)" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 font-semibold rounded-xl text-xs">⬅️ Zurück</button>
+                    <button onclick="executeRollover()" class="bg-school-600 hover:bg-school-500 text-white font-black px-6 py-3 rounded-xl shadow-lg transition text-sm flex items-center gap-2">🚀 Neues Schuljahr anlegen & starten</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: ADMIN / MASTER-PASSWORT LOGIN -->
+    <div id="modal-admin-login" class="fixed inset-0 hidden items-center justify-center z-50 modal-bg p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm text-center">
+            <div class="w-12 h-12 bg-slate-100 text-slate-700 rounded-xl flex items-center justify-center text-2xl mx-auto mb-3">🔐</div>
+            <h3 class="text-xl font-bold text-slate-800 mb-1">Schulleitungs-Bereich</h3>
+            <p class="text-xs text-slate-500 mb-4">Bitte Masterpasswort der Schulleitung eingeben</p>
+            <input type="password" id="admin-master-pin-input" class="w-full border-2 border-slate-200 rounded-xl p-3 text-center font-bold text-lg mb-4 outline-none focus:border-slate-800" placeholder="Passwort eingeben" onkeyup="if(event.key==='Enter') confirmAdminLogin()">
+            <div class="flex space-x-2">
+                <button onclick="closeAdminLoginModal()" class="w-1/2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 rounded-xl font-semibold text-xs">Abbruch</button>
+                <button onclick="confirmAdminLogin()" class="w-1/2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-xs">Entsperren</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ANWENDUNGSLOGIK & CLOUD-SYNCHRONISATION -->
+    <script>
+        const storageKey = 'vertretungsStatistikDB_v2'; 
+        const cloudConfigKey = 'fb_config_vertretungsstatistik';
+        const cloudSchoolKey = 'fb_school_id_vertretungsstatistik';
+
+        let appData = { schoolYear: "", lastRealYear: "", currentMonth: new Date().getMonth() + 1, teachers: [], years: {}, lastModified: 0 };
+        const monthNames = { 8:"August", 9:"September", 10:"Oktober", 11:"November", 12:"Dezember", 1:"Januar", 2:"Februar", 3:"März", 4:"April", 5:"Mai", 6:"Juni", 7:"Juli" };
+        const monthOrder = [8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6, 7];
+        let illnessChartInst = null; let extraChartInst = null;
+        let compareYears = [];
+        let activeTab = 'month';
+
+        // --- FIREBASE CLOUD SYNC STATE ---
+        let fbApp = null;
+        let fbDb = null;
+        let fbUnsubscribe = null;
+        let isSyncingFromRemote = false;
+        let cloudSaveTimer = null;
+        let cloudStatus = 'local'; // 'local' | 'connecting' | 'connected' | 'saving' | 'error'
+
+        function getCurrentSchoolYear() {
+            const now = new Date(); let y1 = now.getMonth() + 1 >= 8 ? now.getFullYear() : now.getFullYear() - 1;
+            return `${y1.toString().slice(-2)}/${(y1 + 1).toString().slice(-2)}`;
+        }
+        
+        function getYearData(yStr = appData.schoolYear) {
+            if (!appData.years[yStr]) appData.years[yStr] = { records: {}, monthConfigs: {}, azv: [], holidays: {}, staffStatus: {} };
+            if (!appData.years[yStr].staffStatus) appData.years[yStr].staffStatus = {};
+            return appData.years[yStr];
+        }
+
+        function generateTeacherPin() {
+            return String(Math.floor(1000 + Math.random() * 9000));
+        }
+
+        // --- INITIALISIERUNG ---
+        function init() {
+            loadFromLocal();
+            if(appData.teachers.length === 0) appData.teachers = [{ id: "t1", name: "Mustermann", r: 0, v: 3, active: true, pin: "1234" }];
+            appData.masterPin = 'Year2003?!%';
+            appData.teachers.forEach(t => {
+                if(!t.pin) t.pin = generateTeacherPin();
+            });
+            populateYearDropdown();
+            if(!monthOrder.includes(appData.currentMonth)) appData.currentMonth = 8;
+            document.getElementById('month-select').value = appData.currentMonth;
+            
+            // Firebase automatisch verbinden, falls Konfiguration hinterlegt ist
+            initFirebaseFromStorage();
+            
+            // Standardmäßig IMMER im geschützten Kollegenzugang (Portal) starten,
+            // außer die Schulleitung hat sich in diesem Browser-Tab bereits mit dem Masterpasswort entsperrt.
+            let isAdminUnlocked = sessionStorage.getItem('admin_unlocked') === 'true';
+            if (isAdminUnlocked && window.location.hash !== '#kollege' && window.location.hash !== '#portal' && window.location.hash !== '#lehrer') {
+                switchTab('month');
+            } else {
+                openPortalView();
+            }
+        }
+
+        // --- TOAST & DIALOGE ---
+        function showToast(msg, icon = "✅") { 
+            const t = document.getElementById('toast'); 
+            t.innerHTML = `<span>${icon}</span> <span>${msg}</span>`; 
+            t.classList.remove('hidden'); 
+            setTimeout(() => t.classList.add('hidden'), 3500); 
+        }
+        
+        let confirmCallback = null;
+        function askConfirm(msg, cb) { 
+            document.getElementById('confirm-msg').innerText = msg; 
+            confirmCallback = cb; 
+            document.getElementById('modal-confirm').classList.remove('hidden'); 
+            document.getElementById('modal-confirm').classList.add('flex'); 
+        }
+        function closeConfirmModal() { 
+            document.getElementById('modal-confirm').classList.add('hidden'); 
+            document.getElementById('modal-confirm').classList.remove('flex'); 
+        }
+        document.getElementById('confirm-btn').addEventListener('click', () => { if(confirmCallback) confirmCallback(); closeConfirmModal(); });
+        function formatAzvDate(day, month) { return String(day).padStart(2, '0') + '.' + String(month).padStart(2, '0') + '.'; }
+
+        // --- DATEN SPEICHERN (LOKAL + CLOUD) ---
+        function saveToLocal() {
+            appData.lastModified = Date.now();
+            localStorage.setItem(storageKey, JSON.stringify(appData));
+            
+            let ind = document.getElementById('save-indicator');
+            if (fbDb && cloudStatus === 'connected') {
+                ind.textContent = "✓ Gespeichert (Lokal & Cloud)";
+                queueCloudSync();
+            } else {
+                ind.textContent = "✓ Gespeichert (Lokal)";
+            }
+            setTimeout(() => { if (ind) ind.textContent = ""; }, 2500);
+        }
+
+        function loadFromLocal() {
+            let saved = localStorage.getItem(storageKey) || localStorage.getItem('vertretungsStatistikDB');
+            if (saved) {
+                try {
+                    let parsed = JSON.parse(saved);
+                    if (!parsed.years) {
+                        parsed.years = {}; let oldYear = parsed.schoolYear || "25/26";
+                        parsed.years[oldYear] = { records: parsed.records || {}, monthConfigs: parsed.monthConfigs || {}, azv: parsed.azv || [], holidays: {} };
+                        if (parsed.holidays) { Object.keys(parsed.holidays).forEach(k => { parsed.years[oldYear].holidays[k.split('_').pop()] = parsed.holidays[k]; }); }
+                        delete parsed.records; delete parsed.monthConfigs; delete parsed.azv; delete parsed.holidays;
+                    }
+                    appData = parsed;
+                } catch (e) { console.error("Fehler beim Laden lokaler Daten:", e); }
+            }
+            let realYear = getCurrentSchoolYear();
+            if (!appData.schoolYear) appData.schoolYear = realYear;
+            if (!appData.years) appData.years = {};
+            if (!appData.years[appData.schoolYear]) appData.years[appData.schoolYear] = { records: {}, monthConfigs: {}, azv: [], holidays: {} };
+        }
+
+        function exportData() { 
+            const dl = document.createElement('a'); 
+            dl.setAttribute("href", "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2))); 
+            dl.setAttribute("download", `Vertretungs_Backup_Archiv_${getCurrentSchoolYear().replace('/','-')}.json`); 
+            document.body.appendChild(dl); 
+            dl.click(); 
+            dl.remove(); 
+        }
+
+        function importData(event) { 
+            const file = event.target.files[0]; 
+            if (!file) return; 
+            const reader = new FileReader(); 
+            reader.onload = function(e) { 
+                try { 
+                    appData = JSON.parse(e.target.result); 
+                    if(!appData.years) { saveToLocal(); loadFromLocal(); } 
+                    saveToLocal(); 
+                    init(); 
+                    showToast("Daten erfolgreich importiert!"); 
+                } catch (err) { 
+                    showToast("Fehler beim Laden der JSON-Datei.", "❌"); 
+                } 
+            }; 
+            reader.readAsText(file); 
+        }
+
+        // --- FIREBASE SYNC MANAGER ---
+        function updateCloudUIStatus(status, text, desc) {
+            cloudStatus = status;
+            const dot = document.getElementById('cloud-sync-dot');
+            const mobileDot = document.getElementById('mobile-cloud-dot');
+            const label = document.getElementById('cloud-sync-label');
+            const modalDot = document.getElementById('cloud-status-indicator-dot');
+            const modalTitle = document.getElementById('cloud-status-title');
+            const modalDesc = document.getElementById('cloud-status-desc');
+
+            const statusColors = {
+                local: 'bg-amber-400',
+                connecting: 'bg-blue-400 sync-active',
+                connected: 'bg-emerald-400',
+                saving: 'bg-blue-500 sync-active',
+                error: 'bg-red-500'
+            };
+
+            const colorClass = statusColors[status] || 'bg-slate-400';
+
+            [dot, mobileDot, modalDot].forEach(el => {
+                if (el) {
+                    el.className = `w-2.5 h-2.5 rounded-full ${colorClass}`;
+                    if (el === modalDot) el.className = `w-3.5 h-3.5 rounded-full ${colorClass}`;
+                }
+            });
+
+            if (label) label.textContent = text || "Cloud";
+            if (modalTitle) modalTitle.textContent = text || "";
+            if (modalDesc && desc) modalDesc.textContent = desc;
+        }
+
+        function getSchoolDocId() {
+            return (localStorage.getItem(cloudSchoolKey) || "schule-standard").trim().toLowerCase().replace(/[^a-z0-9_-]/g, '-');
+        }
+
+        function initFirebaseFromStorage() {
+            const rawConfig = localStorage.getItem(cloudConfigKey);
+            const schoolId = localStorage.getItem(cloudSchoolKey) || "schule-standard";
+            
+            if (!rawConfig) {
+                updateCloudUIStatus('local', 'Lokal (Offline)', 'Keine Firebase-Konfiguration hinterlegt. Daten werden nur im Browser gespeichert.');
+                return;
+            }
+
+            try {
+                const config = JSON.parse(rawConfig);
+                startFirebase(config, schoolId);
+            } catch (e) {
+                console.error("Firebase Config ungültig:", e);
+                updateCloudUIStatus('error', 'Konfig-Fehler', 'Die gespeicherte Firebase-Konfiguration ist fehlerhaft.');
+            }
+        }
+
+        function startFirebase(config, schoolId) {
+            if (typeof firebase === 'undefined') {
+                console.warn("Firebase SDK nicht geladen.");
+                updateCloudUIStatus('error', 'SDK fehlt', 'Firebase SDK konnte nicht aus dem CDN geladen werden.');
+                return;
+            }
+
+            updateCloudUIStatus('connecting', 'Verbinde...', 'Verbindung zu Firestore wird aufgebaut...');
+
+            try {
+                if (!firebase.apps.length) {
+                    fbApp = firebase.initializeApp(config);
+                } else {
+                    fbApp = firebase.app();
+                }
+
+                fbDb = firebase.firestore(fbApp);
+
+                try {
+                    fbDb.enablePersistence({ synchronizeTabs: true }).catch(err => {
+                        if (err.code === 'failed-precondition' || err.code === 'unimplemented') {
+                            console.log("Firestore Persistence Hinweis:", err.message);
+                        }
+                    });
+                } catch(e) {}
+
+                subscribeToSchoolDoc(schoolId);
+
+            } catch (err) {
+                console.error("Fehler beim Starten von Firebase:", err);
+                updateCloudUIStatus('error', 'Fehler', err.message || 'Verbindung fehlgeschlagen');
+            }
+        }
+
+        function subscribeToSchoolDoc(schoolId) {
+            if (fbUnsubscribe) {
+                fbUnsubscribe();
+                fbUnsubscribe = null;
+            }
+
+            const docRef = fbDb.collection("schools").doc(schoolId);
+            
+            fbUnsubscribe = docRef.onSnapshot((docSnap) => {
+                const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                const lastSyncEl = document.getElementById('cloud-last-sync');
+                if (lastSyncEl) lastSyncEl.textContent = `Letzter Sync: ${nowStr}`;
+
+                if (docSnap.exists) {
+                    const remoteData = docSnap.data();
+                    const remoteTs = remoteData.lastModified || 0;
+                    const localTs = appData.lastModified || 0;
+
+                    if (remoteTs > localTs || !appData.teachers || appData.teachers.length === 0) {
+                        isSyncingFromRemote = true;
+                        appData = remoteData;
+                        localStorage.setItem(storageKey, JSON.stringify(appData));
+                        populateYearDropdown();
+                        renderCurrentView();
+                        isSyncingFromRemote = false;
+                        showToast(`Daten mit Cloud synchronisiert (${nowStr})`, "☁️");
+                    }
+                } else {
+                    console.log("Schul-Dokument existiert noch nicht in Firestore. Erstelle neu...");
+                    docRef.set({ ...appData, lastModified: Date.now() });
+                }
+
+                updateCloudUIStatus('connected', 'Live-Sync aktiv', `Echtzeit-Synchronisation aktiv für Mandant: "${schoolId}"`);
+            }, (error) => {
+                console.error("Firestore Snapshot Fehler:", error);
+                updateCloudUIStatus('error', 'Berechtigungsfehler', 'Kein Zugriff auf Firestore. Bitte Security Rules prüfen.');
+            });
+        }
+
+        function queueCloudSync() {
+            if (!fbDb || cloudStatus === 'local' || isSyncingFromRemote) return;
+            
+            clearTimeout(cloudSaveTimer);
+            updateCloudUIStatus('saving', 'Speichere...', 'Änderungen werden in die Cloud übertragen...');
+
+            cloudSaveTimer = setTimeout(async () => {
+                try {
+                    const schoolId = getSchoolDocId();
+                    await fbDb.collection("schools").doc(schoolId).set({
+                        ...appData,
+                        lastModified: Date.now()
+                    }, { merge: true });
+                    
+                    updateCloudUIStatus('connected', 'Live-Sync aktiv', `Echtzeit-Synchronisation aktiv für Mandant: "${schoolId}"`);
+                } catch (err) {
+                    console.error("Cloud-Save fehlgeschlagen:", err);
+                    updateCloudUIStatus('error', 'Sync-Fehler', 'Speichern in Cloud fehlgeschlagen: ' + err.message);
+                }
+            }, 600);
+        }
+
+        // --- CLOUD MODAL FUNKTIONEN ---
+        function openCloudModal() {
+            const rawConfig = localStorage.getItem(cloudConfigKey) || '';
+            const schoolId = localStorage.getItem(cloudSchoolKey) || 'schule-standard';
+            document.getElementById('fb-school-id').value = schoolId;
+            document.getElementById('fb-config-raw').value = rawConfig;
+            
+            document.getElementById('modal-cloud').classList.remove('hidden');
+            document.getElementById('modal-cloud').classList.add('flex');
+        }
+
+        function closeCloudModal() {
+            document.getElementById('modal-cloud').classList.add('hidden');
+            document.getElementById('modal-cloud').classList.remove('flex');
+        }
+
+        function parseFirebaseConfig(raw) {
+            if (!raw || !raw.trim()) throw new Error("Konfiguration ist leer.");
+            let cleaned = raw.trim();
+            if (cleaned.includes('{')) {
+                cleaned = cleaned.substring(cleaned.indexOf('{'), cleaned.lastIndexOf('}') + 1);
+            }
+            try {
+                return JSON.parse(cleaned);
+            } catch (e) {
+                const fn = new Function(`return (${cleaned});`);
+                return fn();
+            }
+        }
+
+        function saveAndConnectFirebase() {
+            const schoolIdInput = document.getElementById('fb-school-id').value.trim() || 'schule-standard';
+            const configRaw = document.getElementById('fb-config-raw').value;
+
+            try {
+                const config = parseFirebaseConfig(configRaw);
+                if (!config.apiKey || !config.projectId) {
+                    throw new Error("Ungültige Konfiguration: apiKey und projectId erforderlich.");
+                }
+
+                localStorage.setItem(cloudConfigKey, JSON.stringify(config, null, 2));
+                localStorage.setItem(cloudSchoolKey, schoolIdInput);
+
+                startFirebase(config, schoolIdInput);
+                showToast("Firebase-Verbindung wird hergestellt...", "⚡");
+                closeCloudModal();
+            } catch (err) {
+                alert("Fehler bei der Konfiguration:\n" + err.message);
+            }
+        }
+
+        function disconnectFirebase() {
+            if (fbUnsubscribe) {
+                fbUnsubscribe();
+                fbUnsubscribe = null;
+            }
+            fbDb = null;
+            localStorage.removeItem(cloudConfigKey);
+            updateCloudUIStatus('local', 'Lokal (Offline)', 'Cloud-Verbindung getrennt. Daten werden nur im Browser gespeichert.');
+            showToast("Cloud-Sync deaktiviert. Sie arbeiten jetzt lokal.", "📴");
+            closeCloudModal();
+        }
+
+        async function forcePushToCloud() {
+            if (!fbDb) return alert("Bitte zuerst Firebase verbinden!");
+            askConfirm("Möchten Sie den aktuellen lokalen Datenbestand verbindlich in die Cloud hochladen?", async () => {
+                try {
+                    const schoolId = getSchoolDocId();
+                    appData.lastModified = Date.now();
+                    await fbDb.collection("schools").doc(schoolId).set(appData);
+                    showToast("Lokaler Stand erfolgreich in Cloud hochgeladen!", "☁️");
+                    closeCloudModal();
+                } catch (err) {
+                    alert("Upload-Fehler: " + err.message);
+                }
+            });
+        }
+
+        async function forcePullFromCloud() {
+            if (!fbDb) return alert("Bitte zuerst Firebase verbinden!");
+            askConfirm("Möchten Sie alle Daten aus der Cloud herunterladen? Lokale ungespeicherte Änderungen werden überschrieben.", async () => {
+                try {
+                    const schoolId = getSchoolDocId();
+                    const docSnap = await fbDb.collection("schools").doc(schoolId).get();
+                    if (docSnap.exists) {
+                        appData = docSnap.data();
+                        localStorage.setItem(storageKey, JSON.stringify(appData));
+                        populateYearDropdown();
+                        renderCurrentView();
+                        showToast("Daten frisch aus der Cloud geladen!", "⬇️");
+                        closeCloudModal();
+                    } else {
+                        alert("In der Cloud existiert noch kein Datenbestand für diese Schul-ID.");
+                    }
+                } catch (err) {
+                    alert("Download-Fehler: " + err.message);
+                }
+            });
+        }
+
+        function loadSampleFirebaseConfig() {
+            document.getElementById('fb-config-raw').value = JSON.stringify({
+                apiKey: "HIER_API_KEY_EINFUEGEN",
+                authDomain: "dein-projekt.firebaseapp.com",
+                projectId: "dein-projekt-id",
+                storageBucket: "dein-projekt.appspot.com",
+                messagingSenderId: "123456789012",
+                appId: "1:123456789012:web:abcdef123456"
+            }, null, 2);
+        }
+
+        // --- TABS & NAVIGATION ---
+        function renderCurrentView() {
+            if (activeTab === 'month') renderMonthView();
+            else if (activeTab === 'dashboard') renderDashboardView();
+            else if (activeTab === 'staff') renderStaffView();
+            else if (activeTab === 'azv') renderAzvView();
+            else if (activeTab === 'survey') renderSurveyView();
+            else if (activeTab === 'reports') renderReportsView();
+        }
+
+        function populateYearDropdown() {
+            const select = document.getElementById('school-year'); 
+            if (!select) return;
+            select.innerHTML = '';
+            
+            let allYears = []; 
+            // Generiere Basis-Schuljahre von 20/21 bis 35/36
+            for (let i = 20; i <= 35; i++) {
+                allYears.push(`${i}/${i+1}`);
+            }
+            
+            // Füge alle Schuljahre hinzu, die bereits in appData vorhanden sind
+            if (appData.years) {
+                Object.keys(appData.years).forEach(y => { 
+                    if (y && !allYears.includes(y)) allYears.push(y); 
+                });
+            }
+            if (appData.schoolYear && !allYears.includes(appData.schoolYear)) {
+                allYears.push(appData.schoolYear);
+            }
+            
+            // Chronologisch sortieren
+            allYears.sort((a, b) => {
+                let ya = parseInt(String(a).split('/')[0]) || 0;
+                let yb = parseInt(String(b).split('/')[0]) || 0;
+                return ya - yb;
+            });
+
+            allYears.forEach(y => { 
+                let opt = document.createElement('option'); 
+                opt.value = y; 
+                opt.text = "SJ " + y; 
+                select.appendChild(opt); 
+            });
+
+            // Option zum manuellen Anlegen eines weiteren Schuljahres
+            let addOpt = document.createElement('option');
+            addOpt.value = '__add_new__';
+            addOpt.text = '➕ Schuljahr anlegen...';
+            select.appendChild(addOpt);
+
+            select.value = allYears.includes(appData.schoolYear) ? appData.schoolYear : (allYears[0] || "25/26");
+        }
+
+        function changeYear() {
+            let select = document.getElementById('school-year');
+            if (!select) return;
+
+            if (select.value === '__add_new__') {
+                promptAddNewSchoolYear();
+                return;
+            }
+
+            appData.schoolYear = select.value;
+            if(!appData.years[appData.schoolYear]) appData.years[appData.schoolYear] = { records: {}, monthConfigs: {}, azv: [], holidays: {} };
+            saveToLocal(); 
+            updateTitleYears();
+            renderCurrentView();
+        }
+
+        function promptAddNewSchoolYear() {
+            let input = prompt("Geben Sie das Schuljahr ein (z. B. 24/25 oder 2024/2025):");
+            if (!input || !input.trim()) {
+                populateYearDropdown();
+                return;
+            }
+            input = input.trim();
+            let match = input.match(/(?:20)?(\d{2})\s*[\/\-_]\s*(?:20)?(\d{2})/);
+            let yStr = match ? `${match[1]}/${match[2]}` : input;
+            
+            if (!appData.years) appData.years = {};
+            if (!appData.years[yStr]) {
+                appData.years[yStr] = { records: {}, monthConfigs: {}, azv: [], holidays: {} };
+            }
+            appData.schoolYear = yStr;
+            saveToLocal();
+            populateYearDropdown();
+            updateTitleYears();
+            renderCurrentView();
+            showToast(`Schuljahr SJ ${yStr} erfolgreich angelegt!`);
+        }
+
+        function updateTitleYears() { 
+            document.querySelectorAll('.dash-year-title').forEach(el => el.innerText = `(SJ ${appData.schoolYear})`); 
+        }
+
+        function switchTab(tabId) {
+            activeTab = tabId;
+            ['month', 'dashboard', 'azv', 'staff', 'survey', 'reports'].forEach(t => {
+                document.getElementById(`view-${t}`).classList.add('hidden');
+                document.getElementById(`tab-${t}`)?.classList.remove('bg-school-600', 'shadow-inner', 'text-amber-300');
+                document.getElementById(`tab-${t}`)?.classList.add('hover:bg-school-600/50');
+            });
+            document.getElementById(`view-${tabId}`).classList.remove('hidden');
+            document.getElementById(`tab-${tabId}`)?.classList.add('bg-school-600', 'shadow-inner');
+            if(tabId === 'survey') document.getElementById(`tab-${tabId}`)?.classList.add('text-amber-300');
+            document.getElementById(`tab-${tabId}`)?.classList.remove('hover:bg-school-600/50');
+            updateTitleYears();
+            renderCurrentView();
+        }
+
+        function changeMonth() { 
+            appData.currentMonth = parseInt(document.getElementById('month-select').value); 
+            saveToLocal(); 
+            renderMonthView(); 
+        }
+
+        function getYearForMonth(m, schoolYearStr) { 
+            let parts = String(schoolYearStr).split('/'); 
+            if (parts.length !== 2) return new Date().getFullYear(); 
+            let y1 = parseInt(parts[0]); 
+            let y2 = parseInt(parts[1]); 
+            return (m >= 8) ? (y1 < 100 ? y1 + 2000 : y1) : (y2 < 100 ? y2 + 2000 : y2); 
+        }
+
+        function getDaysInMonth(month, year) { return new Date(year, month, 0).getDate(); }
+        
+        function toggleHoliday(day) { 
+            const m = appData.currentMonth; 
+            let yd = getYearData(); 
+            if(!yd.holidays[m]) yd.holidays[m] = []; 
+            const idx = yd.holidays[m].indexOf(day); 
+            if(idx > -1) yd.holidays[m].splice(idx, 1); 
+            else yd.holidays[m].push(day); 
+            saveToLocal(); 
+            renderMonthView(); 
+        }
+
+        // --- EXCEL (.XLSX) IMPORT VIA SHEETJS ---
+        function importOldExcel(event) {
+            let file = event.target.files[0];
+            if(!file) return;
+
+            showToast(`Analysiere Excel-Datei...`, "⏳");
+            
+            // Robuste Schuljahreserkennung aus dem Dateinamen (z. B. SJ2526, 2025-2026, SJ 25/26, 25-26 etc.)
+            let yStr = "";
+            let yMatch = file.name.match(/(?:SJ|Schuljahr)?\s*(?:20)?(\d{2})[\/\-_]?(?:20)?(\d{2})/i);
+            if (yMatch) {
+                yStr = `${yMatch[1]}/${yMatch[2]}`;
+            }
+
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    let data = new Uint8Array(e.target.result);
+                    let workbook = XLSX.read(data, {type: 'array'});
+                    
+                    // Falls aus dem Dateinamen kein Schuljahr erkannt wurde, in Tabellenblättern suchen
+                    if (!yStr) {
+                        for (let sName of workbook.SheetNames) {
+                            let sMatch = sName.match(/(?:SJ|Schuljahr)?\s*(?:20)?(\d{2})[\/\-_]?(?:20)?(\d{2})/i);
+                            if (sMatch) { yStr = `${sMatch[1]}/${sMatch[2]}`; break; }
+                        }
+                    }
+                    if (!yStr) {
+                        yStr = appData.schoolYear || getCurrentSchoolYear();
+                    }
+
+                    let monthsMap = {
+                        "August": 8, "September": 9, "Oktober": 10, "November": 11, "Dezember": 12,
+                        "Januar": 1, "Februar": 2, "März": 3, "Maerz": 3, "April": 4, "Mai": 5, "Juni": 6, "Juli": 7
+                    };
+
+                    if (!appData.years) appData.years = {};
+                    if (!appData.years[yStr]) {
+                        appData.years[yStr] = { records: {}, monthConfigs: {}, azv: [], holidays: {} };
+                    }
+                    let yd = appData.years[yStr];
+                    if (!yd.records) yd.records = {};
+                    if (!yd.monthConfigs) yd.monthConfigs = {};
+                    if (!yd.azv) yd.azv = [];
+                    if (!yd.holidays) yd.holidays = {};
+
+                    let importedCount = 0;
+                    let entriesCount = 0;
+
+                    workbook.SheetNames.forEach(sheetName => {
+                        let sTrim = sheetName.trim();
+                        let m = monthsMap[sTrim];
+                        if (!m) {
+                            let sLow = sTrim.toLowerCase();
+                            if (sLow.startsWith('aug')) m = 8;
+                            else if (sLow.startsWith('sep')) m = 9;
+                            else if (sLow.startsWith('okt') || sLow.startsWith('oct')) m = 10;
+                            else if (sLow.startsWith('nov')) m = 11;
+                            else if (sLow.startsWith('dez') || sLow.startsWith('dec')) m = 12;
+                            else if (sLow.startsWith('jan')) m = 1;
+                            else if (sLow.startsWith('feb')) m = 2;
+                            else if (sLow.startsWith('mär') || sLow.startsWith('maer') || sLow.startsWith('mrz') || sLow.startsWith('mar')) m = 3;
+                            else if (sLow.startsWith('apr')) m = 4;
+                            else if (sLow.startsWith('mai') || sLow.startsWith('may')) m = 5;
+                            else if (sLow.startsWith('jun')) m = 6;
+                            else if (sLow.startsWith('jul')) m = 7;
+                        }
+                        if(!m) return; 
+
+                        // SICHERSTELLEN, DASS DIE MONATS-OBJEKTE EXISTIEREN:
+                        if (!yd.records[m]) yd.records[m] = {};
+                        if (!yd.monthConfigs[m]) yd.monthConfigs[m] = {};
+
+                        let sheet = workbook.Sheets[sheetName];
+                        let rows = XLSX.utils.sheet_to_json(sheet, {header: 1});
+
+                        for(let j = 1; j < rows.length; j++) {
+                            let cols = rows[j];
+                            if(!cols || cols.length === 0) continue;
+
+                            let tNameRaw = cols[0] ? String(cols[0]).trim() : "";
+                            if(!tNameRaw || tNameRaw === "Gesamt" || tNameRaw.startsWith("Summe") || tNameRaw === "Wer") continue;
+
+                            let teacher = appData.teachers.find(t => t.name.toLowerCase() === tNameRaw.toLowerCase());
+                            if(!teacher) {
+                                teacher = { id: 't_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5), name: tNameRaw, r: 0, v: 0, active: true };
+                                appData.teachers.push(teacher);
+                            }
+                            
+                            let tId = teacher.id; 
+                            if (!yd.staffStatus) yd.staffStatus = {};
+                            yd.staffStatus[tId] = true;
+                            let rBase = parseInt(cols[1]) || 0; 
+                            let vBase = parseInt(cols[2]) || 0;
+                            
+                            if(teacher.r === 0 && teacher.v === 0) { teacher.r = rBase; teacher.v = vBase; }
+                            yd.monthConfigs[m][tId] = { r: rBase, v: vBase };
+                            if (!yd.records[m][tId]) yd.records[m][tId] = {};
+
+                            for(let d = 1; d <= 31; d++) {
+                                let colIdx = d + 2; 
+                                if(colIdx >= cols.length) break;
+                                
+                                let val = cols[colIdx] !== undefined && cols[colIdx] !== null ? String(cols[colIdx]).trim().toUpperCase() : "";
+                                if(!val) continue;
+
+                                let type = ""; 
+                                let h = 0;
+
+                                if (val.startsWith('KK') || val.includes('KIND')) {
+                                    type = 'KK';
+                                } else if (val === 'K' || val.startsWith('K ') || val.includes('KRANK')) {
+                                    type = 'K';
+                                } else if (val.includes('AZV GEH') || val.includes('AZVG') || val.includes('ABGEGOLTEN')) {
+                                    type = 'AZVgeh';
+                                    let match = val.match(/\d+/);
+                                    h = match ? parseInt(match[0]) : 1;
+                                } else if (val.includes('AZV')) {
+                                    type = 'AZV';
+                                    h = 5;
+                                } else if (val.startsWith('V') || val.includes('VERTRETUNG')) {
+                                    type = 'V';
+                                    let match = val.match(/\d+/);
+                                    h = match ? parseInt(match[0]) : 1;
+                                } else if (val.startsWith('R') || val.includes('REST')) {
+                                    type = 'R';
+                                    let match = val.match(/\d+/);
+                                    h = match ? parseInt(match[0]) : 1;
+                                } else if (val.startsWith('E') || val.includes('EXTRA')) {
+                                    type = 'E';
+                                    let match = val.match(/\d+/);
+                                    h = match ? parseInt(match[0]) : 1;
+                                }
+                                
+                                if(type !== "") {
+                                    yd.records[m][tId][d] = { type: type, h: h };
+                                    entriesCount++;
+                                    
+                                    if(type === 'AZV') {
+                                        let dateStr = formatAzvDate(d, m);
+                                        if(!yd.azv.some(a => a.tId === tId && a.date === dateStr && a.auto === true)) {
+                                            yd.azv.push({ tId: tId, date: dateStr, type: 'genommen', hours: 5, auto: true });
+                                        }
+                                    } else if(type === 'AZVgeh') {
+                                        let dateStr = formatAzvDate(d, m);
+                                        if(!yd.azv.some(a => a.tId === tId && a.date === dateStr && a.auto === true)) {
+                                            yd.azv.push({ tId: tId, date: dateStr, type: 'abgegolten', hours: h, auto: true });
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        importedCount++;
+                    });
+                    
+                    appData.schoolYear = yStr;
+                    saveToLocal(); 
+                    populateYearDropdown();
+                    let yearSelect = document.getElementById('school-year');
+                    if (yearSelect) yearSelect.value = yStr; 
+                    updateTitleYears();
+                    renderCurrentView();
+                    
+                    showToast(`Erfolgreich! SJ ${yStr} (${importedCount} Monate) mit ${entriesCount} Eintragungen importiert.`);
+                    event.target.value = ""; 
+
+                } catch(error) {
+                    console.error("Excel Import Fehler:", error);
+                    alert("Fehler beim Einlesen der Excel-Datei: " + (error.message || error));
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // --- FERIEN & FEIERTAGE ASSISTENT ---
+        function openHolidayModal() { document.getElementById('modal-holidays').classList.remove('hidden'); document.getElementById('modal-holidays').classList.add('flex'); }
+        function closeHolidayModal() { document.getElementById('modal-holidays').classList.add('hidden'); document.getElementById('modal-holidays').classList.remove('flex'); }
+        
+        async function fetchHolidaysAPI() {
+            const btn = document.getElementById('api-fetch-btn'); btn.innerHTML = "⏳ Lade Daten...";
+            try {
+                let parts = String(appData.schoolYear).split('/'); 
+                let y1 = parts[0] ? (parts[0].length === 2 ? parseInt("20" + parts[0]) : parseInt(parts[0])) : new Date().getFullYear(); 
+                let y2 = parts[1] ? (parts[1].length === 2 ? parseInt("20" + parts[1]) : parseInt(parts[1])) : y1 + 1; 
+                let yd = getYearData();
+                let res1 = await fetch(`https://ferien-api.de/api/v1/holidays/TH/${y1}`); let res2 = await fetch(`https://ferien-api.de/api/v1/holidays/TH/${y2}`);
+                if(res1.ok && res2.ok) {
+                    let allHolidays = [...await res1.json(), ...await res2.json()];
+                    allHolidays.forEach(ferien => {
+                        let dStart = new Date(ferien.start); let dEnd = new Date(ferien.end);
+                        for(let d = new Date(dStart); d <= dEnd; d.setDate(d.getDate() + 1)) {
+                            let m = d.getMonth() + 1; let day = d.getDate(); let yr = d.getFullYear();
+                            if ((m >= 8 && yr == y1) || (m <= 7 && yr == y2)) { if(!yd.holidays[m]) yd.holidays[m] = []; if(!yd.holidays[m].includes(day)) yd.holidays[m].push(day); }
+                        }
+                    });
+                } else console.warn("API offline.");
+                generateHolidays(true); saveToLocal(); renderMonthView(); showToast("Ferien & Feiertage geladen!"); closeHolidayModal();
+            } catch (e) { alert("API Fehler. Bitte manuell eingeben."); } finally { btn.innerHTML = "🌐 Daten online laden (Thüringen)"; }
+        }
+
+        function addDateRangeToHolidays(startId, endId) {
+            let startVal = document.getElementById(startId).value; let endVal = document.getElementById(endId).value; if(!startVal) return;
+            let dStart = new Date(startVal); let dEnd = endVal ? new Date(endVal) : new Date(startVal);
+            let parts = String(appData.schoolYear).split('/'); 
+            let y1 = parts[0] ? (parts[0].length === 2 ? parseInt("20" + parts[0]) : parseInt(parts[0])) : new Date().getFullYear(); 
+            let y2 = parts[1] ? (parts[1].length === 2 ? parseInt("20" + parts[1]) : parseInt(parts[1])) : y1 + 1; 
+            let yd = getYearData();
+            for(let d = new Date(dStart); d <= dEnd; d.setDate(d.getDate() + 1)) {
+                let m = d.getMonth() + 1; let day = d.getDate(); let yr = d.getFullYear();
+                if ((m >= 8 && yr === y1) || (m <= 7 && yr === y2)) { if(!yd.holidays[m]) yd.holidays[m] = []; if(!yd.holidays[m].includes(day)) yd.holidays[m].push(day); }
+            }
+        }
+
+        function saveManualHolidays() {
+            addDateRangeToHolidays('hol-herbst-start', 'hol-herbst-end'); addDateRangeToHolidays('hol-weihnacht-start', 'hol-weihnacht-end');
+            addDateRangeToHolidays('hol-winter-start', 'hol-winter-end'); addDateRangeToHolidays('hol-ostern-start', 'hol-ostern-end');
+            addDateRangeToHolidays('hol-sommer-start', 'hol-sommer-end'); addDateRangeToHolidays('hol-var1', 'hol-var1'); addDateRangeToHolidays('hol-var2', 'hol-var2');
+            generateHolidays(true); saveToLocal(); renderMonthView(); closeHolidayModal(); showToast("Manuelle Daten & feste Feiertage eingetragen!");
+        }
+
+        function getEaster(year) { 
+            let f = Math.floor, G = year % 19, C = f(year / 100), H = (C - f(C / 4) - f((8 * C + 13) / 25) + 19 * G + 15) % 30; 
+            let I = H - f(H / 28) * (1 - f(29 / (H + 1)) * f((21 - G) / 11)), J = (year + f(year / 4) + I + 2 - C + f(C / 4)) % 7; 
+            let L = I - J, month = 3 + f((L + 40) / 44), day = L + 28 - 31 * f(month / 4); 
+            return new Date(year, month - 1, day); 
+        }
+
+        function generateHolidays(silent = false) {
+            let parts = String(appData.schoolYear).split('/'); 
+            let y2 = parts[1] ? (parts[1].length === 2 ? parseInt("20" + parts[1]) : parseInt(parts[1])) : new Date().getFullYear() + 1; 
+            let yd = getYearData();
+            let addHol = (m, d) => { if(!yd.holidays[m]) yd.holidays[m] = []; if(!yd.holidays[m].includes(d)) yd.holidays[m].push(d); };
+            addHol(9, 20); addHol(10, 3); addHol(10, 31); addHol(12, 25); addHol(12, 26); addHol(1, 1); addHol(5, 1); 
+            let easter = getEaster(y2);
+            let kf = new Date(easter); kf.setDate(kf.getDate() - 2); addHol(kf.getMonth()+1, kf.getDate()); 
+            let om = new Date(easter); om.setDate(om.getDate() + 1); addHol(om.getMonth()+1, om.getDate()); 
+            let ch = new Date(easter); ch.setDate(ch.getDate() + 39); addHol(ch.getMonth()+1, ch.getDate()); 
+            let pm = new Date(easter); pm.setDate(pm.getDate() + 50); addHol(pm.getMonth()+1, pm.getDate()); 
+            if(!silent) { saveToLocal(); renderMonthView(); closeHolidayModal(); showToast("Gesetzliche Feiertage eingetragen!"); }
+        }
+
+        // --- SCHULJAHR-SPEZIFISCHE LEHRKRAEFT-STATUS PRÜFUNG ---
+        function hasTeacherRecordsInYear(tId, yStr = appData.schoolYear) {
+            let yd = appData.years?.[yStr];
+            if (!yd) return false;
+            if (yd.records) {
+                for (let m in yd.records) {
+                    if (yd.records[m]?.[tId] && Object.keys(yd.records[m][tId]).length > 0) return true;
+                }
+            }
+            if (yd.azv && yd.azv.some(a => a.tId === tId)) return true;
+            return false;
+        }
+
+        function isTeacherActiveInYear(tId, yStr = appData.schoolYear) {
+            let t = appData.teachers.find(teacher => teacher.id === tId);
+            if (!t) return false;
+
+            let yd = appData.years?.[yStr];
+            if (!yd) return t.active !== false;
+
+            // 1. Explizit für dieses Schuljahr gespeicherter Status
+            if (yd.staffStatus && yd.staffStatus[tId] !== undefined) {
+                return !!yd.staffStatus[tId];
+            }
+
+            // 2. Hat bereits Fehlzeiten oder Stunden-Einträge in diesem Schuljahr
+            if (hasTeacherRecordsInYear(tId, yStr)) {
+                return true;
+            }
+
+            // 3. Hat Monatskonfigurationen (Basis R/V) in diesem Schuljahr
+            if (yd.monthConfigs) {
+                for (let m in yd.monthConfigs) {
+                    if (yd.monthConfigs[m]?.[tId] !== undefined) {
+                        return true;
+                    }
+                }
+            }
+
+            // 4. Bei ganz neu angelegtem Schuljahr ohne jegliche Daten: Globalen Status erben
+            let yearHasAnyData = Object.keys(yd.records || {}).length > 0 || Object.keys(yd.monthConfigs || {}).length > 0 || (yd.azv || []).length > 0;
+            if (!yearHasAnyData) {
+                return t.active !== false;
+            }
+
+            return false;
+        }
+
+        // --- STATISTIKEN BERECHNEN ---
+        function calculateStatsForYear(yStr) {
+            if(!appData.years[yStr]) return null;
+            let yd = appData.years[yStr];
+            let tStats = {}; let mStats = {};
+            
+            // Relevante Lehrkräfte für dieses Schuljahr ermitteln
+            let relevantTeachers = appData.teachers.filter(t => isTeacherActiveInYear(t.id, yStr) || hasTeacherRecordsInYear(t.id, yStr));
+            
+            relevantTeachers.forEach(t => { 
+                tStats[t.id] = { 
+                    id: t.id,
+                    name: t.name, 
+                    active: isTeacherActiveInYear(t.id, yStr), 
+                    K: 0, KK: 0, AZV: 0, R: 0, V: 0, E: 0, AZVgeh: 0, bem: false 
+                }; 
+            });
+
+            monthOrder.forEach(m => {
+                mStats[m] = { K: 0, KK: 0, AZV: 0, R: 0, V: 0, E: 0, AZVgeh: 0 };
+                if(yd.records[m]) {
+                    for(let tId in yd.records[m]) {
+                        if(!tStats[tId]) {
+                            let teacherObj = appData.teachers.find(t => t.id === tId);
+                            tStats[tId] = { 
+                                id: tId,
+                                name: teacherObj ? teacherObj.name : "Unbekannt", 
+                                active: isTeacherActiveInYear(tId, yStr), 
+                                K: 0, KK: 0, AZV: 0, R: 0, V: 0, E: 0, AZVgeh: 0, bem: false 
+                            };
+                        }
+                        for(let d in yd.records[m][tId]) {
+                            let entry = yd.records[m][tId][d];
+                            if(entry.type === 'AZV') { tStats[tId].AZV++; mStats[m].AZV++; }
+                            else if(entry.type === 'K') { tStats[tId].K++; mStats[m].K++; }
+                            else if(entry.type === 'KK') { tStats[tId].KK++; mStats[m].KK++; }
+                            else if(entry.type === 'R') { tStats[tId].R += entry.h; mStats[m].R += entry.h; }
+                            else if(entry.type === 'V') { tStats[tId].V += entry.h; mStats[m].V += entry.h; }
+                            else if(entry.type === 'E') { tStats[tId].E += entry.h; mStats[m].E += entry.h; }
+                            else if(entry.type === 'AZVgeh') { tStats[tId].AZVgeh += entry.h; mStats[m].AZVgeh += entry.h; }
+                        }
+                    }
+                }
+            });
+            Object.keys(tStats).forEach(id => { if (tStats[id].K >= 30) tStats[id].bem = true; });
+            let activeT = Object.values(tStats).filter(t => t.active); 
+            let countActive = activeT.length || 1;
+            let avgs = {
+                K: activeT.reduce((s, t) => s + t.K, 0) / countActive, 
+                KK: activeT.reduce((s, t) => s + t.KK, 0) / countActive,
+                AZV: activeT.reduce((s, t) => s + t.AZV, 0) / countActive, 
+                R: activeT.reduce((s, t) => s + t.R, 0) / countActive,
+                V: activeT.reduce((s, t) => s + t.V, 0) / countActive, 
+                E: activeT.reduce((s, t) => s + t.E, 0) / countActive,
+                AZVgeh: activeT.reduce((s, t) => s + t.AZVgeh, 0) / countActive
+            };
+            return { tStats, mStats, avgs };
+        }
+
+        // --- WOCHENTAGS- & TRENDANALYSE BERECHNEN ---
+        let weekdayChartInst = null;
+
+        function calculateWeekdayStatsForYear(yStr = appData.schoolYear) {
+            let yd = appData.years?.[yStr];
+            if (!yd || !yd.records) return null;
+            
+            // 1=Mo, 2=Di, 3=Mi, 4=Do, 5=Fr
+            let weekdays = {
+                1: { name: "Montag", short: "Mo", K: 0, KK: 0, V: 0, R: 0, E: 0, AZVgeh: 0 },
+                2: { name: "Dienstag", short: "Di", K: 0, KK: 0, V: 0, R: 0, E: 0, AZVgeh: 0 },
+                3: { name: "Mittwoch", short: "Mi", K: 0, KK: 0, V: 0, R: 0, E: 0, AZVgeh: 0 },
+                4: { name: "Donnerstag", short: "Do", K: 0, KK: 0, V: 0, R: 0, E: 0, AZVgeh: 0 },
+                5: { name: "Freitag", short: "Fr", K: 0, KK: 0, V: 0, R: 0, E: 0, AZVgeh: 0 }
+            };
+
+            for (let m of monthOrder) {
+                let mRecs = yd.records[m];
+                if (!mRecs) continue;
+                let y = getYearForMonth(m, yStr);
+                let daysCount = getDaysInMonth(m, y);
+                
+                for (let d = 1; d <= daysCount; d++) {
+                    let dt = new Date(y, m - 1, d);
+                    let dayNum = dt.getDay(); // 0=So, 1=Mo, ... 6=Sa
+                    if (dayNum >= 1 && dayNum <= 5) {
+                        for (let tId in mRecs) {
+                            let entry = mRecs[tId]?.[d];
+                            if (!entry) continue;
+                            if (entry.type === 'K') weekdays[dayNum].K++;
+                            else if (entry.type === 'KK') weekdays[dayNum].KK++;
+                            else if (entry.type === 'V') weekdays[dayNum].V += (entry.h || 0);
+                            else if (entry.type === 'R') weekdays[dayNum].R += (entry.h || 0);
+                            else if (entry.type === 'E') weekdays[dayNum].E += (entry.h || 0);
+                            else if (entry.type === 'AZVgeh') weekdays[dayNum].AZVgeh += (entry.h || 0);
+                        }
+                    }
+                }
+            }
+
+            let totalIll = 0;
+            let totalSub = 0;
+            let peakIllDay = 1;
+            let peakSubDay = 1;
+
+            for (let dayNum = 1; dayNum <= 5; dayNum++) {
+                let illSum = weekdays[dayNum].K + weekdays[dayNum].KK;
+                let subSum = weekdays[dayNum].V;
+                totalIll += illSum;
+                totalSub += subSum;
+                if (illSum > (weekdays[peakIllDay].K + weekdays[peakIllDay].KK)) {
+                    peakIllDay = dayNum;
+                }
+                if (subSum > weekdays[peakSubDay].V) {
+                    peakSubDay = dayNum;
+                }
+            }
+
+            return { weekdays, totalIll, totalSub, peakIllDay, peakSubDay };
+        }
+
+        function renderWeekdayAnalysis() {
+            let wkStats = calculateWeekdayStatsForYear(appData.schoolYear);
+            let canvas = document.getElementById('chart-weekday');
+            if (!canvas) return;
+            let ctxWk = canvas.getContext('2d');
+            if (weekdayChartInst) weekdayChartInst.destroy();
+
+            let dayLabels = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag"];
+            let illData = [1,2,3,4,5].map(d => wkStats ? wkStats.weekdays[d].K + wkStats.weekdays[d].KK : 0);
+            let subData = [1,2,3,4,5].map(d => wkStats ? wkStats.weekdays[d].V : 0);
+            let restData = [1,2,3,4,5].map(d => wkStats ? wkStats.weekdays[d].R : 0);
+
+            weekdayChartInst = new Chart(ctxWk, {
+                type: 'bar',
+                data: {
+                    labels: dayLabels,
+                    datasets: [
+                        { label: 'Kranktage (K + Kind)', data: illData, backgroundColor: '#f87171', borderRadius: 4 },
+                        { label: 'Vertretung (V in h)', data: subData, backgroundColor: '#60a5fa', borderRadius: 4 },
+                        { label: 'Reststunden (R in h)', data: restData, backgroundColor: '#34d399', borderRadius: 4 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 6, font: { size: 11 } } }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { precision: 0 } }
+                    }
+                }
+            });
+
+            // Update insights
+            let peakIllEl = document.getElementById('dash-peak-ill-day');
+            let peakIllDescEl = document.getElementById('dash-peak-ill-desc');
+            let peakSubEl = document.getElementById('dash-peak-sub-day');
+            let peakSubDescEl = document.getElementById('dash-peak-sub-desc');
+
+            if (wkStats && wkStats.totalIll > 0) {
+                let pIll = wkStats.weekdays[wkStats.peakIllDay];
+                let illCount = pIll.K + pIll.KK;
+                let illPct = Math.round((illCount / wkStats.totalIll) * 100);
+                if (peakIllEl) peakIllEl.innerText = `${pIll.name}`;
+                if (peakIllDescEl) peakIllDescEl.innerText = `${illCount} Kranktage (${illPct} % aller Fehlzeiten)`;
+            } else {
+                if (peakIllEl) peakIllEl.innerText = '–';
+                if (peakIllDescEl) peakIllDescEl.innerText = 'Keine Fehlzeiten erfasst';
+            }
+
+            if (wkStats && wkStats.totalSub > 0) {
+                let pSub = wkStats.weekdays[wkStats.peakSubDay];
+                let subCount = pSub.V;
+                let subPct = Math.round((subCount / wkStats.totalSub) * 100);
+                if (peakSubEl) peakSubEl.innerText = `${pSub.name}`;
+                if (peakSubDescEl) peakSubDescEl.innerText = `${subCount} Vertretungsstunden (${subPct} % des Volumens)`;
+            } else {
+                if (peakSubEl) peakSubEl.innerText = '–';
+                if (peakSubDescEl) peakSubDescEl.innerText = 'Keine Vertretungsstunden erfasst';
+            }
+        }
+
+        // --- MONATSANSICHT RENDERN ---
+        function renderMonthView() {
+            const m = appData.currentMonth; const y = getYearForMonth(m, appData.schoolYear); const days = getDaysInMonth(m, y);
+            const table = document.getElementById('month-table'); let yd = getYearData();
+            if (!yd.records[m]) yd.records[m] = {}; if (!yd.monthConfigs[m]) yd.monthConfigs[m] = {};
+            const markedHolidays = yd.holidays[m] || []; let weekends = []; let distinctMondays = [];
+            for (let d = 1; d <= days; d++) {
+                let date = new Date(y, m - 1, d);
+                if (date.getDay() === 0 || date.getDay() === 6) weekends.push(d);
+                let mon = new Date(date); let dayNum = mon.getDay() || 7; 
+                mon.setDate(mon.getDate() - (dayNum - 1)); mon.setHours(0,0,0,0); 
+                if (!distinctMondays.some(mDate => mDate.getTime() === mon.getTime())) distinctMondays.push(mon);
+            }
+
+            let { tStats } = calculateStatsForYear(appData.schoolYear) || { tStats: {} }; 
+
+            let html = `<thead><tr><th class="sticky-col min-w-[120px]">Name</th>
+                        <th class="min-w-[80px] bg-green-50"><div class="font-extrabold text-sm">R</div><div class="font-medium text-[9px] text-slate-500 uppercase">Basis/Wo</div></th>
+                        <th class="min-w-[80px] bg-blue-50"><div class="font-extrabold text-sm">V</div><div class="font-medium text-[9px] text-slate-500 uppercase">Basis/Mo</div></th>`;
+            for (let i = 1; i <= days; i++) {
+                let isWeOrHol = weekends.includes(i) || markedHolidays.includes(i);
+                html += `<th class="min-w-[32px] md:min-w-[36px] day-header ${isWeOrHol ? 'weekend-header' : ''}" onclick="toggleHoliday(${i})" title="Als Ferien markieren">${i}</th>`;
+            }
+            html += `<th class="bg-slate-100">K<span class="text-[10px] font-normal block">Tage</span></th><th class="bg-slate-100">KK<span class="text-[10px] font-normal block">Tage</span></th><th class="bg-slate-100 text-green-700">R<span class="text-[10px] font-normal block">h</span></th><th class="bg-slate-100 text-blue-700">V<span class="text-[10px] font-normal block">h</span></th><th class="bg-slate-100 text-red-700">E<span class="text-[10px] font-normal block">h</span></th></tr></thead><tbody class="divide-y divide-slate-100">`;
+
+            let activeTeachers = appData.teachers.filter(t => isTeacherActiveInYear(t.id, appData.schoolYear));
+            
+            if (activeTeachers.length === 0) {
+                html += `<tr><td colspan="${days + 8}" class="p-8 text-center text-slate-400 italic">Keine aktiven Lehrkräfte für SJ ${appData.schoolYear} ausgewählt. Wechseln Sie in den Bereich "Kollegium", um Lehrkräfte zu aktivieren oder neu anzulegen.</td></tr>`;
+            } else {
+                activeTeachers.sort((a,b) => a.name.localeCompare(b.name)).forEach(t => {
+                let currentR = yd.monthConfigs[m][t.id]?.r !== undefined ? yd.monthConfigs[m][t.id].r : t.r;
+                let currentV = yd.monthConfigs[m][t.id]?.v !== undefined ? yd.monthConfigs[m][t.id].v : t.v;
+                let sums = { K: 0, KK: 0, R: 0, V: 0, E: 0 }; let tRecs = yd.records[m][t.id] || {};
+                
+                for (let d = 1; d <= days; d++) {
+                    let entry = tRecs[d];
+                    if (entry) {
+                        if (entry.type === 'K') sums.K++; else if (entry.type === 'KK') sums.KK++;
+                        else if (entry.type !== 'AZV' && entry.type !== 'AZVgeh' && sums[entry.type] !== undefined) sums[entry.type] += parseInt(entry.h);
+                    }
+                }
+
+                let rBadgesHtml = '<div class="flex flex-wrap gap-1 justify-center p-1 mt-1">';
+                distinctMondays.forEach((mon) => {
+                    let rSumThisWeek = 0; let dIter = new Date(mon);
+                    for(let i=0; i<7; i++) {
+                        let recM = dIter.getMonth() + 1; let recD = dIter.getDate();
+                        if (yd.records[recM]?.[t.id]?.[recD]?.type === 'R') rSumThisWeek += parseInt(yd.records[recM][t.id][recD].h);
+                        dIter.setDate(dIter.getDate() + 1);
+                    }
+                    let remW = currentR - rSumThisWeek;
+                    let badgeClass = remW > 0 ? 'bg-green-100 text-green-700 border border-green-200' : (remW === 0 ? 'bg-slate-100 text-slate-400 border border-slate-200' : 'bg-red-100 text-red-700 border border-red-200');
+                    rBadgesHtml += `<div class="text-[10px] font-bold px-1.5 rounded-md shadow-sm cursor-help ${badgeClass}">${remW}</div>`;
+                });
+                rBadgesHtml += '</div>';
+                let remV = currentV - sums.V;
+
+                let bemFlag = tStats[t.id]?.bem ? `<span class="bem-alert text-red-600 text-sm" title="Achtung: >30 Kranktage erreicht! BEM anbieten.">🚨</span>` : '';
+
+                html += `<tr class="hover:bg-slate-50 transition"><td class="font-bold text-left sticky-col pl-3 text-slate-700">${t.name} ${bemFlag}</td>
+                    <td class="bg-green-50/50 p-1 align-top"><input type="number" min="0" value="${currentR}" class="w-full text-center bg-transparent outline-none font-extrabold border-b border-green-200 focus:border-green-500" onchange="updateQuota('${t.id}', 'r', this.value)">${rBadgesHtml}</td>
+                    <td class="bg-blue-50/50 p-1 align-top flex flex-col justify-between h-full"><input type="number" min="0" value="${currentV}" class="w-full text-center bg-transparent outline-none font-extrabold border-b border-blue-200 focus:border-blue-500" onchange="updateQuota('${t.id}', 'v', this.value)">
+                    <div class="text-[10px] font-bold py-1.5 mt-auto shadow-inner rounded-md ${remV < 0 ? 'bg-red-100 text-red-700' : (remV === 0 ? 'bg-slate-100 text-slate-400' : 'bg-blue-100 text-blue-700')}">Saldo: ${remV}</div></td>`;
+
+                for (let d = 1; d <= days; d++) {
+                    let entry = tRecs[d]; let display = ""; let classes = "cell-hover transition ";
+                    if (weekends.includes(d) || markedHolidays.includes(d)) classes += "weekend-cell ";
+                    if (entry) { display = (entry.type === 'K' || entry.type === 'KK' || entry.type === 'AZV') ? entry.type : (entry.type === 'AZVgeh' ? entry.h + 'AZVg' : (entry.h > 1 ? `${entry.h}${entry.type}` : entry.type)); classes += ` entry-${entry.type}`; }
+                    html += `<td class="${classes}" onclick="openCalModal('${t.id}', '${t.name}', ${d}, ${days})">${display}</td>`;
+                }
+                html += `<td class="bg-slate-50 font-bold text-slate-700">${sums.K}</td><td class="bg-slate-50 font-bold text-slate-700">${sums.KK}</td><td class="bg-slate-50 font-bold text-green-700">${sums.R}</td><td class="bg-slate-50 font-bold text-blue-700">${sums.V}</td><td class="bg-slate-50 font-bold text-red-700">${sums.E}</td></tr>`;
+            });
+            }
+            html += "</tbody>"; table.innerHTML = html;
+        }
+
+        function updateQuota(tId, type, val) { 
+            const m = appData.currentMonth; 
+            let yd = getYearData(); 
+            if(!yd.monthConfigs[m][tId]) yd.monthConfigs[m][tId] = {}; 
+            yd.monthConfigs[m][tId][type] = val === "" ? 0 : parseInt(val); 
+            saveToLocal(); 
+            renderMonthView(); 
+        }
+
+        // --- KALENDER MODAL ---
+        function openCalModal(tId, tName, day, daysInMonth) {
+            document.getElementById('cal-modal-title').innerText = `${tName}`; 
+            document.getElementById('cal-modal-tId').value = tId; 
+            document.getElementById('cal-modal-day').value = day;
+            document.getElementById('cal-modal-day-display').innerText = day + '.';
+            const endInput = document.getElementById('cal-modal-day-end'); 
+            endInput.value = day; 
+            endInput.min = day; 
+            endInput.max = daysInMonth;
+            let current = getYearData().records[appData.currentMonth]?.[tId]?.[day];
+            document.getElementById('cal-modal-hours').value = (current && ['V','R','E','AZVgeh'].includes(current.type)) ? current.h : 1;
+            document.getElementById('modal-cal-entry').classList.remove('hidden'); 
+            document.getElementById('modal-cal-entry').classList.add('flex');
+        }
+
+        function closeCalModal() { 
+            document.getElementById('modal-cal-entry').classList.add('hidden'); 
+            document.getElementById('modal-cal-entry').classList.remove('flex'); 
+        }
+
+        function saveCalEntry(type, hours = null) {
+            const tId = document.getElementById('cal-modal-tId').value; 
+            const dayStart = parseInt(document.getElementById('cal-modal-day').value); 
+            const dayEnd = parseInt(document.getElementById('cal-modal-day-end').value); 
+            const m = appData.currentMonth; 
+            const y = getYearForMonth(m, appData.schoolYear); 
+            let yd = getYearData();
+            const markedHolidays = yd.holidays[m] || []; 
+            const isBulk = dayStart !== dayEnd;
+
+            if(!yd.records[m]) yd.records[m] = {}; 
+            if(!yd.records[m][tId]) yd.records[m][tId] = {};
+
+            for (let day = dayStart; day <= dayEnd; day++) {
+                let date = new Date(y, m - 1, day);
+                if (isBulk && (date.getDay() === 0 || date.getDay() === 6 || markedHolidays.includes(day)) && type !== "") continue; 
+                const dateStr = formatAzvDate(day, m);
+                let oldAutoIdx = yd.azv.findIndex(a => a.tId === tId && a.date === dateStr && a.auto === true);
+                if (oldAutoIdx > -1) yd.azv.splice(oldAutoIdx, 1);
+
+                if (type === "") delete yd.records[m][tId][day];
+                else {
+                    yd.records[m][tId][day] = { type: type, h: hours ? parseInt(hours) : 0 };
+                    if (type === 'AZV') yd.azv.push({ tId: tId, date: dateStr, type: 'genommen', hours: 5, auto: true });
+                    else if (type === 'AZVgeh') yd.azv.push({ tId: tId, date: dateStr, type: 'abgegolten', hours: parseInt(hours), auto: true });
+                }
+            }
+            saveToLocal(); 
+            closeCalModal(); 
+            renderMonthView();
+        }
+
+        // --- DASHBOARD RENDERN ---
+        function toggleCompareYear(y) {
+            if(compareYears.includes(y)) compareYears = compareYears.filter(yr => yr !== y);
+            else compareYears.push(y);
+            renderDashboardView();
+        }
+
+        function renderCompareToggles() {
+            let container = document.getElementById('dash-compare-toggles');
+            let allYears = Object.keys(appData.years).sort().reverse();
+            let available = allYears.filter(y => y !== appData.schoolYear).slice(0, 5); 
+
+            compareYears = compareYears.filter(y => available.includes(y));
+
+            if(available.length === 0) {
+                container.innerHTML = '<span class="text-xs text-slate-400 italic py-1">Noch keine Archivdaten verfügbar. Importieren Sie alte .xlsx Dateien im Bereich "Berichte & Export".</span>';
+                return;
+            }
+
+            let html = '';
+            let histColors = ['#94a3b8', '#fbbf24', '#c084fc', '#2dd4bf', '#fb7185'];
+            
+            available.forEach((y, idx) => {
+                let isActive = compareYears.includes(y);
+                let cColor = histColors[idx % histColors.length];
+                let style = isActive ? `background-color: ${cColor}; color: white; border-color: ${cColor};` : '';
+                let bgClass = isActive ? 'shadow-md scale-105' : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100';
+                
+                html += `<button onclick="toggleCompareYear('${y}')" style="${style}" class="px-3 py-1.5 rounded-lg text-xs font-bold border transition active:scale-95 ${bgClass}">SJ ${y}</button>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function formatStat(val, avg, isAbsence) {
+            if(val === 0 && avg === 0) return '<span class="text-slate-300">0</span>';
+            let diff = val - avg; let avgStr = `(Ø ${avg.toFixed(1).replace('.0','')})`;
+            let icon = ''; let colorClass = '';
+            
+            if(Math.abs(diff) < 0.5) { 
+                icon = '➖'; colorClass = 'bg-slate-100 text-slate-500'; 
+            } 
+            else if (val > avg) { 
+                icon = '🔺'; colorClass = isAbsence ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'; 
+            } 
+            else { 
+                icon = '🔻'; colorClass = isAbsence ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'; 
+            }
+            
+            return `<span class="font-extrabold text-base">${val}</span> <span class="text-[10px] text-slate-400 font-medium ml-1">${avgStr}</span> <span class="text-[10px] px-1.5 py-0.5 rounded-md ${colorClass} ml-1 shadow-sm" title="Trend (Vergleich zum Ø)">${icon}</span>`;
+        }
+
+        function renderDashboardView() {
+            renderCompareToggles();
+            
+            let { tStats, mStats, avgs } = calculateStatsForYear(appData.schoolYear);
+            let labels = monthOrder.map(m => monthNames[m]);
+            
+            let dataK = monthOrder.map(m => mStats[m].K + mStats[m].KK);
+            let dataV = monthOrder.map(m => mStats[m].V);
+            
+            let histColors = ['#94a3b8', '#fbbf24', '#c084fc', '#2dd4bf', '#fb7185']; 
+            let availableYears = Object.keys(appData.years).sort().reverse().filter(y => y !== appData.schoolYear).slice(0, 5);
+
+            let ctxIll = document.getElementById('chart-illness').getContext('2d');
+            if(illnessChartInst) illnessChartInst.destroy();
+            
+            let datasetsIll = [{ 
+                label: `SJ ${appData.schoolYear} (Aktuell)`, 
+                data: dataK, 
+                borderColor: '#ef4444', 
+                backgroundColor: 'rgba(239, 68, 68, 0.1)', 
+                borderWidth: 3,
+                tension: 0.3, fill: true, pointBackgroundColor: '#ef4444' 
+            }];
+
+            let ctxExt = document.getElementById('chart-extra').getContext('2d');
+            if(extraChartInst) extraChartInst.destroy();
+            
+            let datasetsExt = [{ 
+                label: `SJ ${appData.schoolYear} (Aktuell)`, 
+                data: dataV, 
+                backgroundColor: '#3b82f6', 
+                borderRadius: 4 
+            }];
+
+            compareYears.forEach(yStr => {
+                let colorIdx = availableYears.indexOf(yStr);
+                let cColor = histColors[colorIdx % histColors.length];
+                let histData = calculateStatsForYear(yStr);
+                if(!histData) return;
+                
+                let dK = monthOrder.map(m => histData.mStats[m].K + histData.mStats[m].KK);
+                datasetsIll.push({ label: `SJ ${yStr}`, data: dK, borderColor: cColor, borderWidth: 2, borderDash: [5, 5], backgroundColor: 'transparent', tension: 0.3, fill: false, pointBackgroundColor: cColor });
+
+                let dV = monthOrder.map(m => histData.mStats[m].V);
+                datasetsExt.push({ label: `SJ ${yStr}`, data: dV, backgroundColor: cColor, borderRadius: 4 });
+            });
+            
+            let showLegend = compareYears.length > 0;
+
+            illnessChartInst = new Chart(ctxIll, { type: 'line', data: { labels: labels, datasets: datasetsIll }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: showLegend, position: 'bottom', labels: { usePointStyle: true, boxWidth: 6 } } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } } });
+            extraChartInst = new Chart(ctxExt, { type: 'bar', data: { labels: labels, datasets: datasetsExt }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: showLegend, position: 'bottom', labels: { usePointStyle: true, boxWidth: 6 } } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } } });
+            
+            // Wochentags- und Trendanalyse rendern
+            renderWeekdayAnalysis();
+
+            let hAbsences = `<thead><tr class="text-slate-600"><th class="font-bold">Name</th><th>Krank</th><th>Kind Krank</th><th>AZV frei (T)</th><th>Gesamt (T)</th></tr></thead><tbody class="divide-y divide-slate-100">`;
+            let hExtra = `<thead><tr class="text-slate-600"><th class="font-bold">Name</th><th>Rest (R)</th><th>Vertr. (V)</th><th>Extra (E)</th><th class="text-teal-600">AZVgeh</th><th>Gesamt (h)</th></tr></thead><tbody class="divide-y divide-slate-100">`;
+            
+            let activeTList = Object.values(tStats).filter(t => t.active).sort((a,b) => a.name.localeCompare(b.name));
+            activeTList.forEach(t => {
+                let bemFlag = t.bem ? `<span class="bem-alert text-red-600 text-sm" title="Achtung: >30 Kranktage. BEM!">🚨</span>` : '';
+                let totalAbs = t.K + t.KK + t.AZV; let totalEx = t.R + t.V + t.E + t.AZVgeh;
+                hAbsences += `<tr class="hover:bg-slate-50 transition"><td class="font-bold text-slate-700">${t.name} ${bemFlag}</td><td>${formatStat(t.K, avgs.K, true)}</td><td>${formatStat(t.KK, avgs.KK, true)}</td><td>${formatStat(t.AZV, avgs.AZV, true)}</td><td class="bg-red-50/50">${formatStat(totalAbs, avgs.K+avgs.KK+avgs.AZV, true)}</td></tr>`;
+                hExtra += `<tr class="hover:bg-slate-50 transition"><td class="font-bold text-slate-700">${t.name}</td><td>${formatStat(t.R, avgs.R, false)}</td><td>${formatStat(t.V, avgs.V, false)}</td><td>${formatStat(t.E, avgs.E, false)}</td><td class="bg-teal-50/30">${formatStat(t.AZVgeh, avgs.AZVgeh, false)}</td><td class="bg-green-50/50">${formatStat(totalEx, avgs.R+avgs.V+avgs.E+avgs.AZVgeh, false)}</td></tr>`;
+            });
+
+            let inactiveWithData = Object.values(tStats).filter(t => !t.active && (t.K > 0 || t.KK > 0 || t.AZV > 0 || t.R > 0 || t.V > 0 || t.E > 0 || t.AZVgeh > 0)).sort((a,b) => a.name.localeCompare(b.name));
+            if(inactiveWithData.length > 0) {
+                hAbsences += `<tr><td colspan="5" class="bg-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-widest py-3">Inaktive / Ausgeschiedene mit Einträgen</td></tr>`;
+                hExtra += `<tr><td colspan="6" class="bg-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-widest py-3">Inaktive / Ausgeschiedene mit Einträgen</td></tr>`;
+                inactiveWithData.forEach(t => {
+                    hAbsences += `<tr class="text-slate-400 bg-slate-50"><td>${t.name}</td><td>${t.K}</td><td>${t.KK}</td><td>${t.AZV}</td><td class="font-bold">${t.K+t.KK+t.AZV}</td></tr>`;
+                    hExtra += `<tr class="text-slate-400 bg-slate-50"><td>${t.name}</td><td>${t.R}</td><td>${t.V}</td><td>${t.E}</td><td>${t.AZVgeh}</td><td class="font-bold">${t.R+t.V+t.E+t.AZVgeh}</td></tr>`;
+                });
+            }
+            document.getElementById('dash-absences').innerHTML = hAbsences + `</tbody>`; 
+            document.getElementById('dash-extra').innerHTML = hExtra + `</tbody>`;
+
+            let hMonths = `<thead><tr class="text-slate-600"><th>Monat</th><th class="bg-red-50">K (T)</th><th class="bg-orange-50">KK (T)</th><th class="bg-purple-50">AZV (T)</th><th class="bg-green-50">R (h)</th><th class="bg-blue-50">V (h)</th><th class="bg-red-100">E (h)</th><th class="bg-teal-50 text-teal-700">AZVgeh (h)</th></tr></thead><tbody class="divide-y divide-slate-100">`;
+            let totalM = { K: 0, KK: 0, AZV: 0, R: 0, V: 0, E: 0, AZVgeh: 0 };
+            monthOrder.forEach(m => {
+                let s = mStats[m];
+                if(s.K>0 || s.KK>0 || s.AZV>0 || s.R>0 || s.V>0 || s.E>0 || s.AZVgeh>0) {
+                    hMonths += `<tr class="hover:bg-slate-50 transition"><td class="font-bold text-left text-slate-700">${monthNames[m]}</td><td>${s.K}</td><td>${s.KK}</td><td>${s.AZV}</td><td class="text-green-600 font-extrabold">${s.R}</td><td class="text-blue-600 font-extrabold">${s.V}</td><td class="text-red-600 font-extrabold">${s.E}</td><td class="text-teal-600 font-extrabold">${s.AZVgeh}</td></tr>`;
+                    totalM.K += s.K; totalM.KK += s.KK; totalM.AZV += s.AZV; totalM.R += s.R; totalM.V += s.V; totalM.E += s.E; totalM.AZVgeh += s.AZVgeh;
+                }
+            });
+            hMonths += `<tr class="bg-slate-100 font-bold text-base text-slate-800"><td class="text-left py-4">GESAMT</td><td>${totalM.K}</td><td>${totalM.KK}</td><td>${totalM.AZV}</td><td class="text-green-700">${totalM.R}</td><td class="text-blue-700">${totalM.V}</td><td class="text-red-700">${totalM.E}</td><td class="text-teal-700">${totalM.AZVgeh}</td></tr></tbody>`;
+            document.getElementById('dash-months').innerHTML = hMonths;
+        }
+
+        // --- JAHRESSTART UMFRAGE ---
+        function renderSurveyView() {
+            const tbody = document.getElementById('survey-table-body');
+            let html = '';
+            let activeInYear = appData.teachers.filter(t => isTeacherActiveInYear(t.id, appData.schoolYear));
+            
+            if (activeInYear.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-slate-400 italic">Keine aktiven Lehrkräfte für SJ ${appData.schoolYear} vorhanden. Wechseln Sie in den Bereich "Kollegium", um Lehrkräfte zu aktivieren.</td></tr>`;
+                return;
+            }
+
+            activeInYear.sort((a,b) => a.name.localeCompare(b.name)).forEach(t => {
+                html += `<tr class="hover:bg-slate-50 transition"><td class="p-3 font-bold text-slate-700 border-r border-slate-100">${t.name}</td><td class="p-3 text-center bg-green-50/30"><input type="number" min="0" value="${t.r}" class="w-20 text-center bg-white border border-green-200 rounded-md outline-none focus:border-school-500 font-bold p-2 transition" onchange="quickUpdateStaff('${t.id}', 'r', this.value)"></td><td class="p-3 text-center bg-blue-50/30"><input type="number" min="0" value="${t.v}" class="w-20 text-center bg-white border border-blue-200 rounded-md outline-none focus:border-school-500 font-bold p-2 transition" onchange="quickUpdateStaff('${t.id}', 'v', this.value)"></td></tr>`;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function quickUpdateStaff(id, field, value) { 
+            let t = appData.teachers.find(t => t.id === id); 
+            if(t) { 
+                t[field] = value === "" ? 0 : parseInt(value); 
+                saveToLocal(); 
+                showToast(`${t.name} aktualisiert.`); 
+            } 
+        }
+
+        function copySurveyText() { 
+            navigator.clipboard.writeText(document.getElementById('survey-text-template').innerText).then(() => { 
+                showToast("Text kopiert!"); 
+            }).catch(err => { console.error('Fehler: ', err); }); 
+        }
+
+        // --- BERICHTE & EXPORT ---
+        function renderReportsView() {
+            const select = document.getElementById('report-teacher-select'); 
+            if (!select) return;
+            select.innerHTML = '';
+            
+            // Nur Lehrkräfte anzeigen, die im aktuellen Schuljahr aktiv sind oder Einträge haben
+            let relevant = appData.teachers.filter(t => isTeacherActiveInYear(t.id, appData.schoolYear) || hasTeacherRecordsInYear(t.id, appData.schoolYear));
+            
+            if (relevant.length === 0) {
+                let opt = document.createElement('option'); 
+                opt.value = ''; 
+                opt.text = "Keine Lehrkräfte für dieses Schuljahr vorhanden"; 
+                select.appendChild(opt);
+                return;
+            }
+
+            relevant.sort((a,b) => a.name.localeCompare(b.name)).forEach(t => { 
+                let isActive = isTeacherActiveInYear(t.id, appData.schoolYear);
+                let opt = document.createElement('option'); 
+                opt.value = t.id; 
+                opt.text = t.name + (isActive ? "" : " (Inaktiv im SJ)"); 
+                select.appendChild(opt); 
+            });
+        }
+
+        function exportCSVReport() {
+            let { tStats, mStats } = calculateStatsForYear(appData.schoolYear);
+            let csvContent = "\uFEFF"; 
+            csvContent += `Schulstatistik: Schuljahr ${appData.schoolYear}\n\nLEHRKRAEFTE\nName;Status;BEM Erforderlich;Kranktage;Kind Krank;AZV Tage;Reststunden (R);Vertretung (V);Extra (E);AZVgeh\n`;
+            Object.values(tStats).sort((a,b) => a.name.localeCompare(b.name)).forEach(t => { 
+                csvContent += `${t.name};${t.active ? 'Aktiv' : 'Inaktiv'};${t.bem ? 'JA' : 'Nein'};${t.K};${t.KK};${t.AZV};${t.R};${t.V};${t.E};${t.AZVgeh}\n`; 
+            });
+            csvContent += `\nMONATSZUSAMMENFASSUNG (SCHULE GESAMT)\nMonat;Kranktage;Kind Krank;AZV Tage;Reststunden (R);Vertretung (V);Extra (E);AZVgeh\n`;
+            monthOrder.forEach(m => { let s = mStats[m]; csvContent += `${monthNames[m]};${s.K};${s.KK};${s.AZV};${s.R};${s.V};${s.E};${s.AZVgeh}\n`; });
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = `Statistik_SJ_${appData.schoolYear.replace('/','-')}.csv`;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        }
+
+        function printSchoolReport() {
+            let { tStats, mStats } = calculateStatsForYear(appData.schoolYear) || { tStats: {}, mStats: {} };
+            let totalStaff = { K: 0, KK: 0, AZV: 0, R: 0, V: 0, E: 0, AZVgeh: 0 };
+            
+            let printHtml = `
+                <div class="print-header">
+                    <h1>Statistik HBS Kahla</h1>
+                    <h2>Jahresbericht der Schule – Schuljahr ${appData.schoolYear}</h2>
+                    <div style="font-size: 8.5pt; color: #475569; margin-bottom: 6px;">Druckdatum: ${new Date().toLocaleDateString('de-DE')}</div>
+                </div>
+                <hr>
+                
+                <h3>1. Fehlzeiten und Mehrleistungen (Kollegium)</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th class="print-num">Status</th>
+                            <th class="print-num">BEM</th>
+                            <th class="print-num">Krank (T)</th>
+                            <th class="print-num">Kind K. (T)</th>
+                            <th class="print-num">AZV frei (T)</th>
+                            <th class="print-num">R (h)</th>
+                            <th class="print-num">V (h)</th>
+                            <th class="print-num">E (h)</th>
+                            <th class="print-num">AZVgeh (h)</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+            
+            let teacherList = Object.values(tStats).sort((a,b) => a.name.localeCompare(b.name));
+            teacherList.forEach(t => { 
+                totalStaff.K += t.K; totalStaff.KK += t.KK; totalStaff.AZV += t.AZV;
+                totalStaff.R += t.R; totalStaff.V += t.V; totalStaff.E += t.E; totalStaff.AZVgeh += t.AZVgeh;
+                
+                printHtml += `
+                    <tr>
+                        <td><b>${t.name}</b></td>
+                        <td class="print-num">${t.active ? 'Aktiv' : 'Inaktiv'}</td>
+                        <td class="print-num">${t.bem ? '<b style="color:#b91c1c;">JA</b>' : '–'}</td>
+                        <td class="print-num">${t.K}</td>
+                        <td class="print-num">${t.KK}</td>
+                        <td class="print-num">${t.AZV}</td>
+                        <td class="print-num">${t.R}</td>
+                        <td class="print-num">${t.V}</td>
+                        <td class="print-num">${t.E}</td>
+                        <td class="print-num">${t.AZVgeh}</td>
+                    </tr>`; 
+            });
+
+            printHtml += `
+                    </tbody>
+                    <tfoot>
+                        <tr style="font-weight: bold; background-color: #f1f5f9;">
+                            <td colspan="3">GESAMT (${teacherList.length} Lehrkräfte)</td>
+                            <td class="print-num">${totalStaff.K}</td>
+                            <td class="print-num">${totalStaff.KK}</td>
+                            <td class="print-num">${totalStaff.AZV}</td>
+                            <td class="print-num">${totalStaff.R}</td>
+                            <td class="print-num">${totalStaff.V}</td>
+                            <td class="print-num">${totalStaff.E}</td>
+                            <td class="print-num">${totalStaff.AZVgeh}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <h3>2. Monats-Zusammenfassung (Schule Gesamt)</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Monat</th>
+                            <th class="print-num">Krank (T)</th>
+                            <th class="print-num">Kind K. (T)</th>
+                            <th class="print-num">AZV frei (T)</th>
+                            <th class="print-num">R (h)</th>
+                            <th class="print-num">V (h)</th>
+                            <th class="print-num">E (h)</th>
+                            <th class="print-num">AZVgeh (h)</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+            
+            let totalM = { K: 0, KK: 0, AZV: 0, R: 0, V: 0, E: 0, AZVgeh: 0 };
+            monthOrder.forEach(m => { 
+                let s = mStats[m] || { K: 0, KK: 0, AZV: 0, R: 0, V: 0, E: 0, AZVgeh: 0 }; 
+                if(s.K>0 || s.KK>0 || s.AZV>0 || s.R>0 || s.V>0 || s.E>0 || s.AZVgeh>0) { 
+                    printHtml += `
+                        <tr>
+                            <td><b>${monthNames[m]}</b></td>
+                            <td class="print-num">${s.K}</td>
+                            <td class="print-num">${s.KK}</td>
+                            <td class="print-num">${s.AZV}</td>
+                            <td class="print-num">${s.R}</td>
+                            <td class="print-num">${s.V}</td>
+                            <td class="print-num">${s.E}</td>
+                            <td class="print-num">${s.AZVgeh}</td>
+                        </tr>`; 
+                    totalM.K += s.K; totalM.KK += s.KK; totalM.AZV += s.AZV; 
+                    totalM.R += s.R; totalM.V += s.V; totalM.E += s.E; totalM.AZVgeh += s.AZVgeh; 
+                } 
+            });
+            
+            printHtml += `
+                    </tbody>
+                    <tfoot>
+                        <tr style="font-weight: bold; background-color: #f1f5f9;">
+                            <td>GESAMT</td>
+                            <td class="print-num">${totalM.K}</td>
+                            <td class="print-num">${totalM.KK}</td>
+                            <td class="print-num">${totalM.AZV}</td>
+                            <td class="print-num">${totalM.R}</td>
+                            <td class="print-num">${totalM.V}</td>
+                            <td class="print-num">${totalM.E}</td>
+                            <td class="print-num">${totalM.AZVgeh}</td>
+                        </tr>
+                    </tfoot>
+                </table>`;
+            
+            document.getElementById('view-print').innerHTML = printHtml; 
+            window.print();
+        }
+
+        function printTeacherReport() {
+            const tId = document.getElementById('report-teacher-select').value; 
+            let teacher = appData.teachers.find(t => t.id === tId); 
+            if(!teacher) return;
+            let { tStats } = calculateStatsForYear(appData.schoolYear) || { tStats: {} }; 
+            let stats = tStats[tId] || { K: 0, KK: 0, AZV: 0, R: 0, V: 0, E: 0, AZVgeh: 0, bem: false };
+            
+            let printHtml = `
+                <div class="print-header">
+                    <h1>Statistik HBS Kahla</h1>
+                    <h2>Persönlicher Jahresbericht – Schuljahr ${appData.schoolYear}</h2>
+                    <div style="font-size: 11pt; font-weight: bold; color: #0f172a; margin-top: 2px; margin-bottom: 2px;">Lehrkraft: ${teacher.name}</div>
+                    <div style="font-size: 8.5pt; color: #475569; margin-bottom: 6px;">Druckdatum: ${new Date().toLocaleDateString('de-DE')}</div>
+                </div>
+                <hr>
+                
+                <h3>1. Zusammenfassung der Statistik</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 70%;">Kategorie</th>
+                            <th class="print-num" style="width: 30%;">Anzahl / Umfang</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Krankheitstage gesamt ${stats.bem ? '<br><b style="color:#b91c1c;">(Achtung: >30 Kranktage erreicht! BEM-Prüfung erforderlich)</b>' : ''}</td>
+                            <td class="print-num font-bold"><b>${stats.K} Tage</b></td>
+                        </tr>
+                        <tr>
+                            <td>Kind Krank Tage gesamt</td>
+                            <td class="print-num">${stats.KK} Tage</td>
+                        </tr>
+                        <tr>
+                            <td>AZV Freitage gesamt (genommen)</td>
+                            <td class="print-num">${stats.AZV} Tage</td>
+                        </tr>
+                        <tr>
+                            <td>Gehaltene Reststunden (R)</td>
+                            <td class="print-num">${stats.R} Stunden</td>
+                        </tr>
+                        <tr>
+                            <td>Gehaltene Vertretungsstunden (V)</td>
+                            <td class="print-num">${stats.V} Stunden</td>
+                        </tr>
+                        <tr>
+                            <td>Extrastunden (E)</td>
+                            <td class="print-num">${stats.E} Stunden</td>
+                        </tr>
+                        <tr>
+                            <td>Reingearbeitete AZV Stunden (AZVgeh)</td>
+                            <td class="print-num">${stats.AZVgeh} Stunden</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>2. Protokoll: AZV & Mehrarbeits-Konto</h3>`;
+            
+            let yd = getYearData(); 
+            let tAzv = (yd.azv || []).filter(a => a.tId === tId); 
+            
+            if (tAzv.length === 0) {
+                printHtml += `<p style="font-size: 9pt; color: #475569; font-style: italic; margin-bottom: 16px;">Keine Buchungen im AZV-Konto für dieses Schuljahr verzeichnet.</p>`;
+            } else { 
+                printHtml += `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 30%;">Datum</th>
+                                <th style="width: 45%;">Buchungsart</th>
+                                <th class="print-num" style="width: 25%;">Stunden</th>
+                            </tr>
+                        </thead>
+                        <tbody>`; 
+                
+                let balance = 0; 
+                tAzv.forEach(a => { 
+                    let isDebt = a.type === 'genommen'; 
+                    let change = isDebt ? -a.hours : a.hours; 
+                    balance += change; 
+                    printHtml += `
+                        <tr>
+                            <td>${a.date}</td>
+                            <td>${isDebt ? 'AZV in Anspruch genommen (Schulden)' : 'Mehrarbeit / AZV abgegolten'}</td>
+                            <td class="print-num" style="font-weight: bold; color: ${isDebt ? '#b91c1c' : '#0d9488'};">${change > 0 ? '+'+change : change} h</td>
+                        </tr>`; 
+                }); 
+                
+                printHtml += `
+                        </tbody>
+                        <tfoot>
+                            <tr style="font-weight: bold; background-color: #f1f5f9;">
+                                <td colspan="2">Aktueller Jahres-Saldo:</td>
+                                <td class="print-num" style="font-size: 10pt; color: ${balance < 0 ? '#b91c1c' : '#0d9488'};">${balance > 0 ? '+'+balance : balance} h</td>
+                            </tr>
+                        </tfoot>
+                    </table>`; 
+            }
+            
+            printHtml += `
+                <table class="signature-block">
+                    <tr>
+                        <td style="width: 45%;">
+                            ___________________________________<br>
+                            Ort, Datum
+                        </td>
+                        <td style="width: 10%;"></td>
+                        <td style="width: 45%;">
+                            ___________________________________<br>
+                            Unterschrift Schulleitung / Personalrat
+                        </td>
+                    </tr>
+                </table>`;
+            
+            document.getElementById('view-print').innerHTML = printHtml; 
+            window.print();
+        }
+
+        // --- AZV KONTO ---
+        function renderAzvView() {
+            let yd = getYearData(); const tbody = document.getElementById('azv-table-body'); let html = '';
+            yd.azv.forEach((entry, idx) => {
+                let tName = appData.teachers.find(t => t.id === entry.tId)?.name || "Unbekannt"; let isDebt = entry.type === 'genommen'; 
+                html += `<tr class="hover:bg-slate-50 transition"><td class="p-3 font-bold text-slate-700">${tName}</td><td class="p-3 font-medium text-slate-600">${entry.date}</td><td class="p-3"><span class="px-3 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider ${isDebt ? 'bg-red-100 text-red-700' : 'bg-teal-100 text-teal-700'}">${isDebt ? 'Schulden (-)' : 'Ausgleich (+)'}</span>${entry.auto ? '<span class="ml-2 text-[10px] text-slate-400 font-medium">Auto-Sync</span>' : ''}</td><td class="p-3 font-black text-lg text-center ${isDebt ? 'text-red-600' : 'text-teal-600'}">${isDebt ? '-'+entry.hours : '+'+entry.hours} h</td><td class="p-3 text-right"><button onclick="deleteAzv(${idx})" class="text-red-500 hover:bg-red-50 font-semibold text-xs px-3 py-1.5 border border-red-200 rounded-md transition active:scale-95">Löschen</button></td></tr>`;
+            });
+            tbody.innerHTML = html;
+            let balances = {}; yd.azv.forEach(e => { if(!balances[e.tId]) balances[e.tId] = 0; balances[e.tId] += (e.type === 'genommen' ? -e.hours : e.hours); });
+            let sumHtml = '';
+            for (let [tId, bal] of Object.entries(balances)) {
+                if (bal === 0) continue; 
+                let tName = appData.teachers.find(t => t.id === tId)?.name || "Unbekannt";
+                sumHtml += `<div class="bg-white p-4 rounded-xl shadow-sm border border-b-4 ${bal < 0 ? 'border-red-200 border-b-red-400' : 'border-teal-200 border-b-teal-400'}"><div class="text-sm font-semibold text-slate-500 mb-1">${tName}</div><div class="text-2xl font-black ${bal < 0 ? 'text-red-600' : 'text-teal-600'}">${bal < 0 ? Math.abs(bal) + ' h Minus' : bal + ' h Plus'}</div></div>`;
+            }
+            if(sumHtml === '') sumHtml = `<p class="text-slate-400 italic font-medium col-span-full">Alle Konten im Jahr ${appData.schoolYear} sind ausgeglichen.</p>`;
+            document.getElementById('azv-summary').innerHTML = sumHtml;
+        }
+
+        function updateAzvHours() {
+            let d1Str = document.getElementById('azv-date-from').value;
+            let d2Str = document.getElementById('azv-date-to').value;
+            let type = document.getElementById('azv-type').value;
+            
+            if (type === 'genommen' && d1Str) {
+                let days = 1;
+                if (d2Str) {
+                    let d1 = new Date(d1Str); let d2 = new Date(d2Str);
+                    if (d2 >= d1) {
+                        days = 0; let cur = new Date(d1);
+                        while(cur <= d2) {
+                            if(cur.getDay() !== 0 && cur.getDay() !== 6) days++; 
+                            cur.setDate(cur.getDate() + 1);
+                        }
+                    }
+                }
+                document.getElementById('azv-hours').value = days * 5;
+            }
+        }
+
+        function openAzvForm() { 
+            const select = document.getElementById('azv-teacher'); select.innerHTML = ''; 
+            appData.teachers.filter(t => isTeacherActiveInYear(t.id, appData.schoolYear)).sort((a,b) => a.name.localeCompare(b.name)).forEach(t => { 
+                let opt = document.createElement('option'); opt.value = t.id; opt.text = t.name; select.appendChild(opt); 
+            }); 
+            document.getElementById('azv-date-from').value = ''; 
+            document.getElementById('azv-date-to').value = ''; 
+            document.getElementById('azv-type').value = 'genommen';
+            document.getElementById('azv-hours').value = '5'; 
+            document.getElementById('modal-azv-form').classList.remove('hidden'); document.getElementById('modal-azv-form').classList.add('flex'); 
+        }
+        
+        function closeAzvForm() { document.getElementById('modal-azv-form').classList.add('hidden'); document.getElementById('modal-azv-form').classList.remove('flex'); }
+        
+        function saveAzvEntry() { 
+            let yd = getYearData(); 
+            let tId = document.getElementById('azv-teacher').value; 
+            let fromVal = document.getElementById('azv-date-from').value; 
+            let toVal = document.getElementById('azv-date-to').value; 
+            let type = document.getElementById('azv-type').value; 
+            let hours = parseInt(document.getElementById('azv-hours').value); 
+            
+            if (!fromVal || isNaN(hours)) return showToast("Bitte Startdatum und gültige Stunden eingeben.", "⚠️"); 
+            
+            let dateStr = "";
+            let d1 = new Date(fromVal);
+            dateStr = String(d1.getDate()).padStart(2, '0') + '.' + String(d1.getMonth() + 1).padStart(2, '0') + '.';
+            
+            if (toVal && toVal !== fromVal) {
+                let d2 = new Date(toVal);
+                if (d2 > d1) {
+                    dateStr += ' - ' + String(d2.getDate()).padStart(2, '0') + '.' + String(d2.getMonth() + 1).padStart(2, '0') + '.';
+                }
+            }
+
+            yd.azv.push({ tId: tId, date: dateStr, type: type, hours: hours, auto: false }); 
+            saveToLocal(); renderAzvView(); closeAzvForm(); showToast("AZV-Eintrag gespeichert!"); 
+        }
+
+        function deleteAzv(idx) { 
+            let yd = getYearData(); 
+            let entry = yd.azv[idx]; 
+            let msg = "Eintrag entfernen?"; 
+            if (entry.auto) msg += "\n(Löscht auch den verknüpften AZV-Eintrag aus dem Kalender!)"; 
+            askConfirm(msg, () => { 
+                if (entry.auto) { 
+                    let parts = entry.date.split('.'); 
+                    if(parts.length >= 2) { 
+                        let d = parseInt(parts[0]); 
+                        let m = parseInt(parts[1]); 
+                        if(yd.records[m]?.[entry.tId]?.[d]) { 
+                            let calType = yd.records[m][entry.tId][d].type; 
+                            if (calType === 'AZV' || calType === 'AZVgeh') { 
+                                delete yd.records[m][entry.tId][d]; 
+                            } 
+                        } 
+                    } 
+                } 
+                yd.azv.splice(idx, 1); 
+                saveToLocal(); 
+                renderAzvView(); 
+                showToast("Erfolgreich gelöscht."); 
+            }); 
+        }
+
+        // --- PERSONALVERWALTUNG ---
+        let staffFilter = 'active';
+        function setStaffFilter(f) {
+            staffFilter = f;
+            let btnAct = document.getElementById('staff-filter-active');
+            let btnAll = document.getElementById('staff-filter-all');
+            if (btnAct && btnAll) {
+                if (f === 'active') {
+                    btnAct.className = "px-3 py-1 rounded-md bg-white text-school-800 shadow-sm transition font-bold";
+                    btnAll.className = "px-3 py-1 rounded-md text-slate-500 hover:text-slate-800 transition";
+                } else {
+                    btnAct.className = "px-3 py-1 rounded-md text-slate-500 hover:text-slate-800 transition";
+                    btnAll.className = "px-3 py-1 rounded-md bg-white text-school-800 shadow-sm transition font-bold";
+                }
+            }
+            renderStaffView();
+        }
+
+        function renderStaffView() {
+            let { tStats } = calculateStatsForYear(appData.schoolYear) || { tStats: {} };
+            const tbody = document.getElementById('staff-table-body'); 
+            if (!tbody) return;
+            let html = '';
+            
+            let list = [...appData.teachers];
+            if (staffFilter === 'active') {
+                list = list.filter(t => isTeacherActiveInYear(t.id, appData.schoolYear));
+            }
+
+            list.sort((a,b) => {
+                let actA = isTeacherActiveInYear(a.id, appData.schoolYear);
+                let actB = isTeacherActiveInYear(b.id, appData.schoolYear);
+                return actA === actB ? a.name.localeCompare(b.name) : (actA ? -1 : 1);
+            });
+
+            if (list.length === 0) {
+                html = `<tr><td colspan="5" class="p-8 text-center text-slate-400 italic">Keine aktiven Lehrkräfte für SJ ${appData.schoolYear} gefunden. Klicken Sie oben auf "Alle (inkl. Archiv)" oder auf "🧑‍🏫 Neu".</td></tr>`;
+            } else {
+                html += `<thead><tr class="text-slate-500 bg-slate-50 border-b border-slate-200 text-xs font-bold uppercase"><th class="p-2.5">Name der Lehrkraft</th><th class="p-2.5 text-center">Basis R / Wo</th><th class="p-2.5 text-center">Basis V / Mo</th><th class="p-2.5 text-center">PIN (Portal)</th><th class="p-2.5 text-center">Status in SJ ${appData.schoolYear}</th></tr></thead><tbody>`;
+                list.forEach(t => {
+                    let isActive = isTeacherActiveInYear(t.id, appData.schoolYear);
+                    let bemFlag = tStats[t.id]?.bem ? `<span class="bem-alert text-red-600 text-sm">🚨 BEM</span>` : '';
+                    let teacherPin = t.pin || '1234';
+                    html += `<tr class="hover:bg-slate-50 transition ${!isActive ? 'opacity-60 bg-slate-50/60' : ''}">
+                        <td class="p-2 flex items-center gap-2">
+                            <input type="text" value="${t.name}" class="bg-transparent outline-none w-full border-b-2 border-transparent focus:border-school-500 font-bold text-slate-700 p-2 transition" onchange="updateStaff('${t.id}', 'name', this.value)"> ${bemFlag}
+                        </td>
+                        <td class="p-2 text-center w-28">
+                            <input type="number" min="0" value="${t.r}" class="bg-white rounded border border-slate-200 outline-none w-16 text-center focus:border-school-500 font-bold p-1.5 transition shadow-sm" onchange="updateStaff('${t.id}', 'r', this.value)" title="Basis R pro Woche">
+                        </td>
+                        <td class="p-2 text-center w-28">
+                            <input type="number" min="0" value="${t.v}" class="bg-white rounded border border-slate-200 outline-none w-16 text-center focus:border-school-500 font-bold p-1.5 transition shadow-sm" onchange="updateStaff('${t.id}', 'v', this.value)" title="Basis V pro Monat">
+                        </td>
+                        <td class="p-2 text-center w-28">
+                            <input type="text" maxlength="4" value="${teacherPin}" class="bg-white rounded border border-slate-200 outline-none w-16 text-center focus:border-teal-500 font-mono font-black p-1.5 transition shadow-sm text-teal-800" onchange="updateStaff('${t.id}', 'pin', this.value)" title="4-stellige PIN für den persönlichen Kollegenzugang">
+                        </td>
+                        <td class="p-2 text-center w-48">
+                            <button onclick="toggleStaffStatus('${t.id}')" class="w-full px-3 py-2 rounded-lg shadow-sm text-xs font-black uppercase tracking-wider transition active:scale-95 ${isActive ? 'bg-green-100 text-green-800 border border-green-200 hover:bg-green-200' : 'bg-slate-200 text-slate-500 hover:bg-slate-300'}" title="Aktivität für Schuljahr ${appData.schoolYear} an- oder ausschalten">
+                                ${isActive ? `✓ Aktiv in SJ ${appData.schoolYear}` : `✗ Inaktiv in SJ ${appData.schoolYear}`}
+                            </button>
+                        </td>
+                    </tr>`;
+                });
+                html += `</tbody>`;
+            }
+            tbody.innerHTML = html;
+        }
+
+        function openTeacherForm() { document.getElementById('new-teacher-name').value = ''; document.getElementById('modal-teacher').classList.remove('hidden'); document.getElementById('modal-teacher').classList.add('flex'); }
+        function closeTeacherModal() { document.getElementById('modal-teacher').classList.add('hidden'); document.getElementById('modal-teacher').classList.remove('flex'); }
+        function saveTeacher() { 
+            let name = document.getElementById('new-teacher-name').value.trim(); 
+            if(name) { 
+                let tId = 't_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+                let newT = { id: tId, name: name, r: 0, v: 0, active: true, pin: generateTeacherPin() };
+                appData.teachers.push(newT); 
+                let yd = getYearData();
+                if (!yd.staffStatus) yd.staffStatus = {};
+                yd.staffStatus[tId] = true;
+                saveToLocal(); 
+                renderStaffView(); 
+                closeTeacherModal(); 
+                showToast(name + ` für SJ ${appData.schoolYear} hinzugefügt.`); 
+            } 
+        }
+        function updateStaff(id, field, value) { 
+            let t = appData.teachers.find(t => t.id === id); 
+            if(t) { 
+                if (field === 'pin') {
+                    t.pin = value.trim() || '1234';
+                } else if (field === 'name') {
+                    t.name = value;
+                } else {
+                    t[field] = value === "" ? 0 : parseInt(value);
+                }
+                saveToLocal(); 
+            } 
+        }
+        function toggleStaffStatus(id) { 
+            let yd = getYearData();
+            if (!yd.staffStatus) yd.staffStatus = {};
+            let current = isTeacherActiveInYear(id, appData.schoolYear);
+            yd.staffStatus[id] = !current;
+            saveToLocal(); 
+            renderStaffView(); 
+            showToast(`Status für SJ ${appData.schoolYear} aktualisiert.`);
+        }
+
+        // --- SCHULJAHRESWECHSEL-ASSISTENT (ROLLOVER WIZARD) ---
+        let rolloverCurrentStep = 1;
+        let rolloverActiveTeacherIds = new Set();
+
+        function openRolloverWizard() {
+            rolloverCurrentStep = 1;
+            let current = appData.schoolYear;
+            document.getElementById('rollover-source-year').innerText = `SJ ${current}`;
+            
+            // Suggest next school year (e.g., 25/26 -> 26/27)
+            let parts = current.split('/');
+            let targetSuggestion = "";
+            if (parts.length === 2 && !isNaN(parseInt(parts[0])) && !isNaN(parseInt(parts[1]))) {
+                let y1 = parseInt(parts[0]) + 1;
+                let y2 = parseInt(parts[1]) + 1;
+                targetSuggestion = `${String(y1).padStart(2, '0')}/${String(y2).padStart(2, '0')}`;
+            } else {
+                let now = new Date();
+                let y1 = now.getFullYear();
+                targetSuggestion = `${(y1).toString().slice(-2)}/${(y1+1).toString().slice(-2)}`;
+            }
+            document.getElementById('rollover-target-year').value = targetSuggestion;
+
+            // Prepopulate active teachers for step 2
+            rolloverActiveTeacherIds.clear();
+            appData.teachers.forEach(t => {
+                if (isTeacherActiveInYear(t.id, current)) {
+                    rolloverActiveTeacherIds.add(t.id);
+                }
+            });
+
+            goToRolloverStep(1);
+            document.getElementById('modal-rollover').classList.remove('hidden');
+            document.getElementById('modal-rollover').classList.add('flex');
+        }
+
+        function closeRolloverWizard() {
+            document.getElementById('modal-rollover').classList.add('hidden');
+            document.getElementById('modal-rollover').classList.remove('flex');
+        }
+
+        function goToRolloverStep(step) {
+            if (step === 2) {
+                let targetY = document.getElementById('rollover-target-year').value.trim();
+                if (!targetY.match(/^\d{2}\/\d{2}$/)) {
+                    showToast("Bitte gültiges Format eingeben (z. B. 26/27)", "⚠️");
+                    return;
+                }
+                renderRolloverTeachersList();
+            } else if (step === 3) {
+                renderRolloverAzvPreview();
+            } else if (step === 4) {
+                renderRolloverSummary();
+            }
+
+            rolloverCurrentStep = step;
+            for (let s = 1; s <= 4; s++) {
+                let stepEl = document.getElementById(`rollover-step-${s}`);
+                let indEl = document.getElementById(`step-ind-${s}`);
+                if (stepEl) {
+                    if (s === step) stepEl.classList.remove('hidden');
+                    else stepEl.classList.add('hidden');
+                }
+                if (indEl) {
+                    if (s === step) indEl.className = "text-amber-600 font-black flex items-center gap-1";
+                    else if (s < step) indEl.className = "text-green-600 font-bold flex items-center gap-1";
+                    else indEl.className = "text-slate-400 font-medium flex items-center gap-1";
+                }
+            }
+        }
+
+        function renderRolloverTeachersList() {
+            let container = document.getElementById('rollover-teachers-list');
+            let sorted = [...appData.teachers].sort((a,b) => a.name.localeCompare(b.name));
+            let html = '';
+            sorted.forEach(t => {
+                let isChecked = rolloverActiveTeacherIds.has(t.id);
+                html += `<label class="flex items-center justify-between p-2 hover:bg-white transition cursor-pointer">
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleRolloverTeacher('${t.id}')" class="w-4 h-4 accent-school-600">
+                        <span class="font-bold text-slate-800 text-xs">${t.name}</span>
+                    </div>
+                    <span class="text-[10px] ${isChecked ? 'text-green-600 font-bold' : 'text-slate-400'}">${isChecked ? 'Aktiv im neuen SJ' : 'Inaktiv / Archiv'}</span>
+                </label>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function toggleRolloverTeacher(tId) {
+            if (rolloverActiveTeacherIds.has(tId)) rolloverActiveTeacherIds.delete(tId);
+            else rolloverActiveTeacherIds.add(tId);
+            renderRolloverTeachersList();
+        }
+
+        function toggleAllRolloverTeachers() {
+            if (rolloverActiveTeacherIds.size === appData.teachers.length) {
+                rolloverActiveTeacherIds.clear();
+            } else {
+                appData.teachers.forEach(t => rolloverActiveTeacherIds.add(t.id));
+            }
+            renderRolloverTeachersList();
+        }
+
+        function getTeacherAzvBalance(tId, yStr) {
+            let yd = appData.years?.[yStr];
+            if (!yd || !yd.azv) return 0;
+            let sum = 0;
+            yd.azv.filter(a => a.tId === tId).forEach(a => {
+                let h = parseFloat(a.hours) || 0;
+                if (a.type === 'abgegolten') sum += h;
+                else sum -= h;
+            });
+            return sum;
+        }
+
+        function renderRolloverAzvPreview() {
+            let previewEl = document.getElementById('rollover-azv-preview');
+            let transferChecked = document.getElementById('rollover-transfer-azv').checked;
+            if (!transferChecked) {
+                previewEl.innerHTML = '<div class="p-3 text-slate-400 italic text-center">Kein Übertrag gewählt. Alle AZV-Konten im neuen Schuljahr starten bei 0 Stunden.</div>';
+                return;
+            }
+
+            let sourceY = appData.schoolYear;
+            let html = '<table class="w-full text-left"><thead><tr class="border-b font-bold text-slate-600"><th class="py-1">Lehrkraft</th><th class="py-1 text-right">Restsaldo Vorjahr</th><th class="py-1 text-right">Startbuchung neues SJ</th></tr></thead><tbody class="divide-y divide-slate-200">';
+            let hasAny = false;
+
+            appData.teachers.filter(t => rolloverActiveTeacherIds.has(t.id)).sort((a,b) => a.name.localeCompare(b.name)).forEach(t => {
+                let bal = getTeacherAzvBalance(t.id, sourceY);
+                if (bal !== 0) {
+                    hasAny = true;
+                    let isPlus = bal > 0;
+                    html += `<tr>
+                        <td class="py-1.5 font-bold text-slate-700">${t.name}</td>
+                        <td class="py-1.5 text-right font-black ${isPlus ? 'text-teal-600' : 'text-rose-600'}">${isPlus ? '+' : ''}${bal} h</td>
+                        <td class="py-1.5 text-right font-medium text-slate-500">${isPlus ? `+${bal} h (Guthaben Übertrag)` : `${bal} h (Ausgleichs-Übertrag)`}</td>
+                    </tr>`;
+                }
+            });
+
+            if (!hasAny) {
+                html += `<tr><td colspan="3" class="py-3 text-center text-slate-400 italic">Alle aktiven Lehrkräfte haben derzeit einen ausgeglichenen Saldo (0 h).</td></tr>`;
+            }
+            html += '</tbody></table>';
+            previewEl.innerHTML = html;
+        }
+
+        function renderRolloverSummary() {
+            let box = document.getElementById('rollover-summary-box');
+            let targetY = document.getElementById('rollover-target-year').value.trim();
+            let activeCount = rolloverActiveTeacherIds.size;
+            let transferAzv = document.getElementById('rollover-transfer-azv').checked;
+
+            box.innerHTML = `
+                <div><b>Neues Schuljahr:</b> <span class="text-school-700 font-bold">SJ ${targetY}</span></div>
+                <div><b>Aktive Lehrkräfte:</b> <span class="font-bold">${activeCount} von ${appData.teachers.length}</span></div>
+                <div><b>AZV-Restsalden:</b> <span class="font-bold">${transferAzv ? 'Automatisch übertragen' : 'Auf 0 setzen'}</span></div>
+                <div class="text-[11px] text-slate-400 mt-2">Hinweis: Das alte Schuljahr (SJ ${appData.schoolYear}) bleibt unverändert gespeichert.</div>
+            `;
+        }
+
+        function executeRollover() {
+            let targetY = document.getElementById('rollover-target-year').value.trim();
+            if (!targetY.match(/^\d{2}\/\d{2}$/)) {
+                showToast("Ungültiges Schuljahr-Format", "⚠️");
+                return;
+            }
+
+            let sourceY = appData.schoolYear;
+            let targetYd = getYearData(targetY);
+            
+            // Set staffStatus for target year
+            targetYd.staffStatus = {};
+            appData.teachers.forEach(t => {
+                targetYd.staffStatus[t.id] = rolloverActiveTeacherIds.has(t.id);
+            });
+
+            // Handle AZV transfer
+            let transferAzv = document.getElementById('rollover-transfer-azv').checked;
+            if (transferAzv) {
+                // Clear any existing rollover auto entries in target year to avoid duplicates
+                targetYd.azv = (targetYd.azv || []).filter(a => !a.memo?.includes('Übertrag aus Vorjahr'));
+                appData.teachers.filter(t => rolloverActiveTeacherIds.has(t.id)).forEach(t => {
+                    let bal = getTeacherAzvBalance(t.id, sourceY);
+                    if (bal !== 0) {
+                        targetYd.azv.push({
+                            tId: t.id,
+                            date: '01.08.',
+                            type: bal > 0 ? 'abgegolten' : 'genommen',
+                            hours: Math.abs(bal),
+                            auto: false,
+                            memo: `Übertrag aus Vorjahr (SJ ${sourceY})`
+                        });
+                    }
+                });
+            }
+
+            // Handle quota (R/V)
+            let quotaChoice = document.querySelector('input[name="rollover-quota"]:checked')?.value || 'keep';
+            if (quotaChoice === 'reset') {
+                appData.teachers.forEach(t => {
+                    t.r = 0;
+                    t.v = 0;
+                });
+            }
+
+            // Switch to target year
+            appData.schoolYear = targetY;
+            saveToLocal();
+            populateYearDropdown();
+            closeRolloverWizard();
+            switchTab('month');
+            showToast(`Schuljahr ${targetY} erfolgreich angelegt!`, "🚀");
+        }
+
+        // --- PIN-GESCHÜTZTER KOLLEGENZUGANG (READ-ONLY) ---
+        let portalUser = null;
+        let portalYear = null;
+
+        function openPortalView() {
+            sessionStorage.removeItem('admin_unlocked');
+            ['month', 'dashboard', 'azv', 'staff', 'survey', 'reports'].forEach(tab => {
+                let el = document.getElementById(`view-${tab}`);
+                if (el) el.classList.add('hidden');
+            });
+            document.getElementById('view-portal').classList.remove('hidden');
+            document.getElementById('view-portal').classList.add('flex');
+            
+            let navTabs = document.getElementById('nav-tabs-container');
+            if (navTabs) navTabs.classList.add('hidden');
+            let navAdminActions = document.getElementById('nav-admin-actions');
+            if (navAdminActions) navAdminActions.classList.add('hidden');
+
+            if (!portalUser) {
+                renderPortalLogin();
+            } else {
+                renderPortalDashboard();
+            }
+        }
+
+        function closePortalView() {
+            document.getElementById('view-portal').classList.add('hidden');
+            document.getElementById('view-portal').classList.remove('flex');
+            
+            let navTabs = document.getElementById('nav-tabs-container');
+            if (navTabs) navTabs.classList.remove('hidden');
+            let navAdminActions = document.getElementById('nav-admin-actions');
+            if (navAdminActions) navAdminActions.classList.remove('hidden');
+
+            switchTab('month');
+        }
+
+        function renderPortalLogin() {
+            document.getElementById('portal-login-screen').classList.remove('hidden');
+            document.getElementById('portal-dashboard-screen').classList.add('hidden');
+            
+            const select = document.getElementById('portal-user-select');
+            select.innerHTML = '';
+            
+            let sorted = [...appData.teachers].filter(t => isTeacherActiveInYear(t.id, appData.schoolYear) || hasTeacherRecordsInYear(t.id, appData.schoolYear)).sort((a,b) => a.name.localeCompare(b.name));
+            if (sorted.length === 0) sorted = [...appData.teachers].sort((a,b) => a.name.localeCompare(b.name));
+
+            sorted.forEach(t => {
+                let opt = document.createElement('option');
+                opt.value = t.id;
+                opt.text = t.name;
+                select.appendChild(opt);
+            });
+
+            document.getElementById('portal-user-pin').value = '';
+            document.getElementById('portal-user-pin').focus();
+        }
+
+        function loginPortal() {
+            const tId = document.getElementById('portal-user-select').value;
+            const pin = document.getElementById('portal-user-pin').value.trim();
+            const teacher = appData.teachers.find(t => t.id === tId);
+
+            if (!teacher) {
+                showToast("Bitte Lehrkraft auswählen", "⚠️");
+                return;
+            }
+
+            let teacherPin = teacher.pin || '1234';
+            let masterPin = appData.masterPin || 'Year2003?!%';
+
+            if (pin === teacherPin || pin === masterPin) {
+                portalUser = teacher;
+                portalYear = appData.schoolYear;
+                showToast(`Willkommen, ${teacher.name}!`, "👋");
+                renderPortalDashboard();
+            } else {
+                showToast("Falsche PIN. Bitte erneut versuchen.", "❌");
+                document.getElementById('portal-user-pin').value = '';
+                document.getElementById('portal-user-pin').focus();
+            }
+        }
+
+        function logoutPortal() {
+            portalUser = null;
+            renderPortalLogin();
+            showToast("Erfolgreich abgemeldet.");
+        }
+
+        function changePortalYear() {
+            portalYear = document.getElementById('portal-year-select').value;
+            renderPortalDashboard();
+        }
+
+        function renderPortalDashboard() {
+            if (!portalUser) {
+                renderPortalLogin();
+                return;
+            }
+
+            document.getElementById('portal-login-screen').classList.add('hidden');
+            document.getElementById('portal-dashboard-screen').classList.remove('hidden');
+            document.getElementById('portal-dashboard-screen').classList.add('flex');
+
+            document.getElementById('portal-greeting-name').innerText = portalUser.name;
+            document.getElementById('portal-year-label').innerText = portalYear;
+
+            // Populate year select
+            let ySelect = document.getElementById('portal-year-select');
+            ySelect.innerHTML = '';
+            let years = Object.keys(appData.years).sort().reverse();
+            if (!years.includes(appData.schoolYear)) years.unshift(appData.schoolYear);
+            years.forEach(y => {
+                let opt = document.createElement('option');
+                opt.value = y;
+                opt.text = `SJ ${y}`;
+                if (y === portalYear) opt.selected = true;
+                ySelect.appendChild(opt);
+            });
+
+            // Populate month select
+            let mSelect = document.getElementById('portal-month-select');
+            let curMonthVal = parseInt(mSelect.value) || appData.currentMonth;
+            mSelect.innerHTML = '';
+            monthOrder.forEach(m => {
+                let opt = document.createElement('option');
+                opt.value = m;
+                opt.text = monthNames[m];
+                if (m === curMonthVal) opt.selected = true;
+                mSelect.appendChild(opt);
+            });
+            let selMonth = parseInt(mSelect.value) || monthOrder[0];
+
+            let yd = getYearData(portalYear);
+            let tId = portalUser.id;
+
+            // 1. Month summary
+            let mConf = yd.monthConfigs?.[selMonth]?.[tId] || { r: portalUser.r, v: portalUser.v };
+            let tRecs = yd.records?.[selMonth]?.[tId] || {};
+            let sums = { K: 0, KK: 0, AZV: 0, R: 0, V: 0, E: 0, AZVgeh: 0 };
+            for (let d in tRecs) {
+                let e = tRecs[d];
+                if (e.type === 'K') sums.K++;
+                else if (e.type === 'KK') sums.KK++;
+                else if (e.type === 'AZV') sums.AZV++;
+                else if (e.type === 'R') sums.R += (e.h || 0);
+                else if (e.type === 'V') sums.V += (e.h || 0);
+                else if (e.type === 'E') sums.E += (e.h || 0);
+                else if (e.type === 'AZVgeh') sums.AZVgeh += (e.h || 0);
+            }
+
+            let monthSaldo = mConf.v - sums.V;
+            let monthSaldoBadge = monthSaldo < 0 
+                ? `<span class="bg-teal-100 text-teal-800 font-extrabold px-2.5 py-1 rounded-lg text-sm">+${Math.abs(monthSaldo)} h Mehrarbeit</span>`
+                : (monthSaldo === 0 
+                    ? `<span class="bg-slate-100 text-slate-500 font-bold px-2.5 py-1 rounded-lg text-xs">Exakt im Soll (0 h)</span>` 
+                    : `<span class="bg-blue-100 text-blue-800 font-bold px-2.5 py-1 rounded-lg text-xs">Noch ${monthSaldo} h offen</span>`);
+
+            document.getElementById('portal-month-summary-box').innerHTML = `
+                <div class="text-2xl font-black text-slate-800 mb-1">${sums.V} <span class="text-sm font-semibold text-slate-500">von ${mConf.v} h V gehalten</span></div>
+                <div class="flex items-center gap-2 mb-2">${monthSaldoBadge}</div>
+                <div class="text-xs text-slate-600 grid grid-cols-3 gap-1 pt-1 bg-slate-50 p-2 rounded-lg">
+                    <div><b>Rest:</b> ${sums.R} h</div>
+                    <div><b>Extra:</b> ${sums.E} h</div>
+                    <div><b>AZV geh.:</b> ${sums.AZVgeh} h</div>
+                </div>
+            `;
+
+            // 2. AZV Saldo
+            let azvBalance = getTeacherAzvBalance(tId, portalYear);
+            let isPlus = azvBalance >= 0;
+            document.getElementById('portal-azv-saldo-box').innerHTML = `
+                <div class="text-3xl font-black ${isPlus ? 'text-teal-600' : 'text-rose-600'} mb-1">
+                    ${isPlus ? '+' : ''}${azvBalance} <span class="text-base font-bold text-slate-600">Stunden</span>
+                </div>
+                <div class="text-xs font-semibold ${isPlus ? 'text-teal-800' : 'text-rose-800'}">
+                    ${isPlus ? '🎉 Positiver Saldo (Guthaben)' : '⏳ Ausgleich / Minus offen'}
+                </div>
+            `;
+
+            // 3. Year totals
+            let { tStats } = calculateStatsForYear(portalYear) || { tStats: {} };
+            let stats = tStats[tId] || { K: 0, KK: 0, AZV: 0, R: 0, V: 0, E: 0, AZVgeh: 0 };
+            document.getElementById('portal-year-totals-box').innerHTML = `
+                <div class="flex justify-between border-b pb-1"><span>Krankheitstage:</span> <b>${stats.K} Tage</b></div>
+                <div class="flex justify-between border-b pb-1"><span>Kind krank:</span> <b>${stats.KK} Tage</b></div>
+                <div class="flex justify-between border-b pb-1"><span>AZV Freitage:</span> <b>${stats.AZV} Tage</b></div>
+                <div class="flex justify-between"><span>Vertretung gesamt:</span> <b class="text-blue-700">${stats.V} h</b></div>
+            `;
+
+            // 4. Month Details Table
+            let dtTable = document.getElementById('portal-month-details-table');
+            let y = getYearForMonth(selMonth, portalYear);
+            let daysInM = getDaysInMonth(selMonth, y);
+            let entriesList = [];
+            for (let d = 1; d <= daysInM; d++) {
+                if (tRecs[d]) {
+                    entriesList.push({ day: d, ...tRecs[d] });
+                }
+            }
+
+            if (entriesList.length === 0) {
+                dtTable.innerHTML = `<div class="p-4 text-center text-slate-400 italic text-xs bg-slate-50 rounded-xl">Keine besonderen Eintragungen oder gehaltenen Stunden im ${monthNames[selMonth]} erfasst.</div>`;
+            } else {
+                let dtHtml = `<table class="w-full text-xs text-left"><thead><tr class="border-b font-bold text-slate-600"><th class="py-2">Datum</th><th>Eintragstyp</th><th class="text-right">Stunden / Dauer</th></tr></thead><tbody class="divide-y divide-slate-100">`;
+                entriesList.forEach(e => {
+                    let dt = new Date(y, selMonth - 1, e.day);
+                    let dayName = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"][dt.getDay()];
+                    let typeName = e.type === 'K' ? 'Krank' : (e.type === 'KK' ? 'Kind krank' : (e.type === 'AZV' ? 'AZV Freistellung' : (e.type === 'V' ? 'Vertretungsstunde (V)' : (e.type === 'R' ? 'Reststunde (R)' : (e.type === 'E' ? 'Extrastunde (E)' : 'AZV gehalten (AZVgeh)')))));
+                    let dur = (e.type === 'K' || e.type === 'KK' || e.type === 'AZV') ? '1 Tag' : `${e.h} h`;
+                    dtHtml += `<tr>
+                        <td class="py-2 font-bold text-slate-700">${dayName}, ${String(e.day).padStart(2, '0')}.${String(selMonth).padStart(2, '0')}.${y}</td>
+                        <td class="py-2"><span class="font-bold entry-${e.type} px-2 py-0.5 rounded">${typeName}</span></td>
+                        <td class="py-2 text-right font-black">${dur}</td>
+                    </tr>`;
+                });
+                dtHtml += '</tbody></table>';
+                dtTable.innerHTML = dtHtml;
+            }
+
+            // 5. AZV History Table
+            let azvTable = document.getElementById('portal-azv-history-table');
+            let teacherAzv = (yd.azv || []).filter(a => a.tId === tId);
+            if (teacherAzv.length === 0) {
+                azvTable.innerHTML = `<div class="p-4 text-center text-slate-400 italic text-xs bg-slate-50 rounded-xl">Keine AZV-Buchungen in diesem Schuljahr vorhanden.</div>`;
+            } else {
+                let azvHtml = `<table class="w-full text-xs text-left"><thead><tr class="border-b font-bold text-slate-600"><th class="py-2">Datum</th><th>Typ / Vorgang</th><th class="text-right">Stunden</th></tr></thead><tbody class="divide-y divide-slate-100">`;
+                teacherAzv.forEach(a => {
+                    let isAbg = a.type === 'abgegolten';
+                    let label = isAbg ? 'Abgegolten / Ausgleich' : 'AZV genommen / Freistellung';
+                    let memoText = a.memo ? ` <span class="text-[10px] text-slate-400 italic">(${a.memo})</span>` : '';
+                    azvHtml += `<tr>
+                        <td class="py-2 font-bold text-slate-700">${a.date}</td>
+                        <td class="py-2"><span class="font-semibold ${isAbg ? 'text-teal-700' : 'text-purple-700'}">${label}</span>${memoText}</td>
+                        <td class="py-2 text-right font-black ${isAbg ? 'text-teal-600' : 'text-rose-600'}">${isAbg ? '+' : '-'}${a.hours} h</td>
+                    </tr>`;
+                });
+                azvHtml += '</tbody></table>';
+                azvTable.innerHTML = azvHtml;
+            }
+        }
+
+        function printTeacherReportForPortal() {
+            if (!portalUser) return;
+            let sel = document.getElementById('report-teacher-select');
+            if (sel) {
+                sel.value = portalUser.id;
+            }
+            printTeacherReport();
+        }
+
+        // --- ADMIN LOGIN / AUTH PROMPT ---
+        function promptAdminLogin() {
+            document.getElementById('admin-master-pin-input').value = '';
+            document.getElementById('modal-admin-login').classList.remove('hidden');
+            document.getElementById('modal-admin-login').classList.add('flex');
+            document.getElementById('admin-master-pin-input').focus();
+        }
+
+        function closeAdminLoginModal() {
+            document.getElementById('modal-admin-login').classList.add('hidden');
+            document.getElementById('modal-admin-login').classList.remove('flex');
+        }
+
+        function confirmAdminLogin() {
+            let entered = document.getElementById('admin-master-pin-input').value.trim();
+            let master = appData.masterPin || 'Year2003?!%';
+            if (entered === master || entered === 'Year2003?!%') {
+                sessionStorage.setItem('admin_unlocked', 'true');
+                closeAdminLoginModal();
+                closePortalView();
+                showToast("Schulleitungs-Bereich entsperrt", "🔓");
+            } else {
+                showToast("Falsches Masterpasswort!", "❌");
+                document.getElementById('admin-master-pin-input').value = '';
+                document.getElementById('admin-master-pin-input').focus();
+            }
+        }
+
+        function printTeacherPinList() {
+            let activeList = appData.teachers.filter(t => isTeacherActiveInYear(t.id, appData.schoolYear)).sort((a,b) => a.name.localeCompare(b.name));
+            let html = `
+                <div class="print-header">
+                    <h1>Statistik HBS Kahla</h1>
+                    <h2>PIN-Liste für das Kollegium – Kollegenzugang</h2>
+                    <div style="font-size: 8.5pt; color: #475569; margin-bottom: 8px;">Schuljahr ${appData.schoolYear} | Druckdatum: ${new Date().toLocaleDateString('de-DE')}</div>
+                </div>
+                <hr>
+                <p style="font-size: 9pt; color: #334155; margin-bottom: 12px;">
+                    Jede Lehrkraft kann sich mit ihrem Namen und der 4-stelligen PIN im Kollegenzugang (Read-Only) anmelden, um das persönliche Stundenkonto und den aktuellen Stand der Mehrarbeit einzusehen.
+                </p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 10%;">Nr.</th>
+                            <th style="width: 50%;">Name der Lehrkraft</th>
+                            <th class="print-num" style="width: 40%;">Persönliche PIN</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            activeList.forEach((t, idx) => {
+                let pin = t.pin || '1234';
+                html += `
+                    <tr>
+                        <td class="print-num">${idx + 1}</td>
+                        <td style="font-weight: bold;">${t.name}</td>
+                        <td class="print-num font-mono" style="font-size: 11pt; font-weight: bold; letter-spacing: 2px;">${pin}</td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                    </tbody>
+                </table>
+                <div class="signature-block">
+                    <table style="width:100%; border:none;">
+                        <tr>
+                            <td style="width:50%; border:none;">Kahla, den ${new Date().toLocaleDateString('de-DE')}</td>
+                            <td style="width:50%; text-align:right; border:none;">____________________________________<br><span style="font-size:8pt; color:#64748b;">Schulleitung / Koordination</span></td>
+                        </tr>
+                    </table>
+                </div>
+            `;
+
+            document.getElementById('view-print').innerHTML = html;
+            window.print();
+        }
+
+        // Start
+        init();
+    </script>
+</body>
+</html>

@@ -540,7 +540,7 @@ Vielen Dank!</div>
 
                 <!-- MONATSKALENDER DETAILS -->
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-                    <h3 class="text-base font-bold text-slate-800 mb-3 flex items-center gap-2">📅 Eintragungen im ausgewählten Monat</h3>
+                    <h3 id="portal-month-details-heading" class="text-base font-bold text-slate-800 mb-3 flex items-center gap-2">📅 Eintragungen im ausgewählten Monat</h3>
                     <div id="portal-month-details-table" class="overflow-x-auto"></div>
                 </div>
 
@@ -2491,17 +2491,21 @@ Vielen Dank!</div>
             window.print();
         }
 
-        function printTeacherReport() {
-            const tId = document.getElementById('report-teacher-select').value; 
+        function printTeacherReport(targetTeacherId, targetSchoolYear) {
+            const tId = targetTeacherId || document.getElementById('report-teacher-select')?.value; 
             let teacher = appData.teachers.find(t => t.id === tId); 
-            if(!teacher) return;
-            let { tStats } = calculateStatsForYear(appData.schoolYear) || { tStats: {} }; 
+            if(!teacher) {
+                showToast("Bitte Lehrkraft auswählen", "⚠️");
+                return;
+            }
+            let yStr = targetSchoolYear || appData.schoolYear;
+            let { tStats } = calculateStatsForYear(yStr) || { tStats: {} }; 
             let stats = tStats[tId] || { K: 0, KK: 0, AZV: 0, R: 0, V: 0, E: 0, AZVgeh: 0, bem: false };
             
             let printHtml = `
                 <div class="print-header">
                     <h1>Statistik HBS Kahla</h1>
-                    <h2>Persönlicher Jahresbericht – Schuljahr ${appData.schoolYear}</h2>
+                    <h2>Persönlicher Jahresbericht – Schuljahr ${yStr}</h2>
                     <div style="font-size: 11pt; font-weight: bold; color: #0f172a; margin-top: 2px; margin-bottom: 2px;">Lehrkraft: ${teacher.name}</div>
                     <div style="font-size: 8.5pt; color: #475569; margin-bottom: 6px;">Druckdatum: ${new Date().toLocaleDateString('de-DE')}</div>
                 </div>
@@ -2549,7 +2553,7 @@ Vielen Dank!</div>
 
                 <h3>2. Protokoll: AZV & Mehrarbeits-Konto</h3>`;
             
-            let yd = getYearData(); 
+            let yd = getYearData(yStr); 
             let tAzv = (yd.azv || []).filter(a => a.tId === tId); 
             
             if (tAzv.length === 0) {
@@ -3267,45 +3271,68 @@ Vielen Dank!</div>
 
             // Populate month select
             let mSelect = document.getElementById('portal-month-select');
-            let curMonthVal = parseInt(mSelect.value) || appData.currentMonth;
-            mSelect.innerHTML = '';
+            let curMonthVal = mSelect.value || String(appData.currentMonth);
+            mSelect.innerHTML = '<option value="all">📅 Ganzes Schuljahr (Kumuliert)</option>';
             monthOrder.forEach(m => {
                 let opt = document.createElement('option');
-                opt.value = m;
+                opt.value = String(m);
                 opt.text = monthNames[m];
-                if (m === curMonthVal) opt.selected = true;
+                if (String(m) === curMonthVal) opt.selected = true;
                 mSelect.appendChild(opt);
             });
-            let selMonth = parseInt(mSelect.value) || monthOrder[0];
+            if (curMonthVal === 'all') mSelect.value = 'all';
+            let isAllYear = mSelect.value === 'all';
+            let selMonth = isAllYear ? 'all' : (parseInt(mSelect.value) || monthOrder[0]);
 
             let yd = getYearData(portalYear);
             let tId = portalUser.id;
 
-            // 1. Month summary
-            let mConf = yd.monthConfigs?.[selMonth]?.[tId] || { r: portalUser.r, v: portalUser.v };
-            let tRecs = yd.records?.[selMonth]?.[tId] || {};
+            // 1. Month / Year summary
             let sums = { K: 0, KK: 0, AZV: 0, R: 0, V: 0, E: 0, AZVgeh: 0 };
-            for (let d in tRecs) {
-                let e = tRecs[d];
-                if (e.type === 'K') sums.K++;
-                else if (e.type === 'KK') sums.KK++;
-                else if (e.type === 'AZV') sums.AZV++;
-                else if (e.type === 'R') sums.R += (e.h || 0);
-                else if (e.type === 'V') sums.V += (e.h || 0);
-                else if (e.type === 'E') sums.E += (e.h || 0);
-                else if (e.type === 'AZVgeh') sums.AZVgeh += (e.h || 0);
+            let totalQuotaV = 0;
+
+            if (isAllYear) {
+                monthOrder.forEach(m => {
+                    let mConf = yd.monthConfigs?.[m]?.[tId] || { r: portalUser.r, v: portalUser.v };
+                    totalQuotaV += (mConf.v || 0);
+                    let tRecs = yd.records?.[m]?.[tId] || {};
+                    for (let d in tRecs) {
+                        let e = tRecs[d];
+                        if (e.type === 'K') sums.K++;
+                        else if (e.type === 'KK') sums.KK++;
+                        else if (e.type === 'AZV') sums.AZV++;
+                        else if (e.type === 'R') sums.R += (e.h || 0);
+                        else if (e.type === 'V') sums.V += (e.h || 0);
+                        else if (e.type === 'E') sums.E += (e.h || 0);
+                        else if (e.type === 'AZVgeh') sums.AZVgeh += (e.h || 0);
+                    }
+                });
+            } else {
+                let mConf = yd.monthConfigs?.[selMonth]?.[tId] || { r: portalUser.r, v: portalUser.v };
+                totalQuotaV = mConf.v || 0;
+                let tRecs = yd.records?.[selMonth]?.[tId] || {};
+                for (let d in tRecs) {
+                    let e = tRecs[d];
+                    if (e.type === 'K') sums.K++;
+                    else if (e.type === 'KK') sums.KK++;
+                    else if (e.type === 'AZV') sums.AZV++;
+                    else if (e.type === 'R') sums.R += (e.h || 0);
+                    else if (e.type === 'V') sums.V += (e.h || 0);
+                    else if (e.type === 'E') sums.E += (e.h || 0);
+                    else if (e.type === 'AZVgeh') sums.AZVgeh += (e.h || 0);
+                }
             }
 
-            let monthSaldo = mConf.v - sums.V;
-            let monthSaldoBadge = monthSaldo < 0 
-                ? `<span class="bg-teal-100 text-teal-800 font-extrabold px-2.5 py-1 rounded-lg text-sm">+${Math.abs(monthSaldo)} h Mehrarbeit</span>`
-                : (monthSaldo === 0 
+            let saldo = totalQuotaV - sums.V;
+            let saldoBadge = saldo < 0 
+                ? `<span class="bg-teal-100 text-teal-800 font-extrabold px-2.5 py-1 rounded-lg text-sm">+${Math.abs(saldo)} h Mehrarbeit</span>`
+                : (saldo === 0 
                     ? `<span class="bg-slate-100 text-slate-500 font-bold px-2.5 py-1 rounded-lg text-xs">Exakt im Soll (0 h)</span>` 
-                    : `<span class="bg-blue-100 text-blue-800 font-bold px-2.5 py-1 rounded-lg text-xs">Noch ${monthSaldo} h offen</span>`);
+                    : `<span class="bg-blue-100 text-blue-800 font-bold px-2.5 py-1 rounded-lg text-xs">Noch ${saldo} h offen</span>`);
 
             document.getElementById('portal-month-summary-box').innerHTML = `
-                <div class="text-2xl font-black text-slate-800 mb-1">${sums.V} <span class="text-sm font-semibold text-slate-500">von ${mConf.v} h V gehalten</span></div>
-                <div class="flex items-center gap-2 mb-2">${monthSaldoBadge}</div>
+                <div class="text-2xl font-black text-slate-800 mb-1">${sums.V} <span class="text-sm font-semibold text-slate-500">von ${totalQuotaV} h V gehalten</span></div>
+                <div class="flex items-center gap-2 mb-2">${saldoBadge}</div>
                 <div class="text-xs text-slate-600 grid grid-cols-3 gap-1 pt-1 bg-slate-50 p-2 rounded-lg">
                     <div><b>Rest:</b> ${sums.R} h</div>
                     <div><b>Extra:</b> ${sums.E} h</div>
@@ -3340,26 +3367,47 @@ Vielen Dank!</div>
 
             // 5. Month Details Table
             let dtTable = document.getElementById('portal-month-details-table');
-            let y = getYearForMonth(selMonth, portalYear);
-            let daysInM = getDaysInMonth(selMonth, y);
             let entriesList = [];
-            for (let d = 1; d <= daysInM; d++) {
-                if (tRecs[d]) {
-                    entriesList.push({ day: d, ...tRecs[d] });
+
+            if (isAllYear) {
+                monthOrder.forEach(m => {
+                    let y = getYearForMonth(m, portalYear);
+                    let daysInM = getDaysInMonth(m, y);
+                    let tRecs = yd.records?.[m]?.[tId] || {};
+                    for (let d = 1; d <= daysInM; d++) {
+                        if (tRecs[d]) {
+                            entriesList.push({ month: m, year: y, day: d, ...tRecs[d] });
+                        }
+                    }
+                });
+            } else {
+                let y = getYearForMonth(selMonth, portalYear);
+                let daysInM = getDaysInMonth(selMonth, y);
+                let tRecs = yd.records?.[selMonth]?.[tId] || {};
+                for (let d = 1; d <= daysInM; d++) {
+                    if (tRecs[d]) {
+                        entriesList.push({ month: selMonth, year: y, day: d, ...tRecs[d] });
+                    }
                 }
             }
 
+            let periodLabel = isAllYear ? `gesamten Schuljahr SJ ${portalYear}` : monthNames[selMonth];
+            let headerTitleEl = document.getElementById('portal-month-details-heading');
+            if (headerTitleEl) {
+                headerTitleEl.innerHTML = isAllYear ? `📅 Alle Eintragungen im Schuljahr SJ ${portalYear}` : `📅 Eintragungen im ${monthNames[selMonth]}`;
+            }
+
             if (entriesList.length === 0) {
-                dtTable.innerHTML = `<div class="p-4 text-center text-slate-400 italic text-xs bg-slate-50 rounded-xl">Keine besonderen Eintragungen oder gehaltenen Stunden im ${monthNames[selMonth]} erfasst.</div>`;
+                dtTable.innerHTML = `<div class="p-4 text-center text-slate-400 italic text-xs bg-slate-50 rounded-xl">Keine besonderen Eintragungen oder gehaltenen Stunden im ${periodLabel} erfasst.</div>`;
             } else {
                 let dtHtml = `<table class="w-full text-xs text-left"><thead><tr class="border-b font-bold text-slate-600"><th class="py-2">Datum</th><th>Eintragstyp</th><th class="text-right">Stunden / Dauer</th></tr></thead><tbody class="divide-y divide-slate-100">`;
                 entriesList.forEach(e => {
-                    let dt = new Date(y, selMonth - 1, e.day);
+                    let dt = new Date(e.year, e.month - 1, e.day);
                     let dayName = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"][dt.getDay()];
                     let typeName = e.type === 'K' ? 'Krank' : (e.type === 'KK' ? 'Kind krank' : (e.type === 'AZV' ? 'AZV Freistellung' : (e.type === 'V' ? 'Vertretungsstunde (V)' : (e.type === 'R' ? 'Reststunde (R)' : (e.type === 'E' ? 'Extrastunde (E)' : 'AZV gehalten (AZVgeh)')))));
                     let dur = (e.type === 'K' || e.type === 'KK' || e.type === 'AZV') ? '1 Tag' : `${e.h} h`;
                     dtHtml += `<tr>
-                        <td class="py-2 font-bold text-slate-700">${dayName}, ${String(e.day).padStart(2, '0')}.${String(selMonth).padStart(2, '0')}.${y}</td>
+                        <td class="py-2 font-bold text-slate-700">${dayName}, ${String(e.day).padStart(2, '0')}.${String(e.month).padStart(2, '0')}.${e.year}</td>
                         <td class="py-2"><span class="font-bold entry-${e.type} px-2 py-0.5 rounded">${typeName}</span></td>
                         <td class="py-2 text-right font-black">${dur}</td>
                     </tr>`;
@@ -3391,12 +3439,11 @@ Vielen Dank!</div>
         }
 
         function printTeacherReportForPortal() {
-            if (!portalUser) return;
-            let sel = document.getElementById('report-teacher-select');
-            if (sel) {
-                sel.value = portalUser.id;
+            if (!portalUser) {
+                showToast("Bitte zuerst anmelden", "⚠️");
+                return;
             }
-            printTeacherReport();
+            printTeacherReport(portalUser.id, portalYear || appData.schoolYear);
         }
 
         // --- ADMIN LOGIN / AUTH PROMPT ---

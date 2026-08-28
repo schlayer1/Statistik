@@ -197,13 +197,17 @@
                 <h1 class="text-lg md:text-xl font-extrabold tracking-wide hidden sm:block">Statistik HBS Kahla</h1>
             </div>
             
-            <div class="flex md:hidden gap-2 items-center">
-                <button onclick="openCloudModal()" id="mobile-cloud-btn" class="bg-school-700 hover:bg-school-600 px-2.5 py-1.5 rounded-lg text-xs font-bold shadow flex items-center gap-1.5 border border-school-500/50" title="Cloud Sync">
-                    <span id="mobile-cloud-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-                    <span>Cloud</span>
+            <div class="flex md:hidden gap-1.5 items-center">
+                <button onclick="manualSyncWithCloud(this)" class="bg-teal-700 hover:bg-teal-600 px-2 py-1.5 rounded-lg text-xs font-bold shadow flex items-center gap-1 border border-teal-500/50 text-white" title="Jetzt mit Cloud abgleichen">
+                    <span class="sync-icon text-xs">🔄</span>
+                    <span class="text-[11px]">Sync</span>
                 </button>
-                <button onclick="exportData()" class="bg-school-600 hover:bg-school-500 p-2 rounded-lg text-sm shadow flex items-center" title="Backup">💾</button>
-                <label class="bg-slate-600 hover:bg-slate-500 p-2 rounded-lg text-sm shadow cursor-pointer flex items-center" title="Laden">📂<input type="file" class="hidden" accept=".json" onchange="importData(event)"></label>
+                <button onclick="openCloudModal()" id="mobile-cloud-btn" class="bg-school-700 hover:bg-school-600 px-2 py-1.5 rounded-lg text-xs font-bold shadow flex items-center gap-1 border border-school-500/50" title="Cloud Sync">
+                    <span id="mobile-cloud-dot" class="w-2 h-2 rounded-full bg-amber-400"></span>
+                    <span class="text-[11px]">Cloud</span>
+                </button>
+                <button onclick="exportData()" class="bg-school-600 hover:bg-school-500 p-1.5 rounded-lg text-xs shadow flex items-center" title="Backup">💾</button>
+                <label class="bg-slate-600 hover:bg-slate-500 p-1.5 rounded-lg text-xs shadow cursor-pointer flex items-center" title="Laden">📂<input type="file" class="hidden" accept=".json" onchange="importData(event)"></label>
             </div>
         </div>
 
@@ -217,7 +221,13 @@
             <button onclick="openPortalView()" id="tab-portal" class="whitespace-nowrap px-3.5 py-2 text-sm font-bold rounded-lg bg-teal-600 hover:bg-teal-500 text-white shadow transition flex items-center gap-1.5 border border-teal-400/50">🧑‍🏫 Kollegenzugang</button>
         </div>
 
-        <div class="hidden md:flex space-x-3 items-center" id="nav-admin-actions">
+        <div class="hidden md:flex space-x-2.5 items-center" id="nav-admin-actions">
+            <!-- MANUAL SYNC BUTTON -->
+            <button onclick="manualSyncWithCloud(this)" class="bg-teal-700 hover:bg-teal-600 border border-teal-500/50 px-3 py-2 rounded-lg text-xs font-bold text-white shadow flex items-center gap-1.5 transition active:scale-95 cursor-pointer" title="Jetzt manuell mit Cloud abgleichen">
+                <span class="sync-icon text-xs">🔄</span>
+                <span>Jetzt Sync</span>
+            </button>
+
             <!-- CLOUD SYNC STATUS BUTTON -->
             <button onclick="openCloudModal()" id="cloud-sync-btn" class="bg-school-700 hover:bg-school-600 border border-school-500/50 px-3 py-2 rounded-lg text-xs font-bold shadow flex items-center gap-2 transition cursor-pointer" title="Cloud-Synchronisation & Einstellungen">
                 <span id="cloud-sync-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
@@ -464,7 +474,7 @@ Vielen Dank!</div>
                 </div>
 
                 <div class="mt-8 pt-4 border-t border-slate-100 flex justify-between items-center text-xs text-slate-400">
-                    <span>Nur eigene Daten sichtbar</span>
+                    <button onclick="manualSyncWithCloud(this)" class="text-teal-700 hover:text-teal-900 font-bold flex items-center gap-1.5 transition"><span class="sync-icon">🔄</span> Daten aktualisieren</button>
                     <button onclick="promptAdminLogin()" class="text-slate-500 hover:text-slate-800 font-semibold underline">🔐 Schulleitungs-Login</button>
                 </div>
             </div>
@@ -478,6 +488,7 @@ Vielen Dank!</div>
                         <div class="text-xs text-slate-500">Persönliche Übersicht für Schuljahr <span id="portal-year-label" class="font-bold text-slate-700"></span></div>
                     </div>
                     <div class="flex flex-wrap items-center gap-2">
+                        <button onclick="manualSyncWithCloud(this)" class="bg-teal-700 hover:bg-teal-600 text-white font-bold px-3 py-2 rounded-lg text-xs shadow transition flex items-center gap-1.5 cursor-pointer" title="Jetzt mit Cloud abgleichen"><span class="sync-icon text-xs">🔄</span> Sync</button>
                         <select id="portal-year-select" class="border-2 border-slate-200 rounded-lg p-2 font-bold text-slate-800 bg-slate-50 text-sm outline-none focus:border-teal-500" onchange="changePortalYear()"></select>
                         <button onclick="logoutPortal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-2 rounded-lg text-xs transition flex items-center gap-1">🚪 Abmelden</button>
                         <button onclick="promptAdminLogin()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold px-3 py-2 rounded-lg text-xs shadow transition flex items-center gap-1">🔐 Schulleitung</button>
@@ -827,6 +838,20 @@ Vielen Dank!</div>
         </div>
     </div>
 
+    <!-- CLOUD SYNC INITIAL GATE / SPERRBILDSCHIRM BEIM START -->
+    <div id="cloud-sync-gate" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 md:p-8 max-w-sm w-full text-center border border-slate-200">
+            <div class="w-14 h-14 bg-teal-50 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <h3 class="text-xl font-black text-slate-800 mb-1">Schul-Cloud Abgleich</h3>
+            <p class="text-xs text-slate-500 mb-4">Lade aktuellen Datenstand der Schule vor Arbeitsbeginn...</p>
+            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex items-center justify-center gap-2 text-xs font-mono text-teal-700">
+                <span class="w-2 h-2 rounded-full bg-teal-500 animate-ping"></span>
+                <span id="sync-gate-status">Synchronisiere mit Firestore...</span>
+            </div>
+            <button id="sync-gate-skip-btn" onclick="hideSyncGate(true)" class="mt-4 text-[11px] text-slate-400 hover:text-slate-600 underline">Direkt ohne Sync starten (Offline)</button>
+        </div>
+    </div>
+
     <!-- ANWENDUNGSLOGIK & CLOUD-SYNCHRONISATION -->
     <script>
         const storageKey = 'vertretungsStatistikDB_v2'; 
@@ -874,6 +899,21 @@ Vielen Dank!</div>
             return String(Math.floor(1000 + Math.random() * 9000));
         }
 
+        let isInitialSyncDone = false;
+
+        function hideSyncGate(forced = false) {
+            if (isInitialSyncDone && !forced) return;
+            isInitialSyncDone = true;
+            let gate = document.getElementById('cloud-sync-gate');
+            if (gate) {
+                gate.classList.add('opacity-0', 'pointer-events-none');
+                setTimeout(() => {
+                    gate.classList.add('hidden');
+                    gate.classList.remove('flex');
+                }, 300);
+            }
+        }
+
         // --- INITIALISIERUNG ---
         function init() {
             loadFromLocal();
@@ -888,6 +928,16 @@ Vielen Dank!</div>
             
             // Firebase automatisch verbinden, falls Konfiguration hinterlegt ist
             initFirebaseFromStorage();
+
+            // Sicherheits-Timeout: Falls Cloud offline ist, nach 2 Sekunden freigeben
+            setTimeout(() => {
+                if (!isInitialSyncDone) {
+                    hideSyncGate(true);
+                    if (cloudStatus === 'local' || cloudStatus === 'error') {
+                        showToast("Offline-Modus aktiv (Lokal)", "📴");
+                    }
+                }
+            }, 2000);
             
             // Standardmäßig IMMER im geschützten Kollegenzugang (Portal) starten,
             // außer die Schulleitung hat sich in diesem Browser-Tab bereits mit dem Masterpasswort entsperrt.
@@ -1124,9 +1174,11 @@ Vielen Dank!</div>
                 }
 
                 updateCloudUIStatus('connected', 'Live-Sync aktiv', `Echtzeit-Synchronisation aktiv für Mandant: "${schoolId}"`);
+                hideSyncGate(); // Entsperre Oberfläche nach erfolgreichem Erstabgleich
             }, (error) => {
                 console.error("Firestore Snapshot Fehler:", error);
                 updateCloudUIStatus('error', 'Berechtigungsfehler', 'Kein Zugriff auf Firestore. Bitte Security Rules prüfen.');
+                hideSyncGate(true);
             });
         }
 
@@ -1149,7 +1201,82 @@ Vielen Dank!</div>
                     console.error("Cloud-Save fehlgeschlagen:", err);
                     updateCloudUIStatus('error', 'Sync-Fehler', 'Speichern in Cloud fehlgeschlagen: ' + err.message);
                 }
-            }, 600);
+            }, 300);
+        }
+
+        async function flushCloudSync() {
+            if (!fbDb || cloudStatus === 'local' || isSyncingFromRemote) return;
+            try {
+                const schoolId = getSchoolDocId();
+                await fbDb.collection("schools").doc(schoolId).set({
+                    ...appData,
+                    lastModified: Date.now()
+                }, { merge: true });
+            } catch (e) {
+                console.error("Fehler beim Flush-Speichern:", e);
+            }
+        }
+
+        window.addEventListener('beforeunload', () => {
+            if (cloudSaveTimer) {
+                clearTimeout(cloudSaveTimer);
+                flushCloudSync();
+            }
+        });
+
+        // --- MANUELLER CLOUD-ABGLEICH (BUTTON REFRESH) ---
+        async function manualSyncWithCloud(btnEl) {
+            let icon = btnEl ? btnEl.querySelector('.sync-icon') : null;
+            if (icon) icon.classList.add('animate-spin');
+
+            if (!fbDb) {
+                initFirebaseFromStorage();
+            }
+
+            if (!fbDb) {
+                if (icon) icon.classList.remove('animate-spin');
+                showToast("Keine Cloud-Verbindung aktiv (Offline)", "📴");
+                return;
+            }
+
+            try {
+                showToast("Prüfe Cloud-Datenbestand...", "🔄");
+                const schoolId = getSchoolDocId();
+                const docSnap = await fbDb.collection("schools").doc(schoolId).get({ source: 'server' });
+
+                if (docSnap.exists) {
+                    const remoteData = docSnap.data();
+                    const remoteTs = remoteData.lastModified || 0;
+                    const localTs = appData.lastModified || 0;
+
+                    let remoteHasRealData = remoteData.teachers && (remoteData.teachers.length > 1 || (remoteData.teachers.length === 1 && remoteData.teachers[0].name !== "Mustermann"));
+                    let localHasRealData = appData.teachers && (appData.teachers.length > 1 || (appData.teachers.length === 1 && appData.teachers[0].name !== "Mustermann"));
+
+                    if (remoteHasRealData && (!localHasRealData || remoteTs >= localTs)) {
+                        isSyncingFromRemote = true;
+                        appData = remoteData;
+                        localStorage.setItem(storageKey, JSON.stringify(appData));
+                        populateYearDropdown();
+                        renderCurrentView();
+                        isSyncingFromRemote = false;
+                        showToast("✓ Daten erfolgreich aus Cloud aktualisiert!", "🟢");
+                    } else if (localHasRealData && (localTs > remoteTs || !remoteHasRealData)) {
+                        await fbDb.collection("schools").doc(schoolId).set({ ...appData, lastModified: Date.now() });
+                        showToast("✓ Lokaler Stand in Cloud hochgeladen!", "☁️");
+                    } else {
+                        showToast("✓ Datenbestand ist auf dem neuesten Stand!", "✨");
+                    }
+                } else {
+                    await fbDb.collection("schools").doc(schoolId).set({ ...appData, lastModified: Date.now() });
+                    showToast("✓ Datenbestand in Cloud angelegt!", "☁️");
+                }
+                updateCloudUIStatus('connected', 'Live-Sync aktiv', `Echtzeit-Synchronisation aktiv`);
+            } catch (err) {
+                console.error("Manueller Sync Fehler:", err);
+                showToast("Sync-Fehler: " + (err.message || 'Server nicht erreichbar'), "❌");
+            } finally {
+                if (icon) icon.classList.remove('animate-spin');
+            }
         }
 
         // --- CLOUD MODAL FUNKTIONEN ---

@@ -198,16 +198,18 @@
             </div>
             
             <div class="flex md:hidden gap-1.5 items-center">
-                <button onclick="manualSyncWithCloud(this)" class="bg-teal-700 hover:bg-teal-600 px-2 py-1.5 rounded-lg text-xs font-bold shadow flex items-center gap-1 border border-teal-500/50 text-white" title="Jetzt mit Cloud abgleichen">
+                <button onclick="manualSyncWithCloud(this)" class="bg-teal-700 hover:bg-teal-600 px-2.5 py-1.5 rounded-lg text-xs font-bold shadow flex items-center gap-1 border border-teal-500/50 text-white" title="Jetzt mit Cloud abgleichen">
                     <span class="sync-icon text-xs">🔄</span>
                     <span class="text-[11px]">Sync</span>
                 </button>
-                <button onclick="openCloudModal()" id="mobile-cloud-btn" class="bg-school-700 hover:bg-school-600 px-2 py-1.5 rounded-lg text-xs font-bold shadow flex items-center gap-1 border border-school-500/50" title="Cloud Sync">
-                    <span id="mobile-cloud-dot" class="w-2 h-2 rounded-full bg-amber-400"></span>
-                    <span class="text-[11px]">Cloud</span>
-                </button>
-                <button onclick="exportData()" class="bg-school-600 hover:bg-school-500 p-1.5 rounded-lg text-xs shadow flex items-center" title="Backup">💾</button>
-                <label class="bg-slate-600 hover:bg-slate-500 p-1.5 rounded-lg text-xs shadow cursor-pointer flex items-center" title="Laden">📂<input type="file" class="hidden" accept=".json" onchange="importData(event)"></label>
+                <div id="mobile-admin-actions" class="hidden flex gap-1.5 items-center">
+                    <button onclick="openCloudModal()" id="mobile-cloud-btn" class="bg-school-700 hover:bg-school-600 px-2 py-1.5 rounded-lg text-xs font-bold shadow flex items-center gap-1 border border-school-500/50" title="Cloud Sync">
+                        <span id="mobile-cloud-dot" class="w-2 h-2 rounded-full bg-amber-400"></span>
+                        <span class="text-[11px]">Cloud</span>
+                    </button>
+                    <button onclick="exportData()" class="bg-school-600 hover:bg-school-500 p-1.5 rounded-lg text-xs shadow flex items-center" title="Backup">💾</button>
+                    <label class="bg-slate-600 hover:bg-slate-500 p-1.5 rounded-lg text-xs shadow cursor-pointer flex items-center" title="Laden">📂<input type="file" class="hidden" accept=".json" onchange="importData(event)"></label>
+                </div>
             </div>
         </div>
 
@@ -874,7 +876,7 @@ Vielen Dank!</div>
         const cloudConfigKey = 'fb_config_vertretungsstatistik';
         const cloudSchoolKey = 'fb_school_id_vertretungsstatistik';
 
-        // Standard-Projektkonfiguration für Statistik HBS Kahla
+        // Standard-Projektkonfiguration
         const DEFAULT_FIREBASE_CONFIG = {
             apiKey: "AIzaSyCnleowgQT4XoMK5P5b_t1uWYGsWoYxT80",
             authDomain: "statistik-91f25.firebaseapp.com",
@@ -883,7 +885,7 @@ Vielen Dank!</div>
             messagingSenderId: "277742289737",
             appId: "1:277742289737:web:b87043732524cc283d5098"
         };
-        const DEFAULT_SCHOOL_ID = "statistik-hbs-kahla";
+        const DEFAULT_SCHOOL_ID = "HBS";
 
         let appData = { schoolYear: "", lastRealYear: "", currentMonth: new Date().getMonth() + 1, teachers: [], years: {}, lastModified: 0 };
         const monthNames = { 8:"August", 9:"September", 10:"Oktober", 11:"November", 12:"Dezember", 1:"Januar", 2:"Februar", 3:"März", 4:"April", 5:"Mai", 6:"Juni", 7:"Juli" };
@@ -1082,12 +1084,13 @@ Vielen Dank!</div>
         }
 
         function getSchoolDocId() {
-            return (localStorage.getItem(cloudSchoolKey) || DEFAULT_SCHOOL_ID).trim().toLowerCase().replace(/[^a-z0-9_-]/g, '-');
+            let raw = localStorage.getItem(cloudSchoolKey) || DEFAULT_SCHOOL_ID;
+            return raw.trim().replace(/[^a-zA-Z0-9_-]/g, '-');
         }
 
         function initFirebaseFromStorage() {
             const rawConfig = localStorage.getItem(cloudConfigKey);
-            const schoolId = localStorage.getItem(cloudSchoolKey) || DEFAULT_SCHOOL_ID;
+            const schoolId = getSchoolDocId();
             
             let config = DEFAULT_FIREBASE_CONFIG;
             if (rawConfig) {
@@ -3058,6 +3061,8 @@ Vielen Dank!</div>
             if (navTabs) navTabs.classList.add('hidden');
             let navAdminActions = document.getElementById('nav-admin-actions');
             if (navAdminActions) navAdminActions.classList.add('hidden');
+            let mobileAdminActions = document.getElementById('mobile-admin-actions');
+            if (mobileAdminActions) mobileAdminActions.classList.add('hidden');
 
             if (!portalUser) {
                 renderPortalLogin();
@@ -3074,6 +3079,8 @@ Vielen Dank!</div>
             if (navTabs) navTabs.classList.remove('hidden');
             let navAdminActions = document.getElementById('nav-admin-actions');
             if (navAdminActions) navAdminActions.classList.remove('hidden');
+            let mobileAdminActions = document.getElementById('mobile-admin-actions');
+            if (mobileAdminActions) mobileAdminActions.classList.remove('hidden');
 
             switchTab('month');
         }

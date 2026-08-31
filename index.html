@@ -57,14 +57,65 @@
         .entry-R { color: #047857; font-weight: 800; }
         .entry-E { color: #b91c1c; font-weight: 800; }
         
-        .weekend-header { background-color: #e2e8f0; color: #64748b; }
+        .weekend-header { background-color: #e2e8f0 !important; color: #64748b; }
         .weekend-cell { background-color: #f1f5f9; }
-        .day-header:hover { background-color: #cbd5e1; cursor: pointer; color: #0f172a; transition: 0.2s; }
+        .day-header:hover { background-color: #cbd5e1 !important; cursor: pointer; color: #0f172a; transition: 0.2s; }
         
         .modal-bg { background-color: rgba(15, 23, 42, 0.75); backdrop-filter: blur(2px); }
         .dash-table th { background-color: #f8fafc; text-align: left; padding: 10px 8px; border-bottom: 2px solid #e2e8f0; }
         .dash-table td { text-align: left; padding: 10px 8px; border-bottom: 1px solid #e2e8f0; }
-        .sticky-col { position: sticky; left: 0; background-color: white; z-index: 10; box-shadow: 2px 0 5px -2px rgba(0,0,0,0.1); }
+
+        /* Sticky Header & Spalten für Monatsansicht */
+        #month-table {
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        #month-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background-color: #f8fafc;
+            border-bottom: 2px solid #cbd5e1;
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.08);
+        }
+        #month-table thead th.sticky-col {
+            position: sticky;
+            top: 0;
+            left: 0;
+            z-index: 35;
+            background-color: #f1f5f9 !important;
+            box-shadow: 2px 2px 5px -1px rgba(0, 0, 0, 0.15);
+        }
+        .sticky-col {
+            position: sticky;
+            left: 0;
+            background-color: white;
+            z-index: 10;
+            box-shadow: 2px 0 5px -2px rgba(0,0,0,0.08);
+        }
+        tr:hover .sticky-col {
+            background-color: #f8fafc;
+        }
+
+        /* Hervorhebung: Aktueller Tag (Heute) */
+        #month-table thead th.today-header {
+            background-color: #fef08a !important;
+            color: #854d0e !important;
+            border-top: 3px solid #eab308;
+            border-bottom: 3px solid #ca8a04;
+            box-shadow: 0 2px 6px -1px rgba(202, 138, 4, 0.35);
+        }
+        .today-cell {
+            background-color: #fefce8 !important;
+            border-left: 1.5px dashed #facc15 !important;
+            border-right: 1.5px dashed #facc15 !important;
+        }
+        .today-cell.weekend-cell {
+            background-color: #fef9c3 !important;
+        }
+        tr:hover .today-cell {
+            background-color: #fef08a !important;
+        }
 
         @keyframes pulse-red { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.1); } }
         .bem-alert { display: inline-block; animation: pulse-red 2s infinite; cursor: help; margin-left: 6px; }
@@ -262,13 +313,19 @@
         <!-- Ansicht: MONAT -->
         <div id="view-month" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 md:p-6 hidden flex-col flex-grow h-full">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
-                <h2 class="text-xl md:text-2xl font-bold text-slate-800">Monatsansicht</h2>
+                <h2 class="text-xl md:text-2xl font-bold text-slate-800 flex items-center gap-2 flex-wrap">
+                    <span>Monatsansicht:</span>
+                    <span id="month-view-title" class="text-school-600 bg-school-50 px-2.5 py-1 rounded-lg border border-school-100 text-base font-extrabold shadow-2xs"></span>
+                </h2>
                 
                 <div class="flex flex-wrap items-center gap-2 bg-slate-50 p-2 rounded-lg border border-slate-200 w-full md:w-auto">
+                    <button onclick="jumpToToday()" class="bg-amber-100 text-amber-900 hover:bg-amber-200 border border-amber-300 font-bold px-3 py-1.5 rounded-md text-sm shadow-sm transition flex items-center gap-1 mr-1" title="Direkt zum heutigen Tag springen">
+                        📍 Heute
+                    </button>
                     <button onclick="openHolidayModal()" class="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 font-bold px-3 py-1.5 rounded-md text-sm shadow-sm transition mr-1 flex items-center gap-1">
                         🏖️ Ferien
                     </button>
-                    <button onclick="openRolloverWizard()" class="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 font-bold px-3 py-1.5 rounded-md text-sm shadow-sm transition flex items-center gap-1" title="Schuljahreswechsel-Assistent">
+                    <button onclick="openRolloverWizard()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 font-bold px-3 py-1.5 rounded-md text-sm shadow-sm transition flex items-center gap-1" title="Schuljahreswechsel-Assistent">
                         🔄 Jahreswechsel
                     </button>
                     <div class="flex items-center gap-1.5 border-l pl-3 border-slate-300">
@@ -285,7 +342,7 @@
                     </div>
                 </div>
             </div>
-            <div class="overflow-x-auto flex-grow rounded-lg border border-slate-200 shadow-inner bg-slate-50">
+            <div id="month-table-container" class="overflow-auto flex-grow rounded-lg border border-slate-200 shadow-inner bg-slate-50 relative" style="max-height: calc(100vh - 210px); min-height: 380px;">
                 <table id="month-table" class="w-full text-xs md:text-sm bg-white"></table>
             </div>
         </div>
@@ -934,9 +991,15 @@ Vielen Dank!</div>
         }
         
         function getYearData(yStr = appData.schoolYear) {
+            if (!appData.years) appData.years = {};
             if (!appData.years[yStr]) appData.years[yStr] = { records: {}, monthConfigs: {}, azv: [], holidays: {}, staffStatus: {} };
-            if (!appData.years[yStr].staffStatus) appData.years[yStr].staffStatus = {};
-            return appData.years[yStr];
+            let yd = appData.years[yStr];
+            if (!yd.records) yd.records = {};
+            if (!yd.monthConfigs) yd.monthConfigs = {};
+            if (!yd.azv) yd.azv = [];
+            if (!yd.holidays) yd.holidays = {};
+            if (!yd.staffStatus) yd.staffStatus = {};
+            return yd;
         }
 
         function generateTeacherPin() {
@@ -966,9 +1029,15 @@ Vielen Dank!</div>
             appData.teachers.forEach(t => {
                 if(!t.pin) t.pin = generateTeacherPin();
             });
+
+            // Start IMMER mit dem aktuellen Kalendermonat und aktuellem Schuljahr
+            const now = new Date();
+            appData.schoolYear = getCurrentSchoolYear();
+            appData.currentMonth = now.getMonth() + 1;
+
             populateYearDropdown();
-            if(!monthOrder.includes(appData.currentMonth)) appData.currentMonth = 8;
-            document.getElementById('month-select').value = appData.currentMonth;
+            let mSelect = document.getElementById('month-select');
+            if (mSelect) mSelect.value = String(appData.currentMonth);
             
             // Firebase automatisch verbinden, falls Konfiguration hinterlegt ist
             initFirebaseFromStorage();
@@ -988,6 +1057,7 @@ Vielen Dank!</div>
             let isAdminUnlocked = sessionStorage.getItem('admin_unlocked') === 'true';
             if (isAdminUnlocked && window.location.hash !== '#kollege' && window.location.hash !== '#portal' && window.location.hash !== '#lehrer') {
                 switchTab('month');
+                scrollToToday();
             } else {
                 openPortalView();
             }
@@ -1174,11 +1244,10 @@ Vielen Dank!</div>
 
                 fbDb = firebase.firestore(fbApp);
 
+                // Persistence optional aktivieren, ohne Verbindungsaufbau zu blockieren
                 try {
                     fbDb.enablePersistence({ synchronizeTabs: true }).catch(err => {
-                        if (err.code === 'failed-precondition' || err.code === 'unimplemented') {
-                            console.log("Firestore Persistence Hinweis:", err.message);
-                        }
+                        console.log("Firestore Persistence Info:", err.message);
                     });
                 } catch(e) {}
 
@@ -1190,6 +1259,39 @@ Vielen Dank!</div>
             }
         }
 
+        function prepareDataForCloud(data) {
+            const payload = {
+                schoolYear: data.schoolYear || "",
+                lastRealYear: data.lastRealYear || "",
+                currentMonth: data.currentMonth || 8,
+                teachers: data.teachers || [],
+                masterPin: data.masterPin || "",
+                lastModified: data.lastModified || Date.now(),
+                yearsJson: JSON.stringify(data.years || {})
+            };
+            if (typeof firebase !== 'undefined' && firebase.firestore && firebase.firestore.FieldValue) {
+                payload.years = firebase.firestore.FieldValue.delete();
+            }
+            return payload;
+        }
+
+        function parseDataFromCloud(remoteData) {
+            if (!remoteData) return null;
+            const data = { ...remoteData };
+            if (typeof data.yearsJson === 'string') {
+                try {
+                    data.years = JSON.parse(data.yearsJson);
+                } catch (e) {
+                    console.error("Fehler beim Parsen von yearsJson:", e);
+                    data.years = data.years || {};
+                }
+                delete data.yearsJson;
+            } else if (!data.years || typeof data.years !== 'object') {
+                data.years = {};
+            }
+            return data;
+        }
+
         function subscribeToSchoolDoc(schoolId) {
             if (fbUnsubscribe) {
                 fbUnsubscribe();
@@ -1198,53 +1300,80 @@ Vielen Dank!</div>
 
             const docRef = fbDb.collection("schools").doc(schoolId);
             
-            fbUnsubscribe = docRef.onSnapshot((docSnap) => {
-                const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                const lastSyncEl = document.getElementById('cloud-last-sync');
-                if (lastSyncEl) lastSyncEl.textContent = `Letzter Sync: ${nowStr}`;
-
-                if (docSnap.exists) {
-                    const remoteData = docSnap.data();
-                    const remoteTs = remoteData.lastModified || 0;
-                    const localTs = appData.lastModified || 0;
-
-                    let remoteHasRealData = remoteData.teachers && (remoteData.teachers.length > 1 || (remoteData.teachers.length === 1 && remoteData.teachers[0].name !== "Mustermann"));
-                    let localHasRealData = appData.teachers && (appData.teachers.length > 1 || (appData.teachers.length === 1 && appData.teachers[0].name !== "Mustermann"));
-
-                    if (remoteHasRealData && (!localHasRealData || remoteTs >= localTs)) {
-                        isSyncingFromRemote = true;
-                        appData = remoteData;
-                        localStorage.setItem(storageKey, JSON.stringify(appData));
-                        populateYearDropdown();
-                        renderCurrentView();
-                        isSyncingFromRemote = false;
-                        showToast(`Daten mit Cloud synchronisiert (${nowStr})`, "☁️");
-                    } else if (localHasRealData && !remoteHasRealData) {
-                        // Lokaler Stand hat echte Daten (z. B. auf dem Mac), Cloud war noch leer -> In Cloud hochladen!
-                        console.log("Lokale Daten sind vollständiger als Cloud-Stand. Synchronisiere zur Cloud...");
-                        docRef.set({ ...appData, lastModified: Date.now() });
-                        showToast(`Lokaler Stand in Cloud übertragen!`, "☁️");
-                    } else if (remoteTs > localTs) {
-                        isSyncingFromRemote = true;
-                        appData = remoteData;
-                        localStorage.setItem(storageKey, JSON.stringify(appData));
-                        populateYearDropdown();
-                        renderCurrentView();
-                        isSyncingFromRemote = false;
-                    }
-                } else {
-                    console.log("Schul-Dokument existiert noch nicht in Firestore. Erstelle neu...");
-                    let localHasRealData = appData.teachers && (appData.teachers.length > 1 || (appData.teachers.length === 1 && appData.teachers[0].name !== "Mustermann"));
-                    if (localHasRealData) {
-                        docRef.set({ ...appData, lastModified: Date.now() });
-                    }
+            // Sofortiger Schnell-Test der Serververbindung zur direkten Status-Aktivierung
+            docRef.get().then((docSnap) => {
+                if (cloudStatus === 'connecting') {
+                    updateCloudUIStatus('connected', 'Live-Sync aktiv', `Echtzeit-Synchronisation aktiv für Mandant: "${schoolId}"`);
+                    hideSyncGate();
                 }
+            }).catch(err => {
+                console.warn("Firestore Verbindungstest:", err);
+            });
 
-                updateCloudUIStatus('connected', 'Live-Sync aktiv', `Echtzeit-Synchronisation aktiv für Mandant: "${schoolId}"`);
-                hideSyncGate(); // Entsperre Oberfläche nach erfolgreichem Erstabgleich
+            fbUnsubscribe = docRef.onSnapshot((docSnap) => {
+                try {
+                    const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    const lastSyncEl = document.getElementById('cloud-last-sync');
+                    if (lastSyncEl) lastSyncEl.textContent = `Letzter Sync: ${nowStr}`;
+
+                    if (docSnap.exists) {
+                        const rawRemote = docSnap.data();
+                        const remoteData = parseDataFromCloud(rawRemote);
+                        const remoteTs = remoteData.lastModified || 0;
+                        const localTs = appData.lastModified || 0;
+
+                        let remoteHasRealData = remoteData.teachers && (remoteData.teachers.length > 1 || (remoteData.teachers.length === 1 && remoteData.teachers[0].name !== "Mustermann"));
+                        let localHasRealData = appData.teachers && (appData.teachers.length > 1 || (appData.teachers.length === 1 && appData.teachers[0].name !== "Mustermann"));
+
+                        if (remoteHasRealData && (!localHasRealData || remoteTs >= localTs)) {
+                            isSyncingFromRemote = true;
+                            const currentActiveYear = appData.schoolYear;
+                            appData = remoteData;
+                            if (currentActiveYear && appData.years && appData.years[currentActiveYear]) {
+                                appData.schoolYear = currentActiveYear;
+                            }
+                            localStorage.setItem(storageKey, JSON.stringify(appData));
+                            populateYearDropdown();
+                            renderCurrentView();
+                            isSyncingFromRemote = false;
+                            showToast(`Daten mit Cloud synchronisiert (${nowStr})`, "☁️");
+                        } else if (localHasRealData && !remoteHasRealData) {
+                            // Lokaler Stand hat echte Daten (z. B. auf dem Mac), Cloud war noch leer -> In Cloud hochladen!
+                            console.log("Lokale Daten sind vollständiger als Cloud-Stand. Synchronisiere zur Cloud...");
+                            appData.lastModified = Date.now();
+                            docRef.set(prepareDataForCloud(appData), { merge: true });
+                            showToast(`Lokaler Stand in Cloud übertragen!`, "☁️");
+                        } else if (remoteTs > localTs) {
+                            isSyncingFromRemote = true;
+                            const currentActiveYear = appData.schoolYear;
+                            appData = remoteData;
+                            if (currentActiveYear && appData.years && appData.years[currentActiveYear]) {
+                                appData.schoolYear = currentActiveYear;
+                            }
+                            localStorage.setItem(storageKey, JSON.stringify(appData));
+                            populateYearDropdown();
+                            renderCurrentView();
+                            isSyncingFromRemote = false;
+                        }
+                    } else {
+                        console.log("Schul-Dokument existiert noch nicht in Firestore. Erstelle neu...");
+                        let localHasRealData = appData.teachers && (appData.teachers.length > 1 || (appData.teachers.length === 1 && appData.teachers[0].name !== "Mustermann"));
+                        if (localHasRealData) {
+                            appData.lastModified = Date.now();
+                            docRef.set(prepareDataForCloud(appData), { merge: true });
+                        }
+                    }
+
+                    updateCloudUIStatus('connected', 'Live-Sync aktiv', `Echtzeit-Synchronisation aktiv für Mandant: "${schoolId}"`);
+                    hideSyncGate(); // Entsperre Oberfläche nach erfolgreichem Erstabgleich
+                } catch (snapErr) {
+                    console.error("Fehler bei der Snapshot-Verarbeitung:", snapErr);
+                    updateCloudUIStatus('connected', 'Live-Sync aktiv', `Echtzeit-Synchronisation aktiv`);
+                    hideSyncGate();
+                }
             }, (error) => {
                 console.error("Firestore Snapshot Fehler:", error);
-                updateCloudUIStatus('error', 'Berechtigungsfehler', 'Kein Zugriff auf Firestore. Bitte Security Rules prüfen.');
+                updateCloudUIStatus('error', 'Berechtigungsfehler', 'Kein Zugriff auf Firestore: ' + (error.message || 'Bitte Verbindung prüfen'));
                 hideSyncGate(true);
             });
         }
@@ -1258,10 +1387,8 @@ Vielen Dank!</div>
             cloudSaveTimer = setTimeout(async () => {
                 try {
                     const schoolId = getSchoolDocId();
-                    await fbDb.collection("schools").doc(schoolId).set({
-                        ...appData,
-                        lastModified: Date.now()
-                    }, { merge: true });
+                    appData.lastModified = Date.now();
+                    await fbDb.collection("schools").doc(schoolId).set(prepareDataForCloud(appData), { merge: true });
                     
                     updateCloudUIStatus('connected', 'Live-Sync aktiv', `Echtzeit-Synchronisation aktiv für Mandant: "${schoolId}"`);
                 } catch (err) {
@@ -1275,10 +1402,8 @@ Vielen Dank!</div>
             if (!fbDb || cloudStatus === 'local' || isSyncingFromRemote) return;
             try {
                 const schoolId = getSchoolDocId();
-                await fbDb.collection("schools").doc(schoolId).set({
-                    ...appData,
-                    lastModified: Date.now()
-                }, { merge: true });
+                appData.lastModified = Date.now();
+                await fbDb.collection("schools").doc(schoolId).set(prepareDataForCloud(appData), { merge: true });
             } catch (e) {
                 console.error("Fehler beim Flush-Speichern:", e);
             }
@@ -1312,7 +1437,8 @@ Vielen Dank!</div>
                 const docSnap = await fbDb.collection("schools").doc(schoolId).get({ source: 'server' });
 
                 if (docSnap.exists) {
-                    const remoteData = docSnap.data();
+                    const rawRemote = docSnap.data();
+                    const remoteData = parseDataFromCloud(rawRemote);
                     const remoteTs = remoteData.lastModified || 0;
                     const localTs = appData.lastModified || 0;
 
@@ -1321,20 +1447,26 @@ Vielen Dank!</div>
 
                     if (remoteHasRealData && (!localHasRealData || remoteTs >= localTs)) {
                         isSyncingFromRemote = true;
+                        const currentActiveYear = appData.schoolYear;
                         appData = remoteData;
+                        if (currentActiveYear && appData.years && appData.years[currentActiveYear]) {
+                            appData.schoolYear = currentActiveYear;
+                        }
                         localStorage.setItem(storageKey, JSON.stringify(appData));
                         populateYearDropdown();
                         renderCurrentView();
                         isSyncingFromRemote = false;
                         showToast("✓ Daten erfolgreich aus Cloud aktualisiert!", "🟢");
                     } else if (localHasRealData && (localTs > remoteTs || !remoteHasRealData)) {
-                        await fbDb.collection("schools").doc(schoolId).set({ ...appData, lastModified: Date.now() });
+                        appData.lastModified = Date.now();
+                        await fbDb.collection("schools").doc(schoolId).set(prepareDataForCloud(appData), { merge: true });
                         showToast("✓ Lokaler Stand in Cloud hochgeladen!", "☁️");
                     } else {
                         showToast("✓ Datenbestand ist auf dem neuesten Stand!", "✨");
                     }
                 } else {
-                    await fbDb.collection("schools").doc(schoolId).set({ ...appData, lastModified: Date.now() });
+                    appData.lastModified = Date.now();
+                    await fbDb.collection("schools").doc(schoolId).set(prepareDataForCloud(appData), { merge: true });
                     showToast("✓ Datenbestand in Cloud angelegt!", "☁️");
                 }
                 updateCloudUIStatus('connected', 'Live-Sync aktiv', `Echtzeit-Synchronisation aktiv`);
@@ -1415,7 +1547,7 @@ Vielen Dank!</div>
                 try {
                     const schoolId = getSchoolDocId();
                     appData.lastModified = Date.now();
-                    await fbDb.collection("schools").doc(schoolId).set(appData);
+                    await fbDb.collection("schools").doc(schoolId).set(prepareDataForCloud(appData), { merge: true });
                     showToast("Lokaler Stand erfolgreich in Cloud hochgeladen!", "☁️");
                     closeCloudModal();
                 } catch (err) {
@@ -1431,7 +1563,7 @@ Vielen Dank!</div>
                     const schoolId = getSchoolDocId();
                     const docSnap = await fbDb.collection("schools").doc(schoolId).get();
                     if (docSnap.exists) {
-                        appData = docSnap.data();
+                        appData = parseDataFromCloud(docSnap.data());
                         localStorage.setItem(storageKey, JSON.stringify(appData));
                         populateYearDropdown();
                         renderCurrentView();
@@ -1498,7 +1630,9 @@ Vielen Dank!</div>
             allYears.forEach(y => { 
                 let opt = document.createElement('option'); 
                 opt.value = y; 
-                opt.text = "SJ " + y; 
+                let yd = appData.years?.[y];
+                let hasData = yd && (Object.keys(yd.records || {}).length > 0 || Object.keys(yd.monthConfigs || {}).length > 0 || (yd.azv || []).length > 0);
+                opt.text = "SJ " + y + (hasData ? " (mit Daten)" : ""); 
                 select.appendChild(opt); 
             });
 
@@ -1521,10 +1655,11 @@ Vielen Dank!</div>
             }
 
             appData.schoolYear = select.value;
-            if(!appData.years[appData.schoolYear]) appData.years[appData.schoolYear] = { records: {}, monthConfigs: {}, azv: [], holidays: {} };
-            saveToLocal(); 
+            getYearData(appData.schoolYear);
+            localStorage.setItem(storageKey, JSON.stringify(appData));
             updateTitleYears();
             renderCurrentView();
+            showToast(`Schuljahr SJ ${appData.schoolYear} geladen`, "📅");
         }
 
         function promptAddNewSchoolYear() {
@@ -1566,12 +1701,21 @@ Vielen Dank!</div>
             document.getElementById(`tab-${tabId}`)?.classList.remove('hover:bg-school-600/50');
             updateTitleYears();
             renderCurrentView();
+            if (tabId === 'month') {
+                scrollToToday();
+            }
         }
 
         function changeMonth() { 
-            appData.currentMonth = parseInt(document.getElementById('month-select').value); 
-            saveToLocal(); 
+            const select = document.getElementById('month-select');
+            if (!select) return;
+            appData.currentMonth = parseInt(select.value); 
+            localStorage.setItem(storageKey, JSON.stringify(appData)); 
             renderMonthView(); 
+            const now = new Date();
+            if (appData.currentMonth === (now.getMonth() + 1) && appData.schoolYear === getCurrentSchoolYear()) {
+                scrollToToday();
+            }
         }
 
         function getYearForMonth(m, schoolYearStr) { 
@@ -2070,9 +2214,34 @@ Vielen Dank!</div>
         // --- MONATSANSICHT RENDERN ---
         function renderMonthView() {
             const m = appData.currentMonth; const y = getYearForMonth(m, appData.schoolYear); const days = getDaysInMonth(m, y);
-            const table = document.getElementById('month-table'); let yd = getYearData();
+            const table = document.getElementById('month-table'); 
+            if (!table) return;
+
+            // Sync Dropdown-Werte mit appData
+            const mSelect = document.getElementById('month-select');
+            if (mSelect && String(mSelect.value) !== String(m)) {
+                mSelect.value = String(m);
+            }
+            const ySelect = document.getElementById('school-year');
+            if (ySelect && ySelect.value !== appData.schoolYear) {
+                ySelect.value = appData.schoolYear;
+            }
+
+            // Titel-Badge aktualisieren
+            const titleEl = document.getElementById('month-view-title');
+            if (titleEl) {
+                titleEl.textContent = `${monthNames[m] || 'Monat ' + m} ${y} (SJ ${appData.schoolYear})`;
+            }
+
+            // Aktuellen Kalendertag ermitteln (für visuelle Hervorhebung)
+            const now = new Date();
+            const isRealCurrentMonth = (m === (now.getMonth() + 1));
+            const isRealCurrentYear = (appData.schoolYear === getCurrentSchoolYear());
+            const todayDate = (isRealCurrentMonth && isRealCurrentYear) ? now.getDate() : null;
+
+            let yd = getYearData();
             if (!yd.records[m]) yd.records[m] = {}; if (!yd.monthConfigs[m]) yd.monthConfigs[m] = {};
-            const markedHolidays = yd.holidays[m] || []; let weekends = []; let distinctMondays = [];
+            const markedHolidays = yd.holidays?.[m] || []; let weekends = []; let distinctMondays = [];
             for (let d = 1; d <= days; d++) {
                 let date = new Date(y, m - 1, d);
                 if (date.getDay() === 0 || date.getDay() === 6) weekends.push(d);
@@ -2083,12 +2252,32 @@ Vielen Dank!</div>
 
             let { tStats } = calculateStatsForYear(appData.schoolYear) || { tStats: {} }; 
 
-            let html = `<thead><tr><th class="sticky-col min-w-[120px]">Name</th>
+            const dayNamesShort = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+
+            let html = `<thead><tr><th class="sticky-col min-w-[130px] p-2 text-left">Lehrkraft</th>
                         <th class="min-w-[80px] bg-green-50"><div class="font-extrabold text-sm">R</div><div class="font-medium text-[9px] text-slate-500 uppercase">Basis/Wo</div></th>
                         <th class="min-w-[80px] bg-blue-50"><div class="font-extrabold text-sm">V</div><div class="font-medium text-[9px] text-slate-500 uppercase">Basis/Mo</div></th>`;
             for (let i = 1; i <= days; i++) {
+                let date = new Date(y, m - 1, i);
+                let dName = dayNamesShort[date.getDay()];
                 let isWeOrHol = weekends.includes(i) || markedHolidays.includes(i);
-                html += `<th class="min-w-[32px] md:min-w-[36px] day-header ${isWeOrHol ? 'weekend-header' : ''}" onclick="toggleHoliday(${i})" title="Als Ferien markieren">${i}</th>`;
+                let isToday = (i === todayDate);
+
+                let headerClass = `min-w-[34px] md:min-w-[38px] day-header `;
+                if (isToday) {
+                    headerClass += `today-header `;
+                } else if (isWeOrHol) {
+                    headerClass += `weekend-header `;
+                }
+
+                let todayBadge = isToday 
+                    ? `<div class="text-[8px] font-black uppercase text-amber-900 leading-none mt-0.5 bg-amber-300 px-1 py-0.5 rounded shadow-2xs">Heute</div>` 
+                    : `<div class="text-[9px] font-normal leading-none opacity-70 mt-0.5">${dName}</div>`;
+
+                html += `<th class="${headerClass}" onclick="toggleHoliday(${i})" title="${isToday ? 'Heute (' + i + '. ' + (monthNames[m] || m) + ')' : 'Als Ferien markieren'}">
+                    <div class="font-extrabold text-xs leading-none">${i}</div>
+                    ${todayBadge}
+                </th>`;
             }
             html += `<th class="bg-slate-100">K<span class="text-[10px] font-normal block">Tage</span></th><th class="bg-slate-100">KK<span class="text-[10px] font-normal block">Tage</span></th><th class="bg-slate-100 text-green-700">R<span class="text-[10px] font-normal block">h</span></th><th class="bg-slate-100 text-blue-700">V<span class="text-[10px] font-normal block">h</span></th><th class="bg-slate-100 text-red-700">E<span class="text-[10px] font-normal block">h</span></th></tr></thead><tbody class="divide-y divide-slate-100">`;
 
@@ -2098,15 +2287,15 @@ Vielen Dank!</div>
                 html += `<tr><td colspan="${days + 8}" class="p-8 text-center text-slate-400 italic">Keine aktiven Lehrkräfte für SJ ${appData.schoolYear} ausgewählt. Wechseln Sie in den Bereich "Kollegium", um Lehrkräfte zu aktivieren oder neu anzulegen.</td></tr>`;
             } else {
                 activeTeachers.sort((a,b) => a.name.localeCompare(b.name)).forEach(t => {
-                let currentR = yd.monthConfigs[m][t.id]?.r !== undefined ? yd.monthConfigs[m][t.id].r : t.r;
-                let currentV = yd.monthConfigs[m][t.id]?.v !== undefined ? yd.monthConfigs[m][t.id].v : t.v;
-                let sums = { K: 0, KK: 0, R: 0, V: 0, E: 0 }; let tRecs = yd.records[m][t.id] || {};
+                let currentR = yd.monthConfigs?.[m]?.[t.id]?.r !== undefined ? yd.monthConfigs[m][t.id].r : t.r;
+                let currentV = yd.monthConfigs?.[m]?.[t.id]?.v !== undefined ? yd.monthConfigs[m][t.id].v : t.v;
+                let sums = { K: 0, KK: 0, R: 0, V: 0, E: 0 }; let tRecs = yd.records?.[m]?.[t.id] || {};
                 
                 for (let d = 1; d <= days; d++) {
                     let entry = tRecs[d];
                     if (entry) {
                         if (entry.type === 'K') sums.K++; else if (entry.type === 'KK') sums.KK++;
-                        else if (entry.type !== 'AZV' && entry.type !== 'AZVgeh' && sums[entry.type] !== undefined) sums[entry.type] += parseInt(entry.h);
+                        else if (entry.type !== 'AZV' && entry.type !== 'AZVgeh' && sums[entry.type] !== undefined) sums[entry.type] += (parseInt(entry.h) || 0);
                     }
                 }
 
@@ -2115,7 +2304,7 @@ Vielen Dank!</div>
                     let rSumThisWeek = 0; let dIter = new Date(mon);
                     for(let i=0; i<7; i++) {
                         let recM = dIter.getMonth() + 1; let recD = dIter.getDate();
-                        if (yd.records[recM]?.[t.id]?.[recD]?.type === 'R') rSumThisWeek += parseInt(yd.records[recM][t.id][recD].h);
+                        if (yd.records?.[recM]?.[t.id]?.[recD]?.type === 'R') rSumThisWeek += (parseInt(yd.records[recM][t.id][recD].h) || 0);
                         dIter.setDate(dIter.getDate() + 1);
                     }
                     let remW = currentR - rSumThisWeek;
@@ -2125,7 +2314,7 @@ Vielen Dank!</div>
                 rBadgesHtml += '</div>';
                 let remV = currentV - sums.V;
 
-                let bemFlag = tStats[t.id]?.bem ? `<span class="bem-alert text-red-600 text-sm" title="Achtung: >30 Kranktage erreicht! BEM anbieten.">🚨</span>` : '';
+                let bemFlag = tStats?.[t.id]?.bem ? `<span class="bem-alert text-red-600 text-sm" title="Achtung: >30 Kranktage erreicht! BEM anbieten.">🚨</span>` : '';
 
                 html += `<tr class="hover:bg-slate-50 transition"><td class="font-bold text-left sticky-col pl-3 text-slate-700">${t.name} ${bemFlag}</td>
                     <td class="bg-green-50/50 p-1 align-top"><input type="number" min="0" value="${currentR}" class="w-full text-center bg-transparent outline-none font-extrabold border-b border-green-200 focus:border-green-500" onchange="updateQuota('${t.id}', 'r', this.value)">${rBadgesHtml}</td>
@@ -2134,14 +2323,46 @@ Vielen Dank!</div>
 
                 for (let d = 1; d <= days; d++) {
                     let entry = tRecs[d]; let display = ""; let classes = "cell-hover transition ";
+                    let isToday = (d === todayDate);
+
+                    if (isToday) classes += "today-cell ";
                     if (weekends.includes(d) || markedHolidays.includes(d)) classes += "weekend-cell ";
-                    if (entry) { display = (entry.type === 'K' || entry.type === 'KK' || entry.type === 'AZV') ? entry.type : (entry.type === 'AZVgeh' ? entry.h + 'AZVg' : (entry.h > 1 ? `${entry.h}${entry.type}` : entry.type)); classes += ` entry-${entry.type}`; }
+                    if (entry) { 
+                        display = (entry.type === 'K' || entry.type === 'KK' || entry.type === 'AZV') ? entry.type : (entry.type === 'AZVgeh' ? entry.h + 'AZVg' : (entry.h > 1 ? `${entry.h}${entry.type}` : entry.type)); 
+                        classes += ` entry-${entry.type}`; 
+                    }
                     html += `<td class="${classes}" onclick="openCalModal('${t.id}', '${t.name}', ${d}, ${days})">${display}</td>`;
                 }
                 html += `<td class="bg-slate-50 font-bold text-slate-700">${sums.K}</td><td class="bg-slate-50 font-bold text-slate-700">${sums.KK}</td><td class="bg-slate-50 font-bold text-green-700">${sums.R}</td><td class="bg-slate-50 font-bold text-blue-700">${sums.V}</td><td class="bg-slate-50 font-bold text-red-700">${sums.E}</td></tr>`;
             });
             }
             html += "</tbody>"; table.innerHTML = html;
+        }
+
+        function scrollToToday() {
+            setTimeout(() => {
+                const todayEl = document.querySelector('.today-header');
+                const container = document.getElementById('month-table-container');
+                if (todayEl && container) {
+                    const elLeft = todayEl.offsetLeft;
+                    const containerWidth = container.clientWidth;
+                    const targetScroll = Math.max(0, elLeft - (containerWidth / 2) + (todayEl.clientWidth / 2));
+                    container.scrollTo({ left: targetScroll, behavior: 'smooth' });
+                }
+            }, 150);
+        }
+
+        function jumpToToday() {
+            const now = new Date();
+            appData.schoolYear = getCurrentSchoolYear();
+            appData.currentMonth = now.getMonth() + 1;
+            populateYearDropdown();
+            let mSelect = document.getElementById('month-select');
+            if (mSelect) mSelect.value = String(appData.currentMonth);
+            updateTitleYears();
+            renderMonthView();
+            scrollToToday();
+            showToast(`Zu heute (${now.getDate()}. ${monthNames[appData.currentMonth]}) gewechselt`, "📍");
         }
 
         function updateQuota(tId, type, val) { 

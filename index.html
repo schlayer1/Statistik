@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Statistik HBS Kahla</title>
     
+    <!-- PWA & Apple Web App Meta Tags -->
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#0284c7">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Vertretung HBS">
+    <link rel="apple-touch-icon" href="logo.png">
+    <link rel="icon" type="image/png" href="logo.png">
+
     <!-- Tailwind CSS (Modernes Design) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js für die Diagramme -->
@@ -19,6 +28,7 @@
     <!-- 🎨 FARBANPASSUNG (Exakt abgestimmt auf das Logo der Heimbürgeschule Kahla) -->
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -122,6 +132,107 @@
 
         @keyframes pulse-sync { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.9); } }
         .sync-active { animation: pulse-sync 1.5s infinite ease-in-out; }
+
+        /* DARK MODE REGELN */
+        html.dark {
+            color-scheme: dark;
+        }
+        html.dark body {
+            background-color: #0f172a !important;
+            color: #f8fafc !important;
+        }
+        html.dark .bg-white {
+            background-color: #1e293b !important;
+            color: #f8fafc;
+            border-color: #334155 !important;
+        }
+        html.dark .bg-slate-50 {
+            background-color: #0f172a !important;
+            border-color: #334155 !important;
+        }
+        html.dark .bg-slate-100 {
+            background-color: #1e293b !important;
+            color: #e2e8f0 !important;
+            border-color: #334155 !important;
+        }
+        html.dark .bg-slate-200 {
+            background-color: #334155 !important;
+        }
+        html.dark .text-slate-800, html.dark .text-slate-900 {
+            color: #f8fafc !important;
+        }
+        html.dark .text-slate-700 {
+            color: #e2e8f0 !important;
+        }
+        html.dark .text-slate-600 {
+            color: #cbd5e1 !important;
+        }
+        html.dark .text-slate-500 {
+            color: #94a3b8 !important;
+        }
+        html.dark .text-slate-400 {
+            color: #64748b !important;
+        }
+        html.dark .border-slate-100, 
+        html.dark .border-slate-200, 
+        html.dark .border-slate-300 {
+            border-color: #334155 !important;
+        }
+        html.dark select, html.dark input {
+            background-color: #1e293b !important;
+            color: #f8fafc !important;
+            border-color: #475569 !important;
+        }
+        html.dark #month-table thead th {
+            background-color: #1e293b !important;
+            color: #f1f5f9 !important;
+            border-bottom: 2px solid #475569 !important;
+            border-color: #334155 !important;
+        }
+        html.dark #month-table thead th.sticky-col {
+            background-color: #0f172a !important;
+            color: #f1f5f9 !important;
+        }
+        html.dark .sticky-col {
+            background-color: #1e293b !important;
+            color: #f1f5f9 !important;
+        }
+        html.dark tr:hover .sticky-col {
+            background-color: #334155 !important;
+        }
+        html.dark .weekend-header {
+            background-color: #334155 !important;
+            color: #94a3b8 !important;
+        }
+        html.dark .weekend-cell {
+            background-color: #0f172a !important;
+        }
+        html.dark .cell-hover:hover {
+            background-color: #0369a1 !important;
+        }
+        html.dark .today-header {
+            background-color: #713f12 !important;
+            color: #fef08a !important;
+            border-top: 3px solid #eab308 !important;
+            border-bottom: 3px solid #ca8a04 !important;
+        }
+        html.dark .today-cell {
+            background-color: #451a03 !important;
+            border-left: 1.5px dashed #eab308 !important;
+            border-right: 1.5px dashed #eab308 !important;
+        }
+        html.dark tr:hover .today-cell {
+            background-color: #713f12 !important;
+        }
+        html.dark .dash-table th {
+            background-color: #1e293b !important;
+            color: #f8fafc !important;
+            border-color: #334155 !important;
+        }
+        html.dark .dash-table td {
+            border-color: #334155 !important;
+            color: #e2e8f0 !important;
+        }
 
         @media print {
             @page { 
@@ -265,6 +376,9 @@
                     <span id="mobile-portal-label">Live verbunden</span>
                 </div>
                 <div id="mobile-admin-actions" class="hidden flex gap-1.5 items-center">
+                    <button onclick="toggleDarkMode()" class="bg-school-700 hover:bg-school-600 p-1.5 rounded-lg text-xs shadow" title="Dunkelmodus umschalten">
+                        <span class="theme-icon">🌙</span>
+                    </button>
                     <button onclick="manualSyncWithCloud(this)" class="bg-teal-700 hover:bg-teal-600 px-2.5 py-1.5 rounded-lg text-xs font-bold shadow flex items-center gap-1 border border-teal-500/50 text-white" title="Jetzt mit Cloud abgleichen">
                         <span class="sync-icon text-xs">🔄</span>
                         <span class="text-[11px]">Sync</span>
@@ -289,7 +403,12 @@
             <button onclick="openPortalView()" id="tab-portal" class="whitespace-nowrap px-3.5 py-2 text-sm font-bold rounded-lg bg-teal-600 hover:bg-teal-500 text-white shadow transition flex items-center gap-1.5 border border-teal-400/50">🧑‍🏫 Kollegenzugang</button>
         </div>
 
-        <div class="hidden md:flex space-x-2.5 items-center" id="nav-admin-actions">
+        <div class="hidden md:flex space-x-2 items-center" id="nav-admin-actions">
+            <!-- THEME TOGGLE BUTTON -->
+            <button onclick="toggleDarkMode()" id="theme-toggle-btn" class="bg-school-700 hover:bg-school-600 border border-school-500/50 p-2 rounded-lg text-sm shadow flex items-center justify-center transition cursor-pointer" title="Dunkelmodus umschalten">
+                <span class="theme-icon text-sm">🌙</span>
+            </button>
+
             <!-- MANUAL SYNC BUTTON -->
             <button onclick="manualSyncWithCloud(this)" class="bg-teal-700 hover:bg-teal-600 border border-teal-500/50 px-3 py-2 rounded-lg text-xs font-bold text-white shadow flex items-center gap-1.5 transition active:scale-95 cursor-pointer" title="Jetzt manuell mit Cloud abgleichen">
                 <span class="sync-icon text-xs">🔄</span>
@@ -319,10 +438,16 @@
                 </h2>
                 
                 <div class="flex flex-wrap items-center gap-2 bg-slate-50 p-2 rounded-lg border border-slate-200 w-full md:w-auto">
-                    <button onclick="jumpToToday()" class="bg-amber-100 text-amber-900 hover:bg-amber-200 border border-amber-300 font-bold px-3 py-1.5 rounded-md text-sm shadow-sm transition flex items-center gap-1 mr-1" title="Direkt zum heutigen Tag springen">
+                    <button onclick="jumpToToday()" class="bg-amber-100 text-amber-900 hover:bg-amber-200 border border-amber-300 font-bold px-3 py-1.5 rounded-md text-sm shadow-sm transition flex items-center gap-1" title="Direkt zum heutigen Tag springen">
                         📍 Heute
                     </button>
-                    <button onclick="openHolidayModal()" class="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 font-bold px-3 py-1.5 rounded-md text-sm shadow-sm transition mr-1 flex items-center gap-1">
+                    <button onclick="printMonthReport()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1.5 rounded-md text-sm shadow-sm transition flex items-center gap-1" title="Offizielle Monatsabrechnung drucken oder als PDF speichern">
+                        🖨️ Abrechnung
+                    </button>
+                    <button onclick="exportMonthToExcel()" class="bg-emerald-700 hover:bg-emerald-600 text-white font-bold px-3 py-1.5 rounded-md text-sm shadow-sm transition flex items-center gap-1" title="Aktuellen Monat als Excel (.xlsx) herunterladen">
+                        📊 Excel
+                    </button>
+                    <button onclick="openHolidayModal()" class="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 font-bold px-3 py-1.5 rounded-md text-sm shadow-sm transition flex items-center gap-1">
                         🏖️ Ferien
                     </button>
                     <button onclick="openRolloverWizard()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 font-bold px-3 py-1.5 rounded-md text-sm shadow-sm transition flex items-center gap-1" title="Schuljahreswechsel-Assistent">
@@ -462,9 +587,10 @@ Vielen Dank!</div>
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
                     <h3 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2">🏫 Für Schulamt & Personalrat <span class="dash-year-title text-school-600 bg-school-50 px-2 py-1 rounded-lg border border-school-100 ml-2 text-sm"></span></h3>
                     <p class="text-sm text-slate-500 mb-6">Generiert eine Gesamtabrechnung aller geleisteten Stunden und Fehlzeiten des aktuellen Schuljahres.</p>
-                    <div class="space-y-4">
-                        <button onclick="exportCSVReport()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 px-4 rounded-lg shadow transition flex items-center justify-center gap-2"><span>📄</span> Als CSV-Tabelle exportieren</button>
-                        <button onclick="printSchoolReport()" class="w-full bg-school-600 hover:bg-school-500 text-white font-bold py-3 px-4 rounded-lg shadow transition flex items-center justify-center gap-2"><span>🖨️</span> Schul-Bericht drucken (PDF)</button>
+                    <div class="space-y-3">
+                        <button onclick="exportYearToExcel()" class="w-full bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-3 px-4 rounded-lg shadow transition flex items-center justify-center gap-2"><span>📊</span> Gesamtes Schuljahr als Excel (.xlsx) exportieren</button>
+                        <button onclick="exportCSVReport()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-2.5 px-4 rounded-lg shadow transition flex items-center justify-center gap-2 text-sm"><span>📄</span> Als CSV-Tabelle exportieren</button>
+                        <button onclick="printSchoolReport()" class="w-full bg-school-600 hover:bg-school-500 text-white font-bold py-2.5 px-4 rounded-lg shadow transition flex items-center justify-center gap-2 text-sm"><span>🖨️</span> Schul-Bericht drucken (PDF)</button>
                     </div>
                 </div>
                 
@@ -806,44 +932,70 @@ Vielen Dank!</div>
         </div>
     </div>
 
-    <!-- Kalendereintrag Modal -->
+    <!-- Kalendereintrag Modal (inkl. Serieneintragung) -->
     <div id="modal-cal-entry" class="fixed inset-0 hidden items-center justify-center z-50 modal-bg p-3">
-        <div class="bg-white rounded-2xl shadow-2xl p-5 w-full max-w-[450px]">
-            <div class="mb-4"><h3 class="text-2xl font-black" id="cal-modal-title">Eintrag</h3></div>
-            <div class="bg-school-50 p-2 rounded-lg mb-4 flex items-center justify-between">
-                <span class="font-bold text-school-900">Zeitraum:</span>
-                <div class="flex items-center space-x-2 bg-white px-2 py-1 rounded">
-                    <span class="font-bold w-8 text-center" id="cal-modal-day-display">15.</span> <span>bis</span>
-                    <input type="number" id="cal-modal-day-end" class="w-12 text-center font-bold outline-none">
+        <div class="bg-white rounded-2xl shadow-2xl p-5 w-full max-w-[460px]">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="text-xl font-black text-slate-800" id="cal-modal-title">Eintrag erfassen</h3>
+                <button onclick="closeCalModal()" class="text-slate-400 hover:text-slate-700 font-bold text-xl leading-none">&times;</button>
+            </div>
+
+            <!-- Zeitraum-Wähler für Serieneintragungen -->
+            <div class="bg-school-50 border border-school-100 p-3 rounded-xl mb-3 space-y-2">
+                <div class="flex items-center justify-between">
+                    <span class="font-bold text-xs text-school-900 uppercase">Zeitraum:</span>
+                    <div class="flex items-center space-x-1.5 bg-white px-2.5 py-1 rounded-lg border border-school-200 shadow-2xs text-sm">
+                        <span class="font-black text-school-800" id="cal-modal-day-display">15.</span>
+                        <span class="text-slate-400 font-medium">bis</span>
+                        <input type="number" id="cal-modal-day-end" class="w-12 text-center font-black text-school-900 outline-none bg-transparent">
+                        <span class="text-slate-500 font-bold">.</span>
+                    </div>
                 </div>
+
+                <!-- Schnellwahl-Buttons für Zeitraum -->
+                <div class="flex gap-1.5 pt-1">
+                    <button type="button" onclick="setCalRangeDays(1)" class="flex-1 bg-white hover:bg-school-100 text-school-800 text-[11px] font-bold py-1 rounded border border-school-200 shadow-2xs">1 Tag</button>
+                    <button type="button" onclick="setCalRangeDays(3)" class="flex-1 bg-white hover:bg-school-100 text-school-800 text-[11px] font-bold py-1 rounded border border-school-200 shadow-2xs">3 Tage</button>
+                    <button type="button" onclick="setCalRangeDays(5)" class="flex-1 bg-white hover:bg-school-100 text-school-800 text-[11px] font-bold py-1 rounded border border-school-200 shadow-2xs">5 Tage (Mo–Fr)</button>
+                </div>
+
+                <label class="flex items-center gap-2 text-[11px] font-semibold text-slate-600 pt-1 cursor-pointer select-none">
+                    <input type="checkbox" id="cal-modal-skip-we" checked class="w-3.5 h-3.5 rounded text-school-600 focus:ring-school-500">
+                    <span>Wochenenden & Feiertage automatisch überspringen</span>
+                </label>
             </div>
             <input type="hidden" id="cal-modal-tId"><input type="hidden" id="cal-modal-day">
 
-            <div class="space-y-4">
-                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+            <div class="space-y-3">
+                <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                    <div class="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Ganztägige Abwesenheiten:</div>
                     <div class="grid grid-cols-3 gap-2">
-                        <button onclick="saveCalEntry('K')" class="bg-red-100 text-red-700 py-3 rounded font-black text-sm">Krank</button>
-                        <button onclick="saveCalEntry('KK')" class="bg-orange-100 text-orange-700 py-3 rounded font-black text-sm">Kind K.</button>
-                        <button onclick="saveCalEntry('AZV')" class="bg-purple-100 text-purple-700 py-3 rounded font-black text-sm">AZV</button>
+                        <button onclick="saveCalEntry('K')" class="bg-red-100 hover:bg-red-200 text-red-800 py-2.5 rounded-lg font-black text-sm transition shadow-2xs">Krank (K)</button>
+                        <button onclick="saveCalEntry('KK')" class="bg-orange-100 hover:bg-orange-200 text-orange-800 py-2.5 rounded-lg font-black text-sm transition shadow-2xs">Kind krank (KK)</button>
+                        <button onclick="saveCalEntry('AZV')" class="bg-purple-100 hover:bg-purple-200 text-purple-800 py-2.5 rounded-lg font-black text-sm transition shadow-2xs">AZV-Tag</button>
                     </div>
                 </div>
-                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
-                    <div class="flex items-center justify-between bg-white rounded p-2 mb-3 border">
-                        <span class="font-bold text-sm">Stunden:</span>
-                        <input type="number" id="cal-modal-hours" value="1" min="1" max="10" class="w-16 text-center font-bold bg-slate-100 rounded outline-none p-1">
+
+                <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                    <div class="flex items-center justify-between bg-white rounded-lg p-1.5 mb-2 border border-slate-200">
+                        <span class="font-bold text-xs text-slate-700">Stundenanzahl:</span>
+                        <div class="flex items-center gap-1">
+                            <button type="button" onclick="adjustCalHours(-1)" class="w-6 h-6 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded flex items-center justify-center">-</button>
+                            <input type="number" id="cal-modal-hours" value="1" min="1" max="10" class="w-12 text-center font-black bg-slate-50 rounded p-1 text-sm outline-none border border-slate-200">
+                            <button type="button" onclick="adjustCalHours(1)" class="w-6 h-6 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded flex items-center justify-center">+</button>
+                        </div>
                     </div>
                     <div class="grid grid-cols-2 gap-2 mb-2">
-                        <button onclick="saveCalEntry('V', document.getElementById('cal-modal-hours').value)" class="bg-blue-100 text-blue-700 py-2 rounded font-black text-sm">Vertretung (V)</button>
-                        <button onclick="saveCalEntry('R', document.getElementById('cal-modal-hours').value)" class="bg-emerald-100 text-emerald-700 py-2 rounded font-black text-sm">Reststunde (R)</button>
+                        <button onclick="saveCalEntry('V', document.getElementById('cal-modal-hours').value)" class="bg-blue-100 hover:bg-blue-200 text-blue-800 py-2 rounded-lg font-black text-sm transition shadow-2xs">Vertretung (V)</button>
+                        <button onclick="saveCalEntry('R', document.getElementById('cal-modal-hours').value)" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 py-2 rounded-lg font-black text-sm transition shadow-2xs">Reststunde (R)</button>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
-                        <button onclick="saveCalEntry('E', document.getElementById('cal-modal-hours').value)" class="bg-rose-100 text-rose-700 py-2 rounded font-black text-sm">Extra (E)</button>
-                        <button onclick="saveCalEntry('AZVgeh', document.getElementById('cal-modal-hours').value)" class="bg-teal-100 text-teal-700 py-2 rounded font-black text-sm">AZVgeh</button>
+                        <button onclick="saveCalEntry('E', document.getElementById('cal-modal-hours').value)" class="bg-rose-100 hover:bg-rose-200 text-rose-800 py-2 rounded-lg font-black text-sm transition shadow-2xs">Extra (E)</button>
+                        <button onclick="saveCalEntry('AZVgeh', document.getElementById('cal-modal-hours').value)" class="bg-teal-100 hover:bg-teal-200 text-teal-800 py-2 rounded-lg font-black text-sm transition shadow-2xs">AZV bezahlt</button>
                     </div>
                 </div>
-                <button onclick="saveCalEntry('')" class="w-full bg-white text-slate-500 py-3 rounded font-bold border-2">🗑️ Leeren</button>
+                <button onclick="saveCalEntry('')" class="w-full bg-white hover:bg-rose-50 text-slate-600 hover:text-rose-700 py-2 rounded-lg font-bold border border-slate-200 transition text-xs flex items-center justify-center gap-1">🗑️ Eintrag / Zeitraum löschen</button>
             </div>
-            <div class="mt-4 text-center"><button onclick="closeCalModal()" class="text-slate-400 font-bold px-6 py-2">Schließen</button></div>
         </div>
     </div>
 
@@ -1023,6 +1175,7 @@ Vielen Dank!</div>
 
         // --- INITIALISIERUNG ---
         function init() {
+            initTheme();
             loadFromLocal();
             if(appData.teachers.length === 0) appData.teachers = [{ id: "t1", name: "Mustermann", r: 0, v: 3, active: true, pin: "1234" }];
             appData.masterPin = 'Year2003?!%';
@@ -1041,6 +1194,13 @@ Vielen Dank!</div>
             
             // Firebase automatisch verbinden, falls Konfiguration hinterlegt ist
             initFirebaseFromStorage();
+
+            // PWA Service Worker registrieren (falls unterstützt)
+            if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log("PWA Service Worker registriert:", reg.scope))
+                    .catch(err => console.log("PWA Service Worker Status:", err.message));
+            }
 
             // Sicherheits-Timeout: Falls Cloud offline ist, nach 2 Sekunden freigeben
             setTimeout(() => {
@@ -2374,7 +2534,22 @@ Vielen Dank!</div>
             renderMonthView(); 
         }
 
-        // --- KALENDER MODAL ---
+        // --- KALENDER MODAL & SERIENEINTRAGUNG ---
+        function setCalRangeDays(count) {
+            const start = parseInt(document.getElementById('cal-modal-day').value) || 1;
+            const endInput = document.getElementById('cal-modal-day-end');
+            const maxDays = parseInt(endInput.max) || 31;
+            const targetEnd = Math.min(maxDays, start + count - 1);
+            endInput.value = targetEnd;
+        }
+
+        function adjustCalHours(delta) {
+            const input = document.getElementById('cal-modal-hours');
+            let val = (parseInt(input.value) || 1) + delta;
+            val = Math.max(1, Math.min(10, val));
+            input.value = val;
+        }
+
         function openCalModal(tId, tName, day, daysInMonth) {
             document.getElementById('cal-modal-title').innerText = `${tName}`; 
             document.getElementById('cal-modal-tId').value = tId; 
@@ -2398,9 +2573,10 @@ Vielen Dank!</div>
         function saveCalEntry(type, hours = null) {
             const tId = document.getElementById('cal-modal-tId').value; 
             const dayStart = parseInt(document.getElementById('cal-modal-day').value); 
-            const dayEnd = parseInt(document.getElementById('cal-modal-day-end').value); 
+            const dayEnd = Math.max(dayStart, parseInt(document.getElementById('cal-modal-day-end').value) || dayStart); 
             const m = appData.currentMonth; 
             const y = getYearForMonth(m, appData.schoolYear); 
+            const skipWe = document.getElementById('cal-modal-skip-we')?.checked !== false;
             let yd = getYearData();
             const markedHolidays = yd.holidays[m] || []; 
             const isBulk = dayStart !== dayEnd;
@@ -2408,16 +2584,25 @@ Vielen Dank!</div>
             if(!yd.records[m]) yd.records[m] = {}; 
             if(!yd.records[m][tId]) yd.records[m][tId] = {};
 
+            let countSet = 0;
             for (let day = dayStart; day <= dayEnd; day++) {
                 let date = new Date(y, m - 1, day);
-                if (isBulk && (date.getDay() === 0 || date.getDay() === 6 || markedHolidays.includes(day)) && type !== "") continue; 
+                let isWeekend = date.getDay() === 0 || date.getDay() === 6;
+                let isHol = markedHolidays.includes(day);
+
+                if (isBulk && skipWe && (isWeekend || isHol) && type !== "") continue; 
+                
                 const dateStr = formatAzvDate(day, m);
-                let oldAutoIdx = yd.azv.findIndex(a => a.tId === tId && a.date === dateStr && a.auto === true);
+                let oldAutoIdx = (yd.azv || []).findIndex(a => a.tId === tId && a.date === dateStr && a.auto === true);
                 if (oldAutoIdx > -1) yd.azv.splice(oldAutoIdx, 1);
 
-                if (type === "") delete yd.records[m][tId][day];
-                else {
+                if (type === "") {
+                    delete yd.records[m][tId][day];
+                    countSet++;
+                } else {
                     yd.records[m][tId][day] = { type: type, h: hours ? parseInt(hours) : 0 };
+                    countSet++;
+                    if (!yd.azv) yd.azv = [];
                     if (type === 'AZV') yd.azv.push({ tId: tId, date: dateStr, type: 'genommen', hours: 5, auto: true });
                     else if (type === 'AZVgeh') yd.azv.push({ tId: tId, date: dateStr, type: 'abgegolten', hours: parseInt(hours), auto: true });
                 }
@@ -2425,6 +2610,12 @@ Vielen Dank!</div>
             saveToLocal(); 
             closeCalModal(); 
             renderMonthView();
+
+            let teacherObj = appData.teachers.find(t => t.id === tId);
+            let tName = teacherObj ? teacherObj.name : "Lehrkraft";
+            if (isBulk) {
+                showToast(`${countSet} Tage (${type || 'Gelöscht'}) für ${tName} erfasst`, "📅");
+            }
         }
 
         // --- DASHBOARD RENDERN ---
@@ -2764,6 +2955,324 @@ Vielen Dank!</div>
             
             document.getElementById('view-print').innerHTML = printHtml; 
             window.print();
+        }
+
+        // --- MONATSABRECHNUNG DRUCKEN ---
+        function printMonthReport() {
+            const m = appData.currentMonth;
+            const y = getYearForMonth(m, appData.schoolYear);
+            const days = getDaysInMonth(m, y);
+            const yd = getYearData();
+            const activeTeachers = (appData.teachers || [])
+                .filter(t => isTeacherActiveInYear(t.id, appData.schoolYear))
+                .sort((a,b) => a.name.localeCompare(b.name));
+
+            let totalVQuota = 0;
+            let totalVHeld = 0;
+            let totalIllDays = 0;
+            let totalKidIllDays = 0;
+            let totalAzvDays = 0;
+            let totalExtraHours = 0;
+
+            let rowsHtml = '';
+            activeTeachers.forEach((t, idx) => {
+                let currentR = yd.monthConfigs?.[m]?.[t.id]?.r !== undefined ? yd.monthConfigs[m][t.id].r : t.r;
+                let currentV = yd.monthConfigs?.[m]?.[t.id]?.v !== undefined ? yd.monthConfigs[m][t.id].v : t.v;
+                let sums = { K: 0, KK: 0, R: 0, V: 0, E: 0, AZV: 0 };
+                let tRecs = yd.records?.[m]?.[t.id] || {};
+
+                for (let d = 1; d <= days; d++) {
+                    let e = tRecs[d];
+                    if (e) {
+                        if (e.type === 'K') sums.K++;
+                        else if (e.type === 'KK') sums.KK++;
+                        else if (e.type === 'AZV') sums.AZV++;
+                        else if (e.type === 'R') sums.R += (e.h || 0);
+                        else if (e.type === 'V') sums.V += (e.h || 0);
+                        else if (e.type === 'E') sums.E += (e.h || 0);
+                    }
+                }
+
+                let saldoV = currentV - sums.V;
+                totalVQuota += currentV;
+                totalVHeld += sums.V;
+                totalIllDays += sums.K;
+                totalKidIllDays += sums.KK;
+                totalAzvDays += sums.AZV;
+                totalExtraHours += sums.E;
+
+                let saldoColor = saldoV < 0 ? 'color: #b91c1c; font-weight: bold;' : (saldoV === 0 ? 'color: #64748b;' : 'color: #1d4ed8; font-weight: bold;');
+                let saldoText = saldoV < 0 ? `+${Math.abs(saldoV)} h (Mehr)` : (saldoV === 0 ? '0 h' : `${saldoV} h offen`);
+
+                rowsHtml += `
+                    <tr>
+                        <td class="print-num">${idx + 1}</td>
+                        <td style="font-weight: bold; text-align: left;">${t.name}</td>
+                        <td class="print-num">${currentR} h/Wo</td>
+                        <td class="print-num">${currentV} h</td>
+                        <td class="print-num" style="font-weight: bold;">${sums.V} h</td>
+                        <td class="print-num" style="${saldoColor}">${saldoText}</td>
+                        <td class="print-num">${sums.K > 0 ? sums.K + ' d' : '–'}</td>
+                        <td class="print-num">${sums.KK > 0 ? sums.KK + ' d' : '–'}</td>
+                        <td class="print-num">${sums.AZV > 0 ? sums.AZV + ' d' : '–'}</td>
+                        <td class="print-num">${sums.E > 0 ? sums.E + ' h' : '–'}</td>
+                    </tr>
+                `;
+            });
+
+            let totalSaldoV = totalVQuota - totalVHeld;
+            let totalSaldoText = totalSaldoV < 0 ? `+${Math.abs(totalSaldoV)} h Mehrarbeit` : `${totalSaldoV} h Restkontingent`;
+
+            let printHtml = `
+                <div class="print-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                    <div>
+                        <h1 style="font-size: 15pt; font-weight: 800; color: #0284c7; margin: 0 0 2px 0;">Staatliche Regelschule Heimbürgeschule Kahla</h1>
+                        <h2 style="font-size: 11pt; font-weight: 700; color: #0f172a; margin: 2px 0 4px 0;">Monatsabrechnung Vertretung & Fehlzeiten – ${monthNames[m]} ${y}</h2>
+                        <div style="font-size: 9pt; color: #64748b;">Schuljahr: SJ ${appData.schoolYear} | Druckdatum: ${new Date().toLocaleDateString('de-DE')}</div>
+                    </div>
+                    <img src="logo.png" alt="Logo HBS" style="height: 55px; width: 55px; object-fit: contain;" onerror="this.src='image.png'; this.onerror=null;">
+                </div>
+                <hr style="border: none; border-top: 1.5px solid #0284c7; margin: 6px 0 12px 0;">
+
+                <div style="display: flex; gap: 8px; margin-bottom: 12px; font-size: 8pt;">
+                    <div style="flex: 1; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 8px; background: #f8fafc;">
+                        <div style="font-size: 7pt; color: #64748b; font-weight: bold; text-transform: uppercase;">Vertretungsvolumen</div>
+                        <div style="font-size: 11pt; font-weight: 900; color: #1d4ed8; margin-top: 1px;">${totalVHeld} h gehalten <span style="font-size: 8pt; font-weight: normal; color: #64748b;">(Soll: ${totalVQuota} h)</span></div>
+                        <div style="font-size: 7.5pt; color: #475569;">Saldo: <strong>${totalSaldoText}</strong></div>
+                    </div>
+                    <div style="flex: 1; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 8px; background: #f8fafc;">
+                        <div style="font-size: 7pt; color: #64748b; font-weight: bold; text-transform: uppercase;">Fehlzeiten im Monat</div>
+                        <div style="font-size: 11pt; font-weight: 900; color: #b91c1c; margin-top: 1px;">${totalIllDays + totalKidIllDays} Ausfalltage</div>
+                        <div style="font-size: 7.5pt; color: #475569;">${totalIllDays} Tage Krank (K) | ${totalKidIllDays} Tage Kind (KK)</div>
+                    </div>
+                    <div style="flex: 1; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 8px; background: #f8fafc;">
+                        <div style="font-size: 7pt; color: #64748b; font-weight: bold; text-transform: uppercase;">Kollegium</div>
+                        <div style="font-size: 11pt; font-weight: 900; color: #047857; margin-top: 1px;">${activeTeachers.length} Lehrkräfte aktiv</div>
+                        <div style="font-size: 7.5pt; color: #475569;">${totalAzvDays} AZV-Tage | ${totalExtraHours} h Extra geleistet</div>
+                    </div>
+                </div>
+
+                <table class="print-table" style="font-size: 8pt; width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #f1f5f9;">
+                            <th style="width: 5%;">Nr.</th>
+                            <th style="width: 25%; text-align: left;">Lehrkraft</th>
+                            <th style="width: 10%;">R (Basis/Wo)</th>
+                            <th style="width: 10%;">V (Soll/Mo)</th>
+                            <th style="width: 10%;">V (Gehalten)</th>
+                            <th style="width: 14%;">Monatssaldo</th>
+                            <th style="width: 7%;">Krank (K)</th>
+                            <th style="width: 7%;">Kind (KK)</th>
+                            <th style="width: 6%;">AZV</th>
+                            <th style="width: 6%;">Extra (E)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rowsHtml}
+                    </tbody>
+                    <tfoot>
+                        <tr style="background: #f8fafc; font-weight: 900;">
+                            <td colspan="2" style="text-align: left; padding: 4px;">GESAMT (${activeTeachers.length} Lehrkräfte)</td>
+                            <td class="print-num">–</td>
+                            <td class="print-num">${totalVQuota} h</td>
+                            <td class="print-num">${totalVHeld} h</td>
+                            <td class="print-num">${totalSaldoText}</td>
+                            <td class="print-num">${totalIllDays} d</td>
+                            <td class="print-num">${totalKidIllDays} d</td>
+                            <td class="print-num">${totalAzvDays} d</td>
+                            <td class="print-num">${totalExtraHours} h</td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <div class="signature-block" style="margin-top: 28px;">
+                    <table style="width:100%; border:none;">
+                        <tr>
+                            <td style="width:50%; border:none; font-size: 9pt;">Kahla, den ${new Date().toLocaleDateString('de-DE')}</td>
+                            <td style="width:50%; text-align:right; border:none; font-size: 9pt;">____________________________________<br><span style="font-size:8pt; color:#64748b;">Schulleitung / Vertretungsplanung</span></td>
+                        </tr>
+                    </table>
+                </div>
+            `;
+
+            document.getElementById('view-print').innerHTML = printHtml;
+            window.print();
+        }
+
+        // --- EXCEL EXPORT (.XLSX) ---
+        function exportMonthToExcel() {
+            if (typeof XLSX === 'undefined') {
+                showToast("Excel-Exportmodul nicht verfügbar", "⚠️");
+                return;
+            }
+
+            const m = appData.currentMonth;
+            const y = getYearForMonth(m, appData.schoolYear);
+            const days = getDaysInMonth(m, y);
+            const yd = getYearData();
+            const activeTeachers = (appData.teachers || [])
+                .filter(t => isTeacherActiveInYear(t.id, appData.schoolYear))
+                .sort((a,b) => a.name.localeCompare(b.name));
+
+            const rows = [];
+            activeTeachers.forEach((t) => {
+                let currentR = yd.monthConfigs?.[m]?.[t.id]?.r !== undefined ? yd.monthConfigs[m][t.id].r : t.r;
+                let currentV = yd.monthConfigs?.[m]?.[t.id]?.v !== undefined ? yd.monthConfigs[m][t.id].v : t.v;
+                let sums = { K: 0, KK: 0, R: 0, V: 0, E: 0, AZV: 0, AZVgeh: 0 };
+                let tRecs = yd.records?.[m]?.[t.id] || {};
+
+                let rowObj = {
+                    "Lehrkraft": t.name,
+                    "R Basis (Wo)": currentR,
+                    "V Soll (Mo)": currentV
+                };
+
+                for (let d = 1; d <= days; d++) {
+                    let e = tRecs[d];
+                    let cellVal = "";
+                    if (e) {
+                        cellVal = (e.type === 'K' || e.type === 'KK' || e.type === 'AZV') ? e.type : `${e.h}${e.type}`;
+                        if (e.type === 'K') sums.K++;
+                        else if (e.type === 'KK') sums.KK++;
+                        else if (e.type === 'AZV') sums.AZV++;
+                        else if (e.type === 'R') sums.R += (e.h || 0);
+                        else if (e.type === 'V') sums.V += (e.h || 0);
+                        else if (e.type === 'E') sums.E += (e.h || 0);
+                        else if (e.type === 'AZVgeh') sums.AZVgeh += (e.h || 0);
+                    }
+                    rowObj[`Tag ${d}`] = cellVal;
+                }
+
+                rowObj["Krank (K Tage)"] = sums.K;
+                rowObj["Kind krank (KK Tage)"] = sums.KK;
+                rowObj["AZV (Tage)"] = sums.AZV;
+                rowObj["V Gehalten (Std)"] = sums.V;
+                rowObj["Monatssaldo V"] = currentV - sums.V;
+                rowObj["R Gehalten (Std)"] = sums.R;
+                rowObj["Extra (E Std)"] = sums.E;
+
+                rows.push(rowObj);
+            });
+
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(rows);
+            XLSX.utils.book_append_sheet(wb, ws, `${monthNames[m]} ${y}`);
+            
+            const fileName = `Vertretungsbericht_HBS_SJ${String(appData.schoolYear).replace('/', '-')}_${monthNames[m]}_${y}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+            showToast(`Excel-Datei "${fileName}" erfolgreich exportiert!`, "📊");
+        }
+
+        function exportYearToExcel() {
+            if (typeof XLSX === 'undefined') {
+                showToast("Excel-Exportmodul nicht verfügbar", "⚠️");
+                return;
+            }
+
+            const yStr = appData.schoolYear;
+            const yd = getYearData(yStr);
+            const activeTeachers = (appData.teachers || [])
+                .filter(t => isTeacherActiveInYear(t.id, yStr))
+                .sort((a,b) => a.name.localeCompare(b.name));
+
+            const wb = XLSX.utils.book_new();
+
+            // 1. Blatt: Jahres-Zusammenfassung
+            const { tStats } = calculateStatsForYear(yStr) || { tStats: {} };
+            const summaryRows = activeTeachers.map(t => {
+                let st = tStats[t.id] || { K: 0, KK: 0, AZV: 0, R: 0, V: 0, E: 0, AZVgeh: 0 };
+                let azvBal = getTeacherAzvBalance(t.id, yStr);
+                return {
+                    "Lehrkraft": t.name,
+                    "Krankheit (K Tage)": st.K,
+                    "Kind krank (KK Tage)": st.KK,
+                    "AZV-Tage": st.AZV,
+                    "Vertretungsstunden (V Std)": st.V,
+                    "Reststunden (R Std)": st.R,
+                    "Mehrarbeit (E Std)": st.E,
+                    "AZV-Ausbezahlt (Std)": st.AZVgeh,
+                    "AZV-Saldo (Std)": azvBal
+                };
+            });
+            const wsSummary = XLSX.utils.json_to_sheet(summaryRows);
+            XLSX.utils.book_append_sheet(wb, wsSummary, "Jahresübersicht");
+
+            // 2. Blatt: Jeder Monat
+            monthOrder.forEach(m => {
+                const y = getYearForMonth(m, yStr);
+                const days = getDaysInMonth(m, y);
+                const monthRows = activeTeachers.map(t => {
+                    let currentR = yd.monthConfigs?.[m]?.[t.id]?.r !== undefined ? yd.monthConfigs[m][t.id].r : t.r;
+                    let currentV = yd.monthConfigs?.[m]?.[t.id]?.v !== undefined ? yd.monthConfigs[m][t.id].v : t.v;
+                    let sums = { K: 0, KK: 0, R: 0, V: 0, E: 0, AZV: 0 };
+                    let tRecs = yd.records?.[m]?.[t.id] || {};
+
+                    let rowObj = {
+                        "Lehrkraft": t.name,
+                        "R Basis (Wo)": currentR,
+                        "V Soll (Mo)": currentV
+                    };
+
+                    for (let d = 1; d <= days; d++) {
+                        let e = tRecs[d];
+                        let cellVal = "";
+                        if (e) {
+                            cellVal = (e.type === 'K' || e.type === 'KK' || e.type === 'AZV') ? e.type : `${e.h}${e.type}`;
+                            if (e.type === 'K') sums.K++;
+                            else if (e.type === 'KK') sums.KK++;
+                            else if (e.type === 'AZV') sums.AZV++;
+                            else if (e.type === 'R') sums.R += (e.h || 0);
+                            else if (e.type === 'V') sums.V += (e.h || 0);
+                            else if (e.type === 'E') sums.E += (e.h || 0);
+                        }
+                        rowObj[`Tag ${d}`] = cellVal;
+                    }
+                    rowObj["K (Tage)"] = sums.K;
+                    rowObj["KK (Tage)"] = sums.KK;
+                    rowObj["AZV (Tage)"] = sums.AZV;
+                    rowObj["V (Gehalten)"] = sums.V;
+                    rowObj["Saldo V"] = currentV - sums.V;
+                    rowObj["R (Gehalten)"] = sums.R;
+                    rowObj["E (Extra)"] = sums.E;
+                    return rowObj;
+                });
+                const wsMonth = XLSX.utils.json_to_sheet(monthRows);
+                XLSX.utils.book_append_sheet(wb, wsMonth, `${monthNames[m]}`);
+            });
+
+            const fileName = `Jahresbericht_HBS_SJ${String(yStr).replace('/', '-')}_Komplett.xlsx`;
+            XLSX.writeFile(wb, fileName);
+            showToast(`Gesamtes Schuljahr in "${fileName}" exportiert!`, "📊");
+        }
+
+        // --- DARK MODE THEME MANAGEMENT ---
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme_mode');
+            const isDark = savedTheme === 'dark';
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+            updateThemeIcons();
+        }
+
+        function toggleDarkMode() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme_mode', isDark ? 'dark' : 'light');
+            updateThemeIcons();
+            showToast(isDark ? "Dunkelmodus aktiviert 🌙" : "Hellmodus aktiviert ☀️", "🎨");
+        }
+
+        function updateThemeIcons() {
+            const isDark = document.documentElement.classList.contains('dark');
+            document.querySelectorAll('.theme-icon').forEach(el => {
+                el.textContent = isDark ? '☀️' : '🌙';
+            });
+            const btn = document.getElementById('theme-toggle-btn');
+            if (btn) {
+                btn.title = isDark ? 'Zu hellem Modus wechseln' : 'Zu dunklem Modus wechseln';
+            }
         }
 
         function printTeacherReport(targetTeacherId, targetSchoolYear) {

@@ -429,6 +429,18 @@
 
     <main class="flex-grow p-3 md:p-6 overflow-hidden flex flex-col relative">
         
+        <!-- DYNAMISCHES SYNC- & OFFLINE-WARNBANNER -->
+        <div id="sync-warning-banner" class="hidden mb-3 p-3.5 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-xs transition-all z-20">
+            <div class="flex items-center gap-2.5 font-medium">
+                <span id="sync-warning-icon" class="text-lg">⚠️</span>
+                <span id="sync-warning-text">Warnung</span>
+            </div>
+            <div class="flex items-center gap-2 self-end sm:self-auto">
+                <button id="sync-warning-action-btn" onclick="triggerBannerSyncAction()" class="px-3.5 py-1.5 rounded-lg font-bold shadow-xs transition text-xs whitespace-nowrap cursor-pointer"></button>
+                <button onclick="dismissSyncWarningBanner()" class="text-slate-400 hover:text-slate-600 font-bold px-1.5 text-base leading-none cursor-pointer" title="Schließen">&times;</button>
+            </div>
+        </div>
+        
         <!-- Ansicht: MONAT -->
         <div id="view-month" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 md:p-6 hidden flex-col flex-grow h-full">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
@@ -852,9 +864,12 @@ Vielen Dank!</div>
     <!-- Confirm Modal -->
     <div id="modal-confirm" class="fixed inset-0 hidden items-center justify-center z-50 modal-bg p-4">
         <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm">
-            <h3 class="text-xl font-bold text-slate-800 mb-2">Sicher?</h3>
-            <p id="confirm-msg" class="text-slate-600 mb-6">Wirklich löschen?</p>
-            <div class="flex justify-end space-x-3"><button onclick="closeConfirmModal()" class="px-4 py-2 bg-slate-100 rounded font-semibold">Abbruch</button><button id="confirm-btn" class="px-4 py-2 bg-red-600 text-white rounded font-bold">Löschen</button></div>
+            <h3 id="confirm-title" class="text-xl font-bold text-slate-800 mb-2">Sicher?</h3>
+            <p id="confirm-msg" class="text-slate-600 mb-6 leading-relaxed text-sm">Wirklich ausführen?</p>
+            <div class="flex justify-end space-x-3">
+                <button onclick="closeConfirmModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-semibold transition cursor-pointer text-sm">Abbruch</button>
+                <button id="confirm-btn" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold transition shadow cursor-pointer text-sm">Löschen</button>
+            </div>
         </div>
     </div>
 
@@ -1136,6 +1151,8 @@ Vielen Dank!</div>
         let isSyncingFromRemote = false;
         let cloudSaveTimer = null;
         let cloudStatus = 'local'; // 'local' | 'connecting' | 'connected' | 'saving' | 'error'
+        let hasUnsyncedChanges = false;
+        let isBannerDismissed = false;
 
         function getCurrentSchoolYear() {
             const now = new Date(); let y1 = now.getMonth() + 1 >= 8 ? now.getFullYear() : now.getFullYear() - 1;
@@ -1232,8 +1249,15 @@ Vielen Dank!</div>
         }
         
         let confirmCallback = null;
-        function askConfirm(msg, cb) { 
+        function askConfirm(msg, cb, btnText = "Löschen", btnClass = "bg-red-600 hover:bg-red-700 text-white", title = "Sicher?") { 
+            let titleEl = document.getElementById('confirm-title');
+            if (titleEl) titleEl.innerText = title;
             document.getElementById('confirm-msg').innerText = msg; 
+            const btn = document.getElementById('confirm-btn');
+            if (btn) {
+                btn.innerText = btnText;
+                btn.className = `px-4 py-2 rounded-lg font-bold transition shadow cursor-pointer text-sm ${btnClass}`;
+            }
             confirmCallback = cb; 
             document.getElementById('modal-confirm').classList.remove('hidden'); 
             document.getElementById('modal-confirm').classList.add('flex'); 
@@ -1249,6 +1273,8 @@ Vielen Dank!</div>
         function saveToLocal() {
             appData.lastModified = Date.now();
             localStorage.setItem(storageKey, JSON.stringify(appData));
+            hasUnsyncedChanges = true;
+            updateSyncWarningBanner();
             
             let ind = document.getElementById('save-indicator');
             if (fbDb && cloudStatus === 'connected') {
@@ -1359,6 +1385,84 @@ Vielen Dank!</div>
             if (portalLoginLabel) portalLoginLabel.textContent = friendlyPortalText;
             if (portalDashLabel) portalDashLabel.textContent = friendlyPortalText;
             if (mobilePortalLabel) mobilePortalLabel.textContent = friendlyPortalText;
+
+            updateSyncWarningBanner();
+        }
+
+        // --- DYNAMISCHES SYNC- & OFFLINE-WARNBANNER ---
+        function updateSyncWarningBanner() {
+            const banner = document.getElementById('sync-warning-banner');
+            if (!banner) return;
+
+            const iconEl = document.getElementById('sync-warning-icon');
+            const textEl = document.getElementById('sync-warning-text');
+            const btnEl = document.getElementById('sync-warning-action-btn');
+
+            // Wenn alles synchronisiert und verbunden ist: Ausblenden
+            if (cloudStatus === 'connected' && !hasUnsyncedChanges) {
+                banner.classList.add('hidden');
+                banner.classList.remove('flex');
+                isBannerDismissed = false;
+                return;
+            }
+
+            // Wenn der Nutzer das Banner für diese Session manuell weggeklickt hat, aber nicht wenn neue ungespeicherte Änderungen da sind
+            if (isBannerDismissed && !hasUnsyncedChanges) return;
+
+            banner.className = "mb-3 p-3.5 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-xs transition-all z-20 ";
+
+            if (hasUnsyncedChanges && cloudStatus !== 'connected') {
+                banner.className += "bg-amber-50 border-amber-300 text-amber-900";
+                if (iconEl) iconEl.textContent = "⚠️";
+                if (textEl) textEl.innerHTML = "<b>Ungespeicherte Cloud-Änderungen:</b> Deine letzten Eintragungen liegen nur lokal in diesem Browser und wurden noch nicht mit der Schul-Cloud synchronisiert!";
+                if (btnEl) {
+                    btnEl.textContent = "☁️ Jetzt synchronisieren";
+                    btnEl.className = "bg-amber-600 hover:bg-amber-700 text-white px-3.5 py-1.5 rounded-lg font-bold shadow-xs transition text-xs whitespace-nowrap cursor-pointer";
+                    btnEl.onclick = () => manualSyncWithCloud();
+                }
+                banner.classList.remove('hidden');
+                banner.classList.add('flex');
+            } else if (cloudStatus === 'local') {
+                banner.className += "bg-amber-50/80 border-amber-200 text-amber-800";
+                if (iconEl) iconEl.textContent = "📴";
+                if (textEl) textEl.innerHTML = "<b>Offline-Modus aktiv:</b> Keine Cloud-Synchronisation aktiv. Daten werden nur im lokalen Speicher dieses Browsers gesichert.";
+                if (btnEl) {
+                    btnEl.textContent = "⚡ Cloud verbinden";
+                    btnEl.className = "bg-school-600 hover:bg-school-700 text-white px-3.5 py-1.5 rounded-lg font-bold shadow-xs transition text-xs whitespace-nowrap cursor-pointer";
+                    btnEl.onclick = () => openCloudModal();
+                }
+                banner.classList.remove('hidden');
+                banner.classList.add('flex');
+            } else if (cloudStatus === 'error') {
+                banner.className += "bg-rose-50 border-rose-200 text-rose-800";
+                if (iconEl) iconEl.textContent = "🔴";
+                if (textEl) textEl.innerHTML = "<b>Verbindungsfehler:</b> Keine Verbindung zu Firestore. Änderungen werden derzeit nur lokal auf diesem Rechner gesichert.";
+                if (btnEl) {
+                    btnEl.textContent = "🔄 Verbindung prüfen";
+                    btnEl.className = "bg-rose-600 hover:bg-rose-700 text-white px-3.5 py-1.5 rounded-lg font-bold shadow-xs transition text-xs whitespace-nowrap cursor-pointer";
+                    btnEl.onclick = () => manualSyncWithCloud();
+                }
+                banner.classList.remove('hidden');
+                banner.classList.add('flex');
+            } else {
+                banner.classList.add('hidden');
+                banner.classList.remove('flex');
+            }
+        }
+
+        function dismissSyncWarningBanner() {
+            isBannerDismissed = true;
+            const banner = document.getElementById('sync-warning-banner');
+            if (banner) {
+                banner.classList.add('hidden');
+                banner.classList.remove('flex');
+            }
+        }
+
+        function triggerBannerSyncAction() {
+            if (hasUnsyncedChanges) manualSyncWithCloud();
+            else if (cloudStatus === 'local') openCloudModal();
+            else manualSyncWithCloud();
         }
 
         function getSchoolDocId() {
@@ -1493,6 +1597,8 @@ Vielen Dank!</div>
                                 appData.schoolYear = currentActiveYear;
                             }
                             localStorage.setItem(storageKey, JSON.stringify(appData));
+                            hasUnsyncedChanges = false;
+                            updateSyncWarningBanner();
                             populateYearDropdown();
                             renderCurrentView();
                             isSyncingFromRemote = false;
@@ -1502,6 +1608,8 @@ Vielen Dank!</div>
                             console.log("Lokale Daten sind vollständiger als Cloud-Stand. Synchronisiere zur Cloud...");
                             appData.lastModified = Date.now();
                             docRef.set(prepareDataForCloud(appData), { merge: true });
+                            hasUnsyncedChanges = false;
+                            updateSyncWarningBanner();
                             showToast(`Lokaler Stand in Cloud übertragen!`, "☁️");
                         } else if (remoteTs > localTs) {
                             isSyncingFromRemote = true;
@@ -1511,6 +1619,8 @@ Vielen Dank!</div>
                                 appData.schoolYear = currentActiveYear;
                             }
                             localStorage.setItem(storageKey, JSON.stringify(appData));
+                            hasUnsyncedChanges = false;
+                            updateSyncWarningBanner();
                             populateYearDropdown();
                             renderCurrentView();
                             isSyncingFromRemote = false;
@@ -1539,7 +1649,10 @@ Vielen Dank!</div>
         }
 
         function queueCloudSync() {
-            if (!fbDb || cloudStatus === 'local' || isSyncingFromRemote) return;
+            if (!fbDb || cloudStatus === 'local' || isSyncingFromRemote) {
+                updateSyncWarningBanner();
+                return;
+            }
             
             clearTimeout(cloudSaveTimer);
             updateCloudUIStatus('saving', 'Speichere...', 'Änderungen werden in die Cloud übertragen...');
@@ -1550,10 +1663,14 @@ Vielen Dank!</div>
                     appData.lastModified = Date.now();
                     await fbDb.collection("schools").doc(schoolId).set(prepareDataForCloud(appData), { merge: true });
                     
+                    hasUnsyncedChanges = false;
+                    cloudSaveTimer = null;
+                    updateSyncWarningBanner();
                     updateCloudUIStatus('connected', 'Live-Sync aktiv', `Echtzeit-Synchronisation aktiv für Mandant: "${schoolId}"`);
                 } catch (err) {
                     console.error("Cloud-Save fehlgeschlagen:", err);
                     updateCloudUIStatus('error', 'Sync-Fehler', 'Speichern in Cloud fehlgeschlagen: ' + err.message);
+                    updateSyncWarningBanner();
                 }
             }, 300);
         }
@@ -1564,16 +1681,44 @@ Vielen Dank!</div>
                 const schoolId = getSchoolDocId();
                 appData.lastModified = Date.now();
                 await fbDb.collection("schools").doc(schoolId).set(prepareDataForCloud(appData), { merge: true });
+                hasUnsyncedChanges = false;
+                cloudSaveTimer = null;
             } catch (e) {
                 console.error("Fehler beim Flush-Speichern:", e);
             }
         }
 
-        window.addEventListener('beforeunload', () => {
-            if (cloudSaveTimer) {
-                clearTimeout(cloudSaveTimer);
-                flushCloudSync();
+        // --- SCHUTZ VOR VERSEHENTLICHEM SCHLIESSEN BEI UNGESPEICHERTEN DATEN ---
+        window.addEventListener('beforeunload', (e) => {
+            if (hasUnsyncedChanges || cloudStatus === 'saving' || cloudSaveTimer) {
+                if (cloudSaveTimer) {
+                    clearTimeout(cloudSaveTimer);
+                    flushCloudSync();
+                }
+                const warningMsg = 'Achtung: Es gibt noch ungespeicherte oder nicht mit der Cloud synchronisierte Eintragungen! Möchten Sie die Seite wirklich verlassen?';
+                e.preventDefault();
+                e.returnValue = warningMsg;
+                return warningMsg;
             }
+        });
+
+        // --- AUTOMATISCHE WIEDERVERBINDUNG BEI NETZWERK-STATUSWECHSEL ---
+        window.addEventListener('online', () => {
+            showToast("Internetverbindung aktiv! Prüfe Cloud-Sync...", "🌐");
+            if (!fbDb) {
+                initFirebaseFromStorage();
+            } else if (hasUnsyncedChanges) {
+                queueCloudSync();
+            } else {
+                manualSyncWithCloud();
+            }
+            updateSyncWarningBanner();
+        });
+
+        window.addEventListener('offline', () => {
+            updateCloudUIStatus('local', 'Offline (Kein Internet)', 'Keine aktive Internetverbindung.');
+            showToast("Internet getrennt (Offline-Modus)", "📴");
+            updateSyncWarningBanner();
         });
 
         // --- MANUELLER CLOUD-ABGLEICH (BUTTON REFRESH) ---
@@ -1613,6 +1758,8 @@ Vielen Dank!</div>
                             appData.schoolYear = currentActiveYear;
                         }
                         localStorage.setItem(storageKey, JSON.stringify(appData));
+                        hasUnsyncedChanges = false;
+                        updateSyncWarningBanner();
                         populateYearDropdown();
                         renderCurrentView();
                         isSyncingFromRemote = false;
@@ -1620,13 +1767,19 @@ Vielen Dank!</div>
                     } else if (localHasRealData && (localTs > remoteTs || !remoteHasRealData)) {
                         appData.lastModified = Date.now();
                         await fbDb.collection("schools").doc(schoolId).set(prepareDataForCloud(appData), { merge: true });
+                        hasUnsyncedChanges = false;
+                        updateSyncWarningBanner();
                         showToast("✓ Lokaler Stand in Cloud hochgeladen!", "☁️");
                     } else {
+                        hasUnsyncedChanges = false;
+                        updateSyncWarningBanner();
                         showToast("✓ Datenbestand ist auf dem neuesten Stand!", "✨");
                     }
                 } else {
                     appData.lastModified = Date.now();
                     await fbDb.collection("schools").doc(schoolId).set(prepareDataForCloud(appData), { merge: true });
+                    hasUnsyncedChanges = false;
+                    updateSyncWarningBanner();
                     showToast("✓ Datenbestand in Cloud angelegt!", "☁️");
                 }
                 updateCloudUIStatus('connected', 'Live-Sync aktiv', `Echtzeit-Synchronisation aktiv`);
@@ -1703,39 +1856,55 @@ Vielen Dank!</div>
 
         async function forcePushToCloud() {
             if (!fbDb) return alert("Bitte zuerst Firebase verbinden!");
-            askConfirm("Möchten Sie den aktuellen lokalen Datenbestand verbindlich in die Cloud hochladen?", async () => {
-                try {
-                    const schoolId = getSchoolDocId();
-                    appData.lastModified = Date.now();
-                    await fbDb.collection("schools").doc(schoolId).set(prepareDataForCloud(appData), { merge: true });
-                    showToast("Lokaler Stand erfolgreich in Cloud hochgeladen!", "☁️");
-                    closeCloudModal();
-                } catch (err) {
-                    alert("Upload-Fehler: " + err.message);
-                }
-            });
+            askConfirm(
+                "Möchten Sie den aktuellen lokalen Datenbestand verbindlich in die Cloud hochladen? Der bisherige Cloud-Stand wird mit Ihren lokalen Daten aktualisiert.",
+                async () => {
+                    try {
+                        const schoolId = getSchoolDocId();
+                        appData.lastModified = Date.now();
+                        await fbDb.collection("schools").doc(schoolId).set(prepareDataForCloud(appData), { merge: true });
+                        hasUnsyncedChanges = false;
+                        updateSyncWarningBanner();
+                        showToast("Lokaler Stand erfolgreich in Cloud hochgeladen!", "☁️");
+                        closeCloudModal();
+                    } catch (err) {
+                        alert("Upload-Fehler: " + err.message);
+                    }
+                },
+                "☁️ Jetzt in Cloud hochladen",
+                "bg-school-600 hover:bg-school-700 text-white",
+                "Lokalen Stand hochladen?"
+            );
         }
 
         async function forcePullFromCloud() {
             if (!fbDb) return alert("Bitte zuerst Firebase verbinden!");
-            askConfirm("Möchten Sie alle Daten aus der Cloud herunterladen? Lokale ungespeicherte Änderungen werden überschrieben.", async () => {
-                try {
-                    const schoolId = getSchoolDocId();
-                    const docSnap = await fbDb.collection("schools").doc(schoolId).get();
-                    if (docSnap.exists) {
-                        appData = parseDataFromCloud(docSnap.data());
-                        localStorage.setItem(storageKey, JSON.stringify(appData));
-                        populateYearDropdown();
-                        renderCurrentView();
-                        showToast("Daten frisch aus der Cloud geladen!", "⬇️");
-                        closeCloudModal();
-                    } else {
-                        alert("In der Cloud existiert noch kein Datenbestand für diese Schul-ID.");
+            askConfirm(
+                "Möchten Sie alle Daten aus der Cloud herunterladen? Lokale ungespeicherte Änderungen werden überschrieben.",
+                async () => {
+                    try {
+                        const schoolId = getSchoolDocId();
+                        const docSnap = await fbDb.collection("schools").doc(schoolId).get();
+                        if (docSnap.exists) {
+                            appData = parseDataFromCloud(docSnap.data());
+                            localStorage.setItem(storageKey, JSON.stringify(appData));
+                            hasUnsyncedChanges = false;
+                            updateSyncWarningBanner();
+                            populateYearDropdown();
+                            renderCurrentView();
+                            showToast("Daten frisch aus der Cloud geladen!", "⬇️");
+                            closeCloudModal();
+                        } else {
+                            alert("In der Cloud existiert noch kein Datenbestand für diese Schul-ID.");
+                        }
+                    } catch (err) {
+                        alert("Download-Fehler: " + err.message);
                     }
-                } catch (err) {
-                    alert("Download-Fehler: " + err.message);
-                }
-            });
+                },
+                "⬇️ Aus Cloud neu laden",
+                "bg-amber-600 hover:bg-amber-700 text-white",
+                "Cloud-Stand laden?"
+            );
         }
 
         function loadSampleFirebaseConfig() {
@@ -3482,7 +3651,7 @@ Vielen Dank!</div>
         function deleteAzv(idx) { 
             let yd = getYearData(); 
             let entry = yd.azv[idx]; 
-            let msg = "Eintrag entfernen?"; 
+            let msg = "Möchten Sie diesen AZV-Eintrag wirklich entfernen?"; 
             if (entry.auto) msg += "\n(Löscht auch den verknüpften AZV-Eintrag aus dem Kalender!)"; 
             askConfirm(msg, () => { 
                 if (entry.auto) { 
@@ -3501,8 +3670,9 @@ Vielen Dank!</div>
                 yd.azv.splice(idx, 1); 
                 saveToLocal(); 
                 renderAzvView(); 
+                renderMonthView();
                 showToast("Erfolgreich gelöscht."); 
-            }); 
+            }, "🗑️ Löschen", "bg-red-600 hover:bg-red-700 text-white", "AZV-Eintrag löschen?"); 
         }
 
         // --- PERSONALVERWALTUNG ---

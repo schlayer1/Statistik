@@ -398,7 +398,7 @@
             <button onclick="switchTab('dashboard')" id="tab-dashboard" class="whitespace-nowrap px-4 py-2 text-sm font-semibold rounded-lg hover:bg-school-600/50 transition">Dashboard</button>
             <button onclick="switchTab('azv')" id="tab-azv" class="whitespace-nowrap px-4 py-2 text-sm font-semibold rounded-lg hover:bg-school-600/50 transition">AZV-Konto</button>
             <button onclick="switchTab('staff')" id="tab-staff" class="whitespace-nowrap px-4 py-2 text-sm font-semibold rounded-lg hover:bg-school-600/50 transition">Kollegium</button>
-            <button onclick="switchTab('survey')" id="tab-survey" class="whitespace-nowrap px-4 py-2 text-sm font-semibold rounded-lg hover:bg-school-600/50 transition text-amber-300">Jahresstart</button>
+            <button onclick="switchTab('survey')" id="tab-survey" class="whitespace-nowrap px-4 py-2 text-sm font-semibold rounded-lg hover:bg-school-600/50 transition text-amber-300 flex items-center gap-1.5" title="Einsatzplanung für das Schuljahr"><span>📋</span> Einsatzplanung</button>
             <button onclick="switchTab('reports')" id="tab-reports" class="whitespace-nowrap px-4 py-2 text-sm font-semibold rounded-lg hover:bg-school-600/50 transition">Berichte</button>
             <button onclick="openPortalView()" id="tab-portal" class="whitespace-nowrap px-3.5 py-2 text-sm font-bold rounded-lg bg-teal-600 hover:bg-teal-500 text-white shadow transition flex items-center gap-1.5 border border-teal-400/50">🧑‍🏫 Kollegenzugang</button>
         </div>
@@ -560,31 +560,293 @@
             </div>
         </div>
 
-        <!-- Ansicht: JAHRESSTART -->
+        <!-- Ansicht: EINSATZPLANUNG (ehemals Jahresstart) -->
         <div id="view-survey" class="hidden flex-col gap-6">
-            <h2 class="text-xl md:text-2xl font-bold text-slate-800">Jahresstart-Assistent <span class="dash-year-title text-school-600 bg-school-50 px-2 py-1 rounded-lg border border-school-100 ml-2"></span></h2>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                    <h3 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2"><span class="text-2xl">1.</span> Daten vom Kollegium abfragen</h3>
-                    <p class="text-sm text-slate-500 mb-4">Nutzen Sie diesen Text, um die Kollegen nach ihren geplanten Stunden zu fragen.</p>
-                    <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 mb-4 whitespace-pre-wrap font-mono" id="survey-text-template">Liebe Kolleginnen und Kollegen,
-
-für die Einsatzplanung des neuen Schuljahres benötige ich eure aktuellen Rahmendaten. Bitte teilt mir kurz mit:
-
-1. Gewünschte Reststunden (R) pro Woche: ___ h
-2. Geplante Vertretungsstunden (V) pro Monat: ___ h
-
-Vielen Dank!</div>
-                    <button onclick="copySurveyText()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 px-4 rounded-lg shadow transition">📋 Text kopieren</button>
+            <!-- HEADER & TOOLBAR -->
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-2xl">📋</span>
+                        <h2 class="text-xl md:text-2xl font-black text-slate-800">Einsatzplanung</h2>
+                        <span class="dash-year-title text-school-600 bg-school-50 px-2 py-0.5 rounded-lg border border-school-100 text-sm font-bold"></span>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-1" id="ep-period-subtitle">Deputate, Abminderungen, Fachunterricht & wöchentliche Reststunden</p>
                 </div>
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                    <h3 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2"><span class="text-2xl">2.</span> Schnellerfassung</h3>
-                    <p class="text-sm text-slate-500 mb-4">Hier tippen Sie die Antworten als neuen Standard ein.</p>
-                    <div class="overflow-x-auto rounded-lg border border-slate-200 shadow-inner bg-slate-50 max-h-[400px]">
-                        <table class="w-full text-sm text-left bg-white whitespace-nowrap">
-                            <thead class="sticky top-0 z-10 shadow-sm"><tr class="bg-slate-100 text-slate-600"><th class="p-3 font-semibold">Name</th><th class="p-3 text-center font-semibold text-green-700 bg-green-50/50">R-Stunden (Wo)</th><th class="p-3 text-center font-semibold text-blue-700 bg-blue-50/50">V-Stunden (Mo)</th></tr></thead>
-                            <tbody id="survey-table-body" class="divide-y divide-slate-100"></tbody>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <!-- Perioden-Wähler -->
+                    <div class="flex items-center bg-slate-50 border border-slate-200 rounded-xl p-1 gap-1">
+                        <span class="text-xs font-bold text-slate-500 pl-2">Gültigkeit:</span>
+                        <select id="ep-period-select" onchange="changeEpPeriod(this.value)" class="bg-white border border-slate-200 text-xs font-bold rounded-lg p-1.5 text-slate-800 outline-none focus:border-school-500 shadow-2xs">
+                        </select>
+                        <button onclick="openNewEpPeriodModal()" class="bg-school-50 hover:bg-school-100 text-school-700 px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer" title="Neue Version anlegen (Klon)">
+                            <span>➕</span> <span class="hidden sm:inline">Neuer Zeitraum</span>
+                        </button>
+                        <button onclick="openEditEpPeriodModal()" class="text-slate-500 hover:text-slate-800 hover:bg-slate-200 p-1.5 rounded-lg text-xs transition cursor-pointer" title="Zeitraum bearbeiten / löschen">
+                            <span>⚙️</span>
+                        </button>
+                    </div>
+
+                    <!-- Ansichts-Umschalter -->
+                    <div class="flex bg-slate-100 p-1 rounded-xl text-xs font-bold">
+                        <button id="ep-btn-dash" onclick="switchEpSubView('dashboard')" class="px-3 py-1.5 rounded-lg bg-white shadow-2xs text-school-700 font-black transition">📊 Gesamt-Dashboard</button>
+                        <button id="ep-btn-teacher" onclick="switchEpSubView('teacher')" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition">👤 Lehrkraft-Detailplan</button>
+                    </div>
+
+                    <!-- Export & Druck -->
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="exportEpToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl text-xs font-bold shadow-2xs transition flex items-center gap-1 cursor-pointer" title="Einsatzplanung als Excel-Datei exportieren (Deckblatt + alle Lehrkraftblätter)">
+                            <span>📥</span> <span>Excel (.xlsx)</span>
+                        </button>
+                        <button onclick="printEpView()" class="bg-slate-800 hover:bg-slate-700 text-white px-3 py-2 rounded-xl text-xs font-bold shadow-2xs transition flex items-center gap-1 cursor-pointer" title="Aktuelle Ansicht drucken (A4)">
+                            <span>🖨️</span> <span>Drucken</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- UNTERANSICHT 1: GESAMT-DASHBOARD (ANALOG EXCEL DECKBLATT) -->
+            <div id="ep-subview-dashboard" class="flex flex-col gap-6">
+                <!-- 4 KENNZAHLEN-KACHELN -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-white p-4 rounded-xl shadow-xs border border-slate-200">
+                        <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Pflichtstunden (Deputat)</div>
+                        <div class="text-2xl md:text-3xl font-black text-slate-800" id="ep-stat-deputat">0 h</div>
+                        <div class="text-[11px] text-slate-400 mt-1">Gesamtkapazität der Schule</div>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-xs border border-slate-200">
+                        <div class="text-[11px] font-bold text-blue-500 uppercase tracking-wider mb-1">Gehaltener Fachunterricht</div>
+                        <div class="text-2xl md:text-3xl font-black text-blue-600" id="ep-stat-unterricht">0 h</div>
+                        <div class="text-[11px] text-blue-700 mt-1">Summe aller Fachstunden</div>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-xs border border-slate-200">
+                        <div class="text-[11px] font-bold text-purple-500 uppercase tracking-wider mb-1">Abminderungen (Entlastung)</div>
+                        <div class="text-2xl md:text-3xl font-black text-purple-600" id="ep-stat-abminderungen">0 h</div>
+                        <div class="text-[11px] text-purple-700 mt-1">Funktionen, Leitungen & AA</div>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-xs border border-slate-200">
+                        <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Schulsaldo / Reststunden</div>
+                        <div class="text-2xl md:text-3xl font-black text-teal-600" id="ep-stat-saldo">0 h</div>
+                        <div class="text-[11px] text-slate-400 mt-1" id="ep-stat-saldo-desc">Bereitschaft & Bilanz</div>
+                    </div>
+                </div>
+
+                <!-- TABELLE: SCHULWEITE EINSATZPLANUNG -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 md:p-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-800">Kollegiumsübersicht nach Einsatzplanung</h3>
+                            <p class="text-xs text-slate-500">Klicken Sie auf eine Lehrkraft, um deren Detailplan zu öffnen und zu bearbeiten.</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="text" id="ep-search-input" onkeyup="filterEpDashboardTable()" placeholder="🔍 Lehrkraft suchen..." class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs outline-none focus:border-school-500 w-44">
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto rounded-xl border border-slate-200">
+                        <table class="w-full text-xs text-left" id="ep-dashboard-table">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                                    <th class="p-3 w-10 text-center">Nr.</th>
+                                    <th class="p-3">Name der Lehrkraft</th>
+                                    <th class="p-3 text-center bg-slate-50">Deputat (Pflicht)</th>
+                                    <th class="p-3 text-center bg-blue-50/50 text-blue-800">Unterricht (U)</th>
+                                    <th class="p-3 text-center bg-purple-50/50 text-purple-800">Abminderungen</th>
+                                    <th class="p-3 text-center bg-teal-50/50 text-teal-800">Reststunden-Soll (R)</th>
+                                    <th class="p-3 text-center">Excel-Bilanz</th>
+                                    <th class="p-3 text-center">GTS</th>
+                                    <th class="p-3 text-right">Aktion</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ep-dashboard-tbody" class="divide-y divide-slate-100">
+                            </tbody>
+                            <tfoot id="ep-dashboard-tfoot" class="bg-slate-100 font-black border-t-2 border-slate-300">
+                            </tfoot>
                         </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- UNTERANSICHT 2: LEHRKRAFT-DETAILPLAN (EDITOR) -->
+            <div id="ep-subview-teacher" class="hidden flex-col gap-6">
+                <!-- LEHRKRAFT-AUSWAHLLEISTE -->
+                <div class="bg-white p-4 rounded-xl shadow-xs border border-slate-200 flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                        <button onclick="prevEpTeacher()" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold flex items-center justify-center transition cursor-pointer" title="Vorherige Lehrkraft">◀</button>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-slate-500">Lehrkraft:</span>
+                            <select id="ep-teacher-select" onchange="changeEpTeacher(this.value)" class="bg-slate-50 border border-slate-200 text-sm font-extrabold rounded-lg p-2 text-slate-800 outline-none focus:border-school-500 min-w-[200px]">
+                            </select>
+                        </div>
+                        <button onclick="nextEpTeacher()" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold flex items-center justify-center transition cursor-pointer" title="Nächste Lehrkraft">▶</button>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button onclick="printTeacherEpReport(currentEpTeacherId, currentEpPeriodId, appData.schoolYear)" class="bg-school-50 hover:bg-school-100 text-school-700 px-3.5 py-2 rounded-xl text-xs font-bold border border-school-200 transition flex items-center gap-1.5 cursor-pointer">
+                            <span>🖨️</span> <span>A4-Druckplan für Lehrkraft</span>
+                        </button>
+                        <button onclick="switchEpSubView('dashboard')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer">
+                            <span>↩</span> <span>Zurück zur Gesamtübersicht</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 3-SPALTEN GRID: RAHMENDATEN, ABMINDERUNGEN, UNTERRICHTSZEILEN -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <!-- SPALTE 1: RAHMENDATEN & LIVE-SALDO (4 SPALTEN) -->
+                    <div class="lg:col-span-4 flex flex-col gap-4">
+                        <div class="bg-white p-5 rounded-2xl shadow-xs border border-slate-200 space-y-4">
+                            <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                                <span>⚙️</span> Rahmendaten
+                            </h3>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">Pflichtstunden (Deputat):</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="number" id="ep-input-deputat" min="0" max="40" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-center text-lg font-black text-slate-800 outline-none focus:border-school-500" onchange="updateEpTeacherDeputat(this.value)">
+                                    <span class="text-xs font-bold text-slate-500">Stunden</span>
+                                </div>
+                                <span class="text-[11px] text-slate-400 mt-0.5 block">Vollzeit i. d. R. 26 h, Teilzeit entsprechend</span>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">GTS-Stunden (Ganztag):</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="number" id="ep-input-gts" min="0" max="20" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-center font-bold text-slate-800 outline-none focus:border-school-500" onchange="updateEpTeacherGts(this.value)">
+                                    <span class="text-xs font-bold text-slate-500">Stunden</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- LIVE SALDO KACHEL -->
+                        <div class="bg-white p-5 rounded-2xl shadow-xs border border-slate-200 space-y-3" id="ep-teacher-saldo-box">
+                            <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                                <span>⚖️</span> Berechneter Saldo
+                            </h3>
+                            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center" id="ep-teacher-saldo-badge">
+                                <!-- Dynamisch befüllt -->
+                            </div>
+                            <div class="text-xs text-slate-600 space-y-1.5 pt-1 border-t border-slate-100">
+                                <div class="flex justify-between"><span>Pflichtstunden:</span> <b id="ep-calc-deputat">0 h</b></div>
+                                <div class="flex justify-between"><span>Abminderungen gesamt:</span> <b id="ep-calc-abm" class="text-purple-700">0 h</b></div>
+                                <div class="flex justify-between"><span>Unterricht gesamt:</span> <b id="ep-calc-unt" class="text-blue-700">0 h</b></div>
+                                <div class="flex justify-between pt-1 border-t font-black"><span>Verplant gesamt:</span> <span id="ep-calc-sum">0 h</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SPALTE 2 & 3: ABMINDERUNGEN UND UNTERRICHT (8 SPALTEN) -->
+                    <div class="lg:col-span-8 flex flex-col gap-6">
+                        <!-- BOX 1: ABMINDERUNGSSTUNDEN -->
+                        <div class="bg-white p-5 rounded-2xl shadow-xs border border-slate-200">
+                            <div class="flex items-center justify-between gap-2 mb-3">
+                                <div>
+                                    <h3 class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+                                        <span class="text-purple-600">🛡️</span> Abminderungen & Anrechnungsstunden
+                                    </h3>
+                                    <p class="text-[11px] text-slate-500">Entlastungen für Klassenleitung, Funktionen, Schulleitung oder Abordnungen</p>
+                                </div>
+                                <div class="text-xs font-black text-purple-700 bg-purple-50 px-2.5 py-1 rounded-lg border border-purple-100" id="ep-abm-total-badge">0 h</div>
+                            </div>
+
+                            <div class="space-y-2 mb-3" id="ep-abm-list">
+                                <!-- Dynamische Zeilen -->
+                            </div>
+
+                            <!-- FORMULAR ZUM HINZUFÜGEN EINER ABMINDERUNG -->
+                            <div class="bg-purple-50/50 p-3 rounded-xl border border-purple-100 flex flex-wrap sm:flex-nowrap items-center gap-2">
+                                <select id="ep-new-abm-art" onchange="onEpAbmArtChange(this.value)" class="bg-white border border-slate-200 rounded-lg p-2 text-xs font-bold text-slate-700 outline-none focus:border-purple-500 w-full sm:w-44">
+                                    <option value="KL">KL – Klassenleitung (1h)</option>
+                                    <option value="PR">PR – Personalrat (1h)</option>
+                                    <option value="SL">SL – Schulleitung (19h)</option>
+                                    <option value="ST">ST – Stellv. Schulleitung (19h)</option>
+                                    <option value="AA">AA – Anrechnungsstunde (1h)</option>
+                                    <option value="AA2">AA – Anrechnungsstunden (2h)</option>
+                                    <option value="BeratL">BeratL – Beratungslehrer (2h)</option>
+                                    <option value="päd">päd – Pädagogische Aufgaben (2h)</option>
+                                    <option value="PA">PA – Prüfungsausschuss (1h)</option>
+                                    <option value="GBA">GBA – Gleichstellung (1h)</option>
+                                    <option value="StS">StS – Studienseminar / Abordnung</option>
+                                    <option value="UNI">UNI – Universität / Abordnung</option>
+                                    <option value="SJA">SJA – Schuljahresarbeit</option>
+                                    <option value="GK">GK – Ganztagskoordination</option>
+                                    <option value="VfA">VfA – Förderung</option>
+                                    <option value="Sonstiges">Sonstige Funktion...</option>
+                                </select>
+                                <input type="text" id="ep-new-abm-text" placeholder="Zusatz / Klasse (z. B. 6a)" class="bg-white border border-slate-200 rounded-lg p-2 text-xs flex-grow outline-none focus:border-purple-500">
+                                <div class="flex items-center gap-1">
+                                    <input type="number" id="ep-new-abm-hours" value="1" min="0.5" step="0.5" max="30" class="w-16 bg-white border border-slate-200 rounded-lg p-2 text-xs font-bold text-center outline-none focus:border-purple-500">
+                                    <span class="text-xs font-bold text-slate-500">h</span>
+                                </div>
+                                <button onclick="addEpAbminderung()" class="bg-purple-600 hover:bg-purple-700 text-white px-3.5 py-2 rounded-lg text-xs font-bold transition shadow-2xs whitespace-nowrap cursor-pointer">
+                                    ➕ Hinzufügen
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- BOX 2: UNTERRICHTSSTUNDEN NACH FACH & KLASSE -->
+                        <div class="bg-white p-5 rounded-2xl shadow-xs border border-slate-200">
+                            <div class="flex items-center justify-between gap-2 mb-3">
+                                <div>
+                                    <h3 class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+                                        <span class="text-blue-600">📚</span> Unterrichtsstunden (Fach & Klasse)
+                                    </h3>
+                                    <p class="text-[11px] text-slate-500">Reguläre Unterrichtsstunden laut Einsatzplanung</p>
+                                </div>
+                                <div class="text-xs font-black text-blue-700 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100" id="ep-unt-total-badge">0 h</div>
+                            </div>
+
+                            <div class="overflow-x-auto rounded-xl border border-slate-200 mb-3">
+                                <table class="w-full text-xs text-left" id="ep-unt-table">
+                                    <thead>
+                                        <tr class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                                            <th class="p-2.5 w-16 text-center">Stunden</th>
+                                            <th class="p-2.5 w-24">Fach</th>
+                                            <th class="p-2.5 w-28">Klasse</th>
+                                            <th class="p-2.5">Bemerkung</th>
+                                            <th class="p-2.5 w-12 text-center">Aktion</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="ep-unt-tbody" class="divide-y divide-slate-100">
+                                        <!-- Dynamische Zeilen -->
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- FORMULAR ZUM HINZUFÜGEN EINES FACHES -->
+                            <div class="bg-blue-50/50 p-3 rounded-xl border border-blue-100 flex flex-wrap sm:flex-nowrap items-center gap-2">
+                                <div class="flex items-center gap-1">
+                                    <input type="number" id="ep-new-unt-hours" value="4" min="1" max="15" class="w-16 bg-white border border-slate-200 rounded-lg p-2 text-xs font-bold text-center outline-none focus:border-blue-500" placeholder="Std">
+                                    <span class="text-xs font-bold text-slate-500">h</span>
+                                </div>
+                                <input type="text" id="ep-new-unt-subject" placeholder="Fach (z. B. Ma, De, Eng, Ph...)" list="ep-subjects-list" class="bg-white border border-slate-200 rounded-lg p-2 text-xs w-36 outline-none focus:border-blue-500 uppercase font-bold">
+                                <datalist id="ep-subjects-list">
+                                    <option value="DE">Deutsch</option>
+                                    <option value="MA">Mathematik</option>
+                                    <option value="ENG">Englisch</option>
+                                    <option value="PH">Physik</option>
+                                    <option value="BIO">Biologie</option>
+                                    <option value="CH">Chemie</option>
+                                    <option value="GEO">Geografie</option>
+                                    <option value="GE">Geschichte</option>
+                                    <option value="KU">Kunst</option>
+                                    <option value="MU">Musik</option>
+                                    <option value="SP">Sport</option>
+                                    <option value="WRT">WRT / HAWI</option>
+                                    <option value="ETH">Ethik</option>
+                                    <option value="KR">Religion</option>
+                                    <option value="MNT">MNT</option>
+                                    <option value="SKD">Sozialkunde</option>
+                                    <option value="FRZ">Französisch</option>
+                                    <option value="FÖRDERN">Förderunterricht</option>
+                                </datalist>
+                                <input type="text" id="ep-new-unt-class" placeholder="Klasse (z. B. 6a, 7c, 10b)" class="bg-white border border-slate-200 rounded-lg p-2 text-xs w-32 outline-none focus:border-blue-500 font-bold">
+                                <input type="text" id="ep-new-unt-note" placeholder="Bemerkung (optional)" class="bg-white border border-slate-200 rounded-lg p-2 text-xs flex-grow outline-none focus:border-blue-500">
+                                <button onclick="addEpUnterricht()" class="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-2 rounded-lg text-xs font-bold transition shadow-2xs whitespace-nowrap cursor-pointer">
+                                    ➕ Fach hinzufügen
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -746,6 +1008,32 @@ Vielen Dank!</div>
                         <span class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Jahresübersicht</span>
                         <div id="portal-year-totals-box" class="space-y-1 my-1 text-xs"></div>
                         <button onclick="printTeacherReportForPortal()" class="mt-2 text-xs text-teal-700 hover:text-teal-900 font-bold underline flex items-center gap-1">🖨️ Persönlichen Bericht drucken</button>
+                    </div>
+                </div>
+
+                <!-- EINSATZPLAN DES KOLLEGEN (INKL. HISTORIE ALLER PERIODEN DES SCHULJAHRES) -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 md:p-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                                <span>📋</span> Mein Einsatzplan
+                            </h3>
+                            <p class="text-xs text-slate-500">Stunden- und Fächerverteilung für Schuljahr <span id="portal-ep-year-label" class="font-bold text-slate-700"></span></p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <!-- Perioden-Wähler für den Kollegen -->
+                            <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl p-1">
+                                <span class="text-xs font-bold text-slate-500 pl-2">Gültigkeit:</span>
+                                <select id="portal-ep-period-select" onchange="renderPortalEpDetails()" class="bg-white border border-slate-200 text-xs font-bold rounded-lg p-1.5 text-slate-700 outline-none focus:border-teal-500">
+                                </select>
+                            </div>
+                            <button onclick="printTeacherEpReportForPortal()" class="bg-teal-50 hover:bg-teal-100 text-teal-800 font-bold px-3 py-2 rounded-xl text-xs border border-teal-200 shadow-2xs flex items-center gap-1.5 transition cursor-pointer">
+                                <span>🖨️</span> <span>Einsatzplan drucken (A4)</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="portal-ep-container">
+                        <!-- Dynamisch befüllt mit Pflichtstunden, Entlastungen, Fächern & Klassen -->
                     </div>
                 </div>
 
@@ -1092,6 +1380,57 @@ Vielen Dank!</div>
         </div>
     </div>
 
+    <!-- MODAL: EINSATZPLANUNGS-ZEITRAUM (PERIOD) ANLEGEN / BEARBEITEN -->
+    <div id="modal-ep-period" class="fixed inset-0 hidden items-center justify-center z-50 modal-bg p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md">
+            <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">📅</span>
+                    <h3 class="text-lg font-bold text-slate-800" id="ep-modal-title">Gültigkeitszeitraum festlegen</h3>
+                </div>
+                <button onclick="closeEpPeriodModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer">&times;</button>
+            </div>
+            
+            <input type="hidden" id="ep-modal-period-id">
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Bezeichnung des Zeitraums:</label>
+                    <input type="text" id="ep-modal-period-name" placeholder="z. B. Schuljahresbeginn oder Planänderung Herbst" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm font-bold text-slate-800 outline-none focus:border-school-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Gültig ab (Datum, i. d. R. ein Montag):</label>
+                    <input type="date" id="ep-modal-period-date" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm font-bold text-slate-800 outline-none focus:border-school-500">
+                    <span class="text-[11px] text-slate-400 mt-0.5 block">Ab diesem Tag greifen die berechneten Reststunden in der Vertretungsstatistik.</span>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Bemerkung / Anlass (optional):</label>
+                    <input type="text" id="ep-modal-period-note" placeholder="z. B. Rückkehr Fr. Müller aus Elternzeit" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs text-slate-700 outline-none focus:border-school-500">
+                </div>
+
+                <div id="ep-modal-clone-container" class="bg-school-50 p-3 rounded-xl border border-school-100">
+                    <label class="flex items-center gap-2 text-xs font-bold text-school-900 cursor-pointer select-none">
+                        <input type="checkbox" id="ep-modal-clone-check" checked class="w-4 h-4 rounded text-school-600 focus:ring-school-500">
+                        <span>Bestehende Pläne aller Lehrkräfte 1:1 übernehmen (Klon)</span>
+                    </label>
+                    <p class="text-[11px] text-school-700 ml-6 mt-0.5">Empfohlen: Alle bisherigen Lehrkraft-Pläne werden kopiert, sodass nur Änderungen gepflegt werden müssen.</p>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between gap-2 mt-6 pt-4 border-t border-slate-100">
+                <button type="button" id="ep-modal-delete-btn" onclick="deleteEpPeriod()" class="hidden px-3.5 py-2 text-rose-600 hover:bg-rose-50 border border-rose-200 rounded-xl font-bold text-xs transition cursor-pointer">
+                    🗑️ Zeitraum löschen
+                </button>
+                <div class="flex items-center gap-2 ml-auto">
+                    <button type="button" onclick="closeEpPeriodModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold text-xs cursor-pointer">Abbrechen</button>
+                    <button type="button" onclick="saveEpPeriod()" class="px-5 py-2 bg-school-600 hover:bg-school-700 text-white rounded-xl font-bold text-xs shadow-xs transition cursor-pointer">Speichern</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL: ADMIN / MASTER-PASSWORT LOGIN -->
     <div id="modal-admin-login" class="fixed inset-0 hidden items-center justify-center z-50 modal-bg p-4">
         <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm text-center">
@@ -1168,6 +1507,7 @@ Vielen Dank!</div>
             if (!yd.azv) yd.azv = [];
             if (!yd.holidays) yd.holidays = {};
             if (!yd.staffStatus) yd.staffStatus = {};
+            if (!yd.einsatzplanung) yd.einsatzplanung = { periods: [], plans: {} };
             return yd;
         }
 
@@ -2616,7 +2956,9 @@ Vielen Dank!</div>
                 html += `<tr><td colspan="${days + 8}" class="p-8 text-center text-slate-400 italic">Keine aktiven Lehrkräfte für SJ ${appData.schoolYear} ausgewählt. Wechseln Sie in den Bereich "Kollegium", um Lehrkräfte zu aktivieren oder neu anzulegen.</td></tr>`;
             } else {
                 activeTeachers.sort((a,b) => a.name.localeCompare(b.name)).forEach(t => {
-                let currentR = yd.monthConfigs?.[m]?.[t.id]?.r !== undefined ? yd.monthConfigs[m][t.id].r : t.r;
+                let currentR = yd.monthConfigs?.[m]?.[t.id]?.r !== undefined 
+                    ? yd.monthConfigs[m][t.id].r 
+                    : getTeacherWeeklyRSoll(t.id, new Date(y, m - 1, 1), appData.schoolYear);
                 let currentV = yd.monthConfigs?.[m]?.[t.id]?.v !== undefined ? yd.monthConfigs[m][t.id].v : t.v;
                 let sums = { K: 0, KK: 0, R: 0, V: 0, E: 0 }; let tRecs = yd.records?.[m]?.[t.id] || {};
                 
@@ -2636,9 +2978,12 @@ Vielen Dank!</div>
                         if (yd.records?.[recM]?.[t.id]?.[recD]?.type === 'R') rSumThisWeek += (parseInt(yd.records[recM][t.id][recD].h) || 0);
                         dIter.setDate(dIter.getDate() + 1);
                     }
-                    let remW = currentR - rSumThisWeek;
+                    let weekRSoll = (yd.monthConfigs?.[m]?.[t.id]?.r !== undefined)
+                        ? yd.monthConfigs[m][t.id].r
+                        : getTeacherWeeklyRSoll(t.id, new Date(mon), appData.schoolYear);
+                    let remW = weekRSoll - rSumThisWeek;
                     let badgeClass = remW > 0 ? 'bg-green-100 text-green-700 border border-green-200' : (remW === 0 ? 'bg-slate-100 text-slate-400 border border-slate-200' : 'bg-red-100 text-red-700 border border-red-200');
-                    rBadgesHtml += `<div class="text-[10px] font-bold px-1.5 rounded-md shadow-sm cursor-help ${badgeClass}">${remW}</div>`;
+                    rBadgesHtml += `<div class="text-[10px] font-bold px-1.5 rounded-md shadow-sm cursor-help ${badgeClass}" title="KW-Start ${new Date(mon).getDate()}.${new Date(mon).getMonth()+1}.: Soll ${weekRSoll} h, Gehalten ${rSumThisWeek} h">${remW}</div>`;
                 });
                 rBadgesHtml += '</div>';
                 let remV = currentV - sums.V;
@@ -2929,36 +3274,1234 @@ Vielen Dank!</div>
             document.getElementById('dash-months').innerHTML = hMonths;
         }
 
-        // --- JAHRESSTART UMFRAGE ---
+        // --- EINSATZPLANUNG ENGINE (DYNAMISCHE PERIODEN, DEPUTATE, ABMINDERUNGEN, FACHUNTERRICHT & EXPORT) ---
+        let currentEpSubView = 'dashboard'; // 'dashboard' | 'teacher'
+        let currentEpPeriodId = null;
+        let currentEpTeacherId = null;
+        let portalEpPeriodId = null;
+
+        function getYearEpData(yStr = appData.schoolYear) {
+            let yd = getYearData(yStr);
+            if (!yd.einsatzplanung) {
+                yd.einsatzplanung = { periods: [], plans: {} };
+            }
+            if (!Array.isArray(yd.einsatzplanung.periods)) {
+                yd.einsatzplanung.periods = [];
+            }
+            if (!yd.einsatzplanung.plans || typeof yd.einsatzplanung.plans !== 'object') {
+                yd.einsatzplanung.plans = {};
+            }
+
+            // Standard-Periode anlegen, falls noch keine existiert (100% abwärtskompatibler Start)
+            if (yd.einsatzplanung.periods.length === 0) {
+                let parts = String(yStr).split('/');
+                let startYear = (parts.length === 2) ? (parseInt(parts[0]) < 100 ? 2000 + parseInt(parts[0]) : parseInt(parts[0])) : new Date().getFullYear();
+                let startValidFrom = `${startYear}-08-01`;
+                let defaultPid = 'p_start_' + String(yStr).replace(/[^0-9]/g, '');
+
+                yd.einsatzplanung.periods.push({
+                    id: defaultPid,
+                    name: "Schuljahresbeginn",
+                    validFrom: startValidFrom,
+                    note: "Start-Einsatzplan"
+                });
+                yd.einsatzplanung.plans[defaultPid] = {};
+
+                // Initialisiere für alle Lehrkräfte einen Basisplan mit Standard 26h Deputat
+                appData.teachers.forEach(t => {
+                    let dep = (t.r && t.r > 15) ? t.r : 26;
+                    yd.einsatzplanung.plans[defaultPid][t.id] = {
+                        pflichtstunden: dep,
+                        abminderungen: [],
+                        unterricht: [],
+                        gts: 0
+                    };
+                });
+            }
+
+            return yd.einsatzplanung;
+        }
+
+        function calculateTeacherEp(teacherPlan, defaultPflichtstunden = 26) {
+            if (!teacherPlan) {
+                return {
+                    pflichtstunden: defaultPflichtstunden,
+                    abminderungenTotal: 0,
+                    unterrichtTotal: 0,
+                    verplantTotal: 0,
+                    excelRest: -defaultPflichtstunden,
+                    rSoll: defaultPflichtstunden,
+                    gts: 0
+                };
+            }
+
+            const pflichtstunden = (typeof teacherPlan.pflichtstunden === 'number') ? teacherPlan.pflichtstunden : defaultPflichtstunden;
+            const gts = teacherPlan.gts || 0;
+
+            let abminderungenTotal = 0;
+            (teacherPlan.abminderungen || []).forEach(a => {
+                abminderungenTotal += (parseFloat(a.hours) || 0);
+            });
+
+            let unterrichtTotal = 0;
+            (teacherPlan.unterricht || []).forEach(u => {
+                unterrichtTotal += (parseFloat(u.hours) || 0);
+            });
+
+            const verplantTotal = Math.round((abminderungenTotal + unterrichtTotal) * 10) / 10;
+            // Original-Excel: Rest = (Abminderungen + Unterricht) - Pflichtstunden
+            const excelRest = Math.round((verplantTotal - pflichtstunden) * 10) / 10;
+            // Vertretungsstatistik: Negativer Rest bedeutet Reststunden-Soll (Bereitschaft)
+            const rSoll = excelRest < 0 ? Math.abs(excelRest) : 0;
+
+            return {
+                pflichtstunden,
+                abminderungenTotal,
+                unterrichtTotal,
+                verplantTotal,
+                excelRest,
+                rSoll,
+                gts
+            };
+        }
+
+        function getTeacherActiveEpPeriod(dateObj, yStr = appData.schoolYear) {
+            const epData = getYearEpData(yStr);
+            if (!epData.periods || epData.periods.length === 0) return null;
+
+            let targetIso = "";
+            if (typeof dateObj === 'string') {
+                targetIso = dateObj.slice(0, 10);
+            } else if (dateObj instanceof Date) {
+                let y = dateObj.getFullYear();
+                let m = String(dateObj.getMonth() + 1).padStart(2, '0');
+                let d = String(dateObj.getDate()).padStart(2, '0');
+                targetIso = `${y}-${m}-${d}`;
+            } else {
+                targetIso = new Date().toISOString().slice(0, 10);
+            }
+
+            // Nach validFrom absteigend sortieren
+            const sorted = [...epData.periods].sort((a, b) => b.validFrom.localeCompare(a.validFrom));
+            let match = sorted.find(p => p.validFrom <= targetIso);
+            return match || sorted[sorted.length - 1];
+        }
+
+        function getTeacherWeeklyRSoll(tId, mondayDate, yStr = appData.schoolYear) {
+            const period = getTeacherActiveEpPeriod(mondayDate, yStr);
+            if (!period) {
+                let yd = getYearData(yStr);
+                let m = (mondayDate instanceof Date) ? mondayDate.getMonth() + 1 : new Date().getMonth() + 1;
+                let t = appData.teachers.find(teacher => teacher.id === tId);
+                return yd.monthConfigs?.[m]?.[tId]?.r !== undefined ? yd.monthConfigs[m][tId].r : (t?.r || 0);
+            }
+
+            const epData = getYearEpData(yStr);
+            const plan = epData.plans?.[period.id]?.[tId];
+            if (!plan) {
+                let yd = getYearData(yStr);
+                let m = (mondayDate instanceof Date) ? mondayDate.getMonth() + 1 : new Date().getMonth() + 1;
+                let t = appData.teachers.find(teacher => teacher.id === tId);
+                return yd.monthConfigs?.[m]?.[tId]?.r !== undefined ? yd.monthConfigs[m][tId].r : (t?.r || 0);
+            }
+
+            const calc = calculateTeacherEp(plan);
+            return calc.rSoll;
+        }
+
+        // --- ANSICHT: EINSATZPLANUNG RENDERN ---
         function renderSurveyView() {
-            const tbody = document.getElementById('survey-table-body');
+            const epData = getYearEpData(appData.schoolYear);
+
+            // Perioden-Dropdown befüllen
+            const pSelect = document.getElementById('ep-period-select');
+            if (pSelect) {
+                pSelect.innerHTML = '';
+                epData.periods.sort((a,b) => a.validFrom.localeCompare(b.validFrom)).forEach((p, idx) => {
+                    let opt = document.createElement('option');
+                    opt.value = p.id;
+                    let parts = p.validFrom.split('-');
+                    let dateDe = parts.length === 3 ? `${parts[2]}.${parts[1]}.${parts[0]}` : p.validFrom;
+                    opt.text = `${p.name} (ab ${dateDe})`;
+                    if (!currentEpPeriodId && idx === epData.periods.length - 1) {
+                        currentEpPeriodId = p.id;
+                    }
+                    if (p.id === currentEpPeriodId) opt.selected = true;
+                    pSelect.appendChild(opt);
+                });
+                if (!currentEpPeriodId && epData.periods.length > 0) {
+                    currentEpPeriodId = epData.periods[epData.periods.length - 1].id;
+                }
+            }
+
+            const activePeriod = epData.periods.find(p => p.id === currentEpPeriodId) || epData.periods[0];
+
+            // Subtitle
+            const subTitle = document.getElementById('ep-period-subtitle');
+            if (subTitle && activePeriod) {
+                let parts = activePeriod.validFrom.split('-');
+                let dateDe = parts.length === 3 ? `${parts[2]}.${parts[1]}.${parts[0]}` : activePeriod.validFrom;
+                subTitle.innerHTML = `Ausgewählter Zeitraum: <b>${activePeriod.name}</b> (Gültig ab Montag, ${dateDe}) ${activePeriod.note ? '• <i>' + activePeriod.note + '</i>' : ''}`;
+            }
+
+            if (currentEpSubView === 'dashboard') {
+                document.getElementById('ep-subview-dashboard').classList.remove('hidden');
+                document.getElementById('ep-subview-dashboard').classList.add('flex');
+                document.getElementById('ep-subview-teacher').classList.add('hidden');
+                document.getElementById('ep-subview-teacher').classList.remove('flex');
+                document.getElementById('ep-btn-dash').className = "px-3 py-1.5 rounded-lg bg-white shadow-2xs text-school-700 font-black transition";
+                document.getElementById('ep-btn-teacher').className = "px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition";
+                renderEpDashboard(epData, activePeriod);
+            } else {
+                document.getElementById('ep-subview-dashboard').classList.add('hidden');
+                document.getElementById('ep-subview-dashboard').classList.remove('flex');
+                document.getElementById('ep-subview-teacher').classList.remove('hidden');
+                document.getElementById('ep-subview-teacher').classList.add('flex');
+                document.getElementById('ep-btn-dash').className = "px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition";
+                document.getElementById('ep-btn-teacher').className = "px-3 py-1.5 rounded-lg bg-white shadow-2xs text-school-700 font-black transition";
+                renderEpTeacherEditor(epData, activePeriod);
+            }
+        }
+
+        function switchEpSubView(subView) {
+            currentEpSubView = subView;
+            renderSurveyView();
+        }
+
+        function changeEpPeriod(periodId) {
+            currentEpPeriodId = periodId;
+            renderSurveyView();
+            showToast("Gültigkeitszeitraum gewechselt", "📅");
+        }
+
+        // --- SUBVIEW 1: SCHUL-DASHBOARD (ANALOG EXCEL DECKBLATT) ---
+        function renderEpDashboard(epData, activePeriod) {
+            if (!activePeriod) return;
+
+            let activeTeachers = appData.teachers.filter(t => isTeacherActiveInYear(t.id, appData.schoolYear))
+                .sort((a,b) => a.name.localeCompare(b.name));
+
+            const tbody = document.getElementById('ep-dashboard-tbody');
+            const tfoot = document.getElementById('ep-dashboard-tfoot');
+            if (!tbody) return;
+
+            let sumDep = 0;
+            let sumUnt = 0;
+            let sumAbm = 0;
+            let sumRSoll = 0;
+            let sumExcelRest = 0;
+            let sumGts = 0;
+
             let html = '';
-            let activeInYear = appData.teachers.filter(t => isTeacherActiveInYear(t.id, appData.schoolYear));
+            activeTeachers.forEach((t, idx) => {
+                let plan = epData.plans?.[activePeriod.id]?.[t.id];
+                let calc = calculateTeacherEp(plan);
+
+                sumDep += calc.pflichtstunden;
+                sumUnt += calc.unterrichtTotal;
+                sumAbm += calc.abminderungenTotal;
+                sumRSoll += calc.rSoll;
+                sumExcelRest += calc.excelRest;
+                sumGts += calc.gts;
+
+                let saldoBadge = "";
+                if (calc.excelRest < 0) {
+                    saldoBadge = `<span class="bg-teal-100 text-teal-800 font-bold px-2 py-0.5 rounded text-[11px]">${calc.excelRest} h (Defizit)</span>`;
+                } else if (calc.excelRest === 0) {
+                    saldoBadge = `<span class="bg-slate-100 text-slate-500 font-bold px-2 py-0.5 rounded text-[11px]">0 h (Ausgeglichen)</span>`;
+                } else {
+                    saldoBadge = `<span class="bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded text-[11px]">+${calc.excelRest} h (Überhang)</span>`;
+                }
+
+                html += `
+                    <tr class="hover:bg-slate-50 transition cursor-pointer" onclick="openTeacherEp('${t.id}')">
+                        <td class="p-3 text-center font-bold text-slate-400">${idx + 1}</td>
+                        <td class="p-3 font-extrabold text-slate-800 flex items-center gap-2">
+                            <span>👤 ${t.name}</span>
+                        </td>
+                        <td class="p-3 text-center font-bold bg-slate-50/50 text-slate-700">${calc.pflichtstunden} h</td>
+                        <td class="p-3 text-center font-black bg-blue-50/30 text-blue-700">${calc.unterrichtTotal} h</td>
+                        <td class="p-3 text-center font-bold bg-purple-50/30 text-purple-700">${calc.abminderungenTotal} h</td>
+                        <td class="p-3 text-center font-black bg-teal-50/30 text-teal-700">${calc.rSoll > 0 ? calc.rSoll + ' h' : '–'}</td>
+                        <td class="p-3 text-center">${saldoBadge}</td>
+                        <td class="p-3 text-center font-medium text-slate-500">${calc.gts > 0 ? calc.gts + ' h' : '–'}</td>
+                        <td class="p-3 text-right" onclick="event.stopPropagation()">
+                            <button onclick="openTeacherEp('${t.id}')" class="bg-school-50 hover:bg-school-100 text-school-700 px-2.5 py-1 rounded-lg font-bold text-xs transition border border-school-200 shadow-2xs">
+                                ✏️ Bearbeiten
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            if (activeTeachers.length === 0) {
+                html = `<tr><td colspan="9" class="p-8 text-center text-slate-400 italic">Keine aktiven Lehrkräfte für dieses Schuljahr vorhanden.</td></tr>`;
+            }
+
+            tbody.innerHTML = html;
+
+            // Kennzahlenkarten oben aktualisieren
+            document.getElementById('ep-stat-deputat').textContent = `${sumDep} h`;
+            document.getElementById('ep-stat-unterricht').textContent = `${Math.round(sumUnt * 10) / 10} h`;
+            document.getElementById('ep-stat-abminderungen').textContent = `${Math.round(sumAbm * 10) / 10} h`;
+            document.getElementById('ep-stat-saldo').textContent = `${sumExcelRest > 0 ? '+' : ''}${Math.round(sumExcelRest * 10) / 10} h`;
             
-            if (activeInYear.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-slate-400 italic">Keine aktiven Lehrkräfte für SJ ${appData.schoolYear} vorhanden. Wechseln Sie in den Bereich "Kollegium", um Lehrkräfte zu aktivieren.</td></tr>`;
+            let saldoDesc = document.getElementById('ep-stat-saldo-desc');
+            if (saldoDesc) {
+                saldoDesc.textContent = `${sumRSoll} h wöchentliche Reststunden im Kollegium`;
+            }
+
+            // Gesamtsummenzeile im Tabellenfuß
+            if (tfoot) {
+                tfoot.innerHTML = `
+                    <tr class="text-slate-800">
+                        <td class="p-3 text-center">Σ</td>
+                        <td class="p-3 font-black">GESAMTSUMME SCHULE</td>
+                        <td class="p-3 text-center font-black">${sumDep} h</td>
+                        <td class="p-3 text-center font-black text-blue-700">${Math.round(sumUnt * 10) / 10} h</td>
+                        <td class="p-3 text-center font-black text-purple-700">${Math.round(sumAbm * 10) / 10} h</td>
+                        <td class="p-3 text-center font-black text-teal-700">${sumRSoll} h</td>
+                        <td class="p-3 text-center font-black ${sumExcelRest < 0 ? 'text-teal-700' : (sumExcelRest > 0 ? 'text-amber-700' : 'text-slate-700')}">
+                            ${sumExcelRest > 0 ? '+' : ''}${Math.round(sumExcelRest * 10) / 10} h
+                        </td>
+                        <td class="p-3 text-center font-bold text-slate-600">${sumGts} h</td>
+                        <td class="p-3 text-right text-xs text-slate-400 font-normal">Stand: ${new Date().toLocaleDateString('de-DE')}</td>
+                    </tr>
+                `;
+            }
+        }
+
+        function filterEpDashboardTable() {
+            let filter = (document.getElementById('ep-search-input')?.value || '').toLowerCase();
+            let rows = document.querySelectorAll('#ep-dashboard-tbody tr');
+            rows.forEach(r => {
+                let text = r.textContent.toLowerCase();
+                r.style.display = text.includes(filter) ? '' : 'none';
+            });
+        }
+
+        // --- SUBVIEW 2: LEHRKRAFT-DETAILPLAN (EDITOR) ---
+        function openTeacherEp(tId) {
+            currentEpTeacherId = tId;
+            currentEpSubView = 'teacher';
+            renderSurveyView();
+        }
+
+        function changeEpTeacher(tId) {
+            currentEpTeacherId = tId;
+            renderSurveyView();
+        }
+
+        function prevEpTeacher() {
+            let active = appData.teachers.filter(t => isTeacherActiveInYear(t.id, appData.schoolYear)).sort((a,b) => a.name.localeCompare(b.name));
+            let idx = active.findIndex(t => t.id === currentEpTeacherId);
+            if (idx > 0) {
+                changeEpTeacher(active[idx - 1].id);
+            } else if (active.length > 0) {
+                changeEpTeacher(active[active.length - 1].id);
+            }
+        }
+
+        function nextEpTeacher() {
+            let active = appData.teachers.filter(t => isTeacherActiveInYear(t.id, appData.schoolYear)).sort((a,b) => a.name.localeCompare(b.name));
+            let idx = active.findIndex(t => t.id === currentEpTeacherId);
+            if (idx < active.length - 1) {
+                changeEpTeacher(active[idx + 1].id);
+            } else if (active.length > 0) {
+                changeEpTeacher(active[0].id);
+            }
+        }
+
+        function renderEpTeacherEditor(epData, activePeriod) {
+            let activeTeachers = appData.teachers.filter(t => isTeacherActiveInYear(t.id, appData.schoolYear))
+                .sort((a,b) => a.name.localeCompare(b.name));
+
+            if (activeTeachers.length === 0) {
+                showToast("Keine aktiven Lehrkräfte vorhanden", "⚠️");
+                switchEpSubView('dashboard');
                 return;
             }
 
-            activeInYear.sort((a,b) => a.name.localeCompare(b.name)).forEach(t => {
-                html += `<tr class="hover:bg-slate-50 transition"><td class="p-3 font-bold text-slate-700 border-r border-slate-100">${t.name}</td><td class="p-3 text-center bg-green-50/30"><input type="number" min="0" value="${t.r}" class="w-20 text-center bg-white border border-green-200 rounded-md outline-none focus:border-school-500 font-bold p-2 transition" onchange="quickUpdateStaff('${t.id}', 'r', this.value)"></td><td class="p-3 text-center bg-blue-50/30"><input type="number" min="0" value="${t.v}" class="w-20 text-center bg-white border border-blue-200 rounded-md outline-none focus:border-school-500 font-bold p-2 transition" onchange="quickUpdateStaff('${t.id}', 'v', this.value)"></td></tr>`;
+            // Lehrkraft-Auswahl befüllen
+            const select = document.getElementById('ep-teacher-select');
+            if (select) {
+                select.innerHTML = '';
+                activeTeachers.forEach(t => {
+                    let opt = document.createElement('option');
+                    opt.value = t.id;
+                    opt.text = t.name;
+                    if (!currentEpTeacherId) currentEpTeacherId = t.id;
+                    if (t.id === currentEpTeacherId) opt.selected = true;
+                    select.appendChild(opt);
+                });
+            }
+
+            if (!currentEpTeacherId) currentEpTeacherId = activeTeachers[0].id;
+
+            // Plan abrufen oder anlegen
+            if (!epData.plans[activePeriod.id]) epData.plans[activePeriod.id] = {};
+            if (!epData.plans[activePeriod.id][currentEpTeacherId]) {
+                let tObj = appData.teachers.find(t => t.id === currentEpTeacherId);
+                epData.plans[activePeriod.id][currentEpTeacherId] = {
+                    pflichtstunden: (tObj && tObj.r && tObj.r > 15) ? tObj.r : 26,
+                    abminderungen: [],
+                    unterricht: [],
+                    gts: 0
+                };
+            }
+
+            let plan = epData.plans[activePeriod.id][currentEpTeacherId];
+            let calc = calculateTeacherEp(plan);
+
+            // Inputs befüllen
+            const depInput = document.getElementById('ep-input-deputat');
+            if (depInput) depInput.value = calc.pflichtstunden;
+            const gtsInput = document.getElementById('ep-input-gts');
+            if (gtsInput) gtsInput.value = calc.gts;
+
+            // Saldo-Badge
+            const saldoBadge = document.getElementById('ep-teacher-saldo-badge');
+            if (saldoBadge) {
+                if (calc.rSoll > 0) {
+                    saldoBadge.className = "p-4 rounded-xl bg-teal-50 border border-teal-200 text-center";
+                    saldoBadge.innerHTML = `
+                        <div class="text-3xl font-black text-teal-700">${calc.rSoll} h</div>
+                        <div class="text-xs font-bold text-teal-800 mt-1">🎯 Wöchentliches Reststunden-Soll (R)</div>
+                        <div class="text-[11px] text-teal-600 mt-0.5">Bereitschaft / Vertretung (${calc.excelRest} h Excel-Rest)</div>
+                    `;
+                } else if (calc.excelRest === 0) {
+                    saldoBadge.className = "p-4 rounded-xl bg-blue-50 border border-blue-200 text-center";
+                    saldoBadge.innerHTML = `
+                        <div class="text-3xl font-black text-blue-700">0 h</div>
+                        <div class="text-xs font-bold text-blue-800 mt-1">✅ Exakt im Soll verplant</div>
+                        <div class="text-[11px] text-blue-600 mt-0.5">Keine offenen Reststunden (R = 0 h)</div>
+                    `;
+                } else {
+                    saldoBadge.className = "p-4 rounded-xl bg-amber-50 border border-amber-200 text-center";
+                    saldoBadge.innerHTML = `
+                        <div class="text-3xl font-black text-amber-700">+${calc.excelRest} h</div>
+                        <div class="text-xs font-bold text-amber-800 mt-1">⚠️ Überhang / Mehrarbeit</div>
+                        <div class="text-[11px] text-amber-600 mt-0.5">Lehrkraft unterrichtet über Deputat</div>
+                    `;
+                }
+            }
+
+            document.getElementById('ep-calc-deputat').textContent = `${calc.pflichtstunden} h`;
+            document.getElementById('ep-calc-abm').textContent = `${calc.abminderungenTotal} h`;
+            document.getElementById('ep-calc-unt').textContent = `${calc.unterrichtTotal} h`;
+            document.getElementById('ep-calc-sum').textContent = `${calc.verplantTotal} h`;
+            document.getElementById('ep-abm-total-badge').textContent = `${calc.abminderungenTotal} h gesamt`;
+            document.getElementById('ep-unt-total-badge').textContent = `${calc.unterrichtTotal} h gesamt`;
+
+            // Abminderungsliste rendern
+            const abmList = document.getElementById('ep-abm-list');
+            if (abmList) {
+                let abmHtml = '';
+                (plan.abminderungen || []).forEach((a, idx) => {
+                    abmHtml += `
+                        <div class="flex items-center justify-between p-2.5 bg-slate-50 hover:bg-slate-100/80 rounded-xl border border-slate-200 transition">
+                            <div class="flex items-center gap-2">
+                                <span class="bg-purple-100 text-purple-800 font-extrabold px-2 py-0.5 rounded text-xs">${a.art}</span>
+                                <span class="font-bold text-slate-800 text-xs">${a.text || 'Entlastung'}</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="font-black text-purple-700 text-sm">${a.hours} h</span>
+                                <button onclick="removeEpAbminderung(${idx})" class="text-slate-400 hover:text-rose-600 hover:bg-rose-50 p-1 rounded-lg transition cursor-pointer" title="Löschen">
+                                    🗑️
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                if ((plan.abminderungen || []).length === 0) {
+                    abmHtml = `<div class="p-3 text-center text-slate-400 text-xs italic bg-slate-50/50 rounded-xl border border-dashed border-slate-200">Keine Abminderungsstunden für diese Lehrkraft eingetragen.</div>`;
+                }
+                abmList.innerHTML = abmHtml;
+            }
+
+            // Unterrichtstabelle rendern
+            const untTbody = document.getElementById('ep-unt-tbody');
+            if (untTbody) {
+                let untHtml = '';
+                (plan.unterricht || []).forEach((u, idx) => {
+                    untHtml += `
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="p-2.5 text-center font-black text-blue-700 bg-blue-50/20">${u.hours} h</td>
+                            <td class="p-2.5 font-bold text-slate-800 uppercase">${u.subject}</td>
+                            <td class="p-2.5 font-bold text-slate-700">${u.class}</td>
+                            <td class="p-2.5 text-slate-500 italic text-[11px]">${u.note || '–'}</td>
+                            <td class="p-2.5 text-center">
+                                <button onclick="removeEpUnterricht(${idx})" class="text-slate-400 hover:text-rose-600 hover:bg-rose-50 p-1 rounded-lg transition cursor-pointer" title="Zeile löschen">
+                                    🗑️
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                if ((plan.unterricht || []).length === 0) {
+                    untHtml = `<tr><td colspan="5" class="p-4 text-center text-slate-400 italic">Noch keine Unterrichtsstunden erfasst. Nutzen Sie das Formular unten.</td></tr>`;
+                }
+                untTbody.innerHTML = untHtml;
+            }
+        }
+
+        function updateEpTeacherDeputat(val) {
+            let epData = getYearEpData(appData.schoolYear);
+            let pId = currentEpPeriodId;
+            let tId = currentEpTeacherId;
+            if (!epData.plans[pId]) epData.plans[pId] = {};
+            if (!epData.plans[pId][tId]) epData.plans[pId][tId] = { pflichtstunden: 26, abminderungen: [], unterricht: [], gts: 0 };
+            
+            epData.plans[pId][tId].pflichtstunden = parseInt(val) || 0;
+            saveToLocal();
+            renderEpTeacherEditor(epData, epData.periods.find(p => p.id === pId));
+            showToast("Pflichtstunden aktualisiert");
+        }
+
+        function updateEpTeacherGts(val) {
+            let epData = getYearEpData(appData.schoolYear);
+            let pId = currentEpPeriodId;
+            let tId = currentEpTeacherId;
+            if (!epData.plans[pId]) epData.plans[pId] = {};
+            if (!epData.plans[pId][tId]) epData.plans[pId][tId] = { pflichtstunden: 26, abminderungen: [], unterricht: [], gts: 0 };
+            
+            epData.plans[pId][tId].gts = parseInt(val) || 0;
+            saveToLocal();
+            renderEpTeacherEditor(epData, epData.periods.find(p => p.id === pId));
+        }
+
+        function onEpAbmArtChange(val) {
+            const hoursInput = document.getElementById('ep-new-abm-hours');
+            const textInput = document.getElementById('ep-new-abm-text');
+            if (!hoursInput) return;
+
+            const standardHours = {
+                'KL': 1,
+                'PR': 1,
+                'SL': 19,
+                'ST': 19,
+                'AA': 1,
+                'AA2': 2,
+                'BeratL': 2,
+                'päd': 2,
+                'PA': 1,
+                'GBA': 1,
+                'StS': 8,
+                'UNI': 4,
+                'SJA': 1,
+                'GK': 1,
+                'VfA': 2
+            };
+
+            if (standardHours[val] !== undefined) {
+                hoursInput.value = standardHours[val];
+            }
+            if (val === 'KL' && textInput && !textInput.value) {
+                textInput.placeholder = "Klasse (z. B. 6a)";
+            }
+        }
+
+        function addEpAbminderung() {
+            const art = document.getElementById('ep-new-abm-art').value;
+            const text = document.getElementById('ep-new-abm-text').value.trim();
+            const hours = parseFloat(document.getElementById('ep-new-abm-hours').value) || 0;
+
+            if (hours <= 0) {
+                showToast("Bitte gültige Stundenanzahl angeben", "⚠️");
+                return;
+            }
+
+            let epData = getYearEpData(appData.schoolYear);
+            let pId = currentEpPeriodId;
+            let tId = currentEpTeacherId;
+            if (!epData.plans[pId]) epData.plans[pId] = {};
+            if (!epData.plans[pId][tId]) epData.plans[pId][tId] = { pflichtstunden: 26, abminderungen: [], unterricht: [], gts: 0 };
+            if (!epData.plans[pId][tId].abminderungen) epData.plans[pId][tId].abminderungen = [];
+
+            epData.plans[pId][tId].abminderungen.push({
+                art: art,
+                text: text,
+                hours: hours
             });
-            tbody.innerHTML = html;
+
+            saveToLocal();
+            document.getElementById('ep-new-abm-text').value = '';
+            renderEpTeacherEditor(epData, epData.periods.find(p => p.id === pId));
+            showToast(`Abminderung (${art}) hinzugefügt`, "🛡️");
         }
 
-        function quickUpdateStaff(id, field, value) { 
-            let t = appData.teachers.find(t => t.id === id); 
-            if(t) { 
-                t[field] = value === "" ? 0 : parseInt(value); 
-                saveToLocal(); 
-                showToast(`${t.name} aktualisiert.`); 
-            } 
+        function removeEpAbminderung(idx) {
+            let epData = getYearEpData(appData.schoolYear);
+            let pId = currentEpPeriodId;
+            let tId = currentEpTeacherId;
+            let plan = epData.plans?.[pId]?.[tId];
+            if (plan && plan.abminderungen && plan.abminderungen[idx] !== undefined) {
+                plan.abminderungen.splice(idx, 1);
+                saveToLocal();
+                renderEpTeacherEditor(epData, epData.periods.find(p => p.id === pId));
+                showToast("Abminderung entfernt");
+            }
         }
 
-        function copySurveyText() { 
-            navigator.clipboard.writeText(document.getElementById('survey-text-template').innerText).then(() => { 
-                showToast("Text kopiert!"); 
-            }).catch(err => { console.error('Fehler: ', err); }); 
+        function addEpUnterricht() {
+            const hours = parseInt(document.getElementById('ep-new-unt-hours').value) || 0;
+            const subject = document.getElementById('ep-new-unt-subject').value.trim();
+            const klass = document.getElementById('ep-new-unt-class').value.trim();
+            const note = document.getElementById('ep-new-unt-note').value.trim();
+
+            if (hours <= 0 || !subject || !klass) {
+                showToast("Bitte Stunden, Fach und Klasse angeben", "⚠️");
+                return;
+            }
+
+            let epData = getYearEpData(appData.schoolYear);
+            let pId = currentEpPeriodId;
+            let tId = currentEpTeacherId;
+            if (!epData.plans[pId]) epData.plans[pId] = {};
+            if (!epData.plans[pId][tId]) epData.plans[pId][tId] = { pflichtstunden: 26, abminderungen: [], unterricht: [], gts: 0 };
+            if (!epData.plans[pId][tId].unterricht) epData.plans[pId][tId].unterricht = [];
+
+            epData.plans[pId][tId].unterricht.push({
+                hours: hours,
+                subject: subject,
+                class: klass,
+                note: note
+            });
+
+            saveToLocal();
+            document.getElementById('ep-new-unt-subject').value = '';
+            document.getElementById('ep-new-unt-class').value = '';
+            document.getElementById('ep-new-unt-note').value = '';
+            document.getElementById('ep-new-unt-hours').value = '4';
+            document.getElementById('ep-new-unt-subject').focus();
+
+            renderEpTeacherEditor(epData, epData.periods.find(p => p.id === pId));
+            showToast(`${hours}h ${subject} (${klass}) hinzugefügt`, "📚");
+        }
+
+        function removeEpUnterricht(idx) {
+            let epData = getYearEpData(appData.schoolYear);
+            let pId = currentEpPeriodId;
+            let tId = currentEpTeacherId;
+            let plan = epData.plans?.[pId]?.[tId];
+            if (plan && plan.unterricht && plan.unterricht[idx] !== undefined) {
+                plan.unterricht.splice(idx, 1);
+                saveToLocal();
+                renderEpTeacherEditor(epData, epData.periods.find(p => p.id === pId));
+                showToast("Unterrichtszeile gelöscht");
+            }
+        }
+
+        // --- PERIODEN-VERWALTUNG (NEUE VERSION, KLON, BEARBEITEN, LÖSCHEN) ---
+        function openNewEpPeriodModal() {
+            document.getElementById('ep-modal-title').textContent = "Neuen Gültigkeitszeitraum anlegen";
+            document.getElementById('ep-modal-period-id').value = "";
+            document.getElementById('ep-modal-period-name').value = "Planänderung " + new Date().toLocaleDateString('de-DE', { month: 'long' });
+            
+            // Standardmäßig kommenden Montag als Startdatum vorschlagen
+            let nextMon = new Date();
+            let day = nextMon.getDay();
+            let diff = (day === 0 ? 1 : (day === 1 ? 7 : (8 - day)));
+            nextMon.setDate(nextMon.getDate() + diff);
+            let y = nextMon.getFullYear();
+            let m = String(nextMon.getMonth() + 1).padStart(2, '0');
+            let d = String(nextMon.getDate()).padStart(2, '0');
+            document.getElementById('ep-modal-period-date').value = `${y}-${m}-${d}`;
+            
+            document.getElementById('ep-modal-period-note').value = "";
+            document.getElementById('ep-modal-clone-container').classList.remove('hidden');
+            document.getElementById('ep-modal-clone-check').checked = true;
+            document.getElementById('ep-modal-delete-btn').classList.add('hidden');
+
+            document.getElementById('modal-ep-period').classList.remove('hidden');
+            document.getElementById('modal-ep-period').classList.add('flex');
+        }
+
+        function openEditEpPeriodModal() {
+            let epData = getYearEpData(appData.schoolYear);
+            let period = epData.periods.find(p => p.id === currentEpPeriodId);
+            if (!period) return;
+
+            document.getElementById('ep-modal-title').textContent = "Gültigkeitszeitraum bearbeiten";
+            document.getElementById('ep-modal-period-id').value = period.id;
+            document.getElementById('ep-modal-period-name').value = period.name;
+            document.getElementById('ep-modal-period-date').value = period.validFrom;
+            document.getElementById('ep-modal-period-note').value = period.note || "";
+            document.getElementById('ep-modal-clone-container').classList.add('hidden');
+            
+            let delBtn = document.getElementById('ep-modal-delete-btn');
+            if (delBtn) {
+                if (epData.periods.length > 1) {
+                    delBtn.classList.remove('hidden');
+                } else {
+                    delBtn.classList.add('hidden');
+                }
+            }
+
+            document.getElementById('modal-ep-period').classList.remove('hidden');
+            document.getElementById('modal-ep-period').classList.add('flex');
+        }
+
+        function closeEpPeriodModal() {
+            document.getElementById('modal-ep-period').classList.add('hidden');
+            document.getElementById('modal-ep-period').classList.remove('flex');
+        }
+
+        function saveEpPeriod() {
+            let pId = document.getElementById('ep-modal-period-id').value;
+            let name = document.getElementById('ep-modal-period-name').value.trim();
+            let validFrom = document.getElementById('ep-modal-period-date').value;
+            let note = document.getElementById('ep-modal-period-note').value.trim();
+            let shouldClone = document.getElementById('ep-modal-clone-check').checked;
+
+            if (!name || !validFrom) {
+                showToast("Bitte Name und Startdatum angeben", "⚠️");
+                return;
+            }
+
+            let epData = getYearEpData(appData.schoolYear);
+
+            if (pId) {
+                // Bearbeiten
+                let existing = epData.periods.find(p => p.id === pId);
+                if (existing) {
+                    existing.name = name;
+                    existing.validFrom = validFrom;
+                    existing.note = note;
+                }
+            } else {
+                // Neu anlegen
+                let newId = 'p_' + Date.now();
+                epData.periods.push({
+                    id: newId,
+                    name: name,
+                    validFrom: validFrom,
+                    note: note
+                });
+
+                if (!epData.plans) epData.plans = {};
+
+                if (shouldClone && currentEpPeriodId && epData.plans[currentEpPeriodId]) {
+                    // 1:1 Klon aller bisherigen Pläne
+                    epData.plans[newId] = JSON.parse(JSON.stringify(epData.plans[currentEpPeriodId]));
+                } else {
+                    epData.plans[newId] = {};
+                    appData.teachers.forEach(t => {
+                        let dep = (t.r && t.r > 15) ? t.r : 26;
+                        epData.plans[newId][t.id] = { pflichtstunden: dep, abminderungen: [], unterricht: [], gts: 0 };
+                    });
+                }
+                currentEpPeriodId = newId;
+            }
+
+            // Nach Datum sortieren
+            epData.periods.sort((a,b) => a.validFrom.localeCompare(b.validFrom));
+            saveToLocal();
+            closeEpPeriodModal();
+            renderSurveyView();
+            showToast("Gültigkeitszeitraum gespeichert!", "✅");
+        }
+
+        function deleteEpPeriod() {
+            let pId = document.getElementById('ep-modal-period-id').value;
+            let epData = getYearEpData(appData.schoolYear);
+            if (epData.periods.length <= 1) {
+                showToast("Der einzige Gültigkeitszeitraum kann nicht gelöscht werden.", "⚠️");
+                return;
+            }
+
+            askConfirm("Möchten Sie diesen Zeitraum und die zugehörigen Planungsdaten wirklich löschen?", () => {
+                let idx = epData.periods.findIndex(p => p.id === pId);
+                if (idx > -1) {
+                    epData.periods.splice(idx, 1);
+                    delete epData.plans[pId];
+                    currentEpPeriodId = epData.periods[epData.periods.length - 1].id;
+                    saveToLocal();
+                    closeEpPeriodModal();
+                    renderSurveyView();
+                    showToast("Zeitraum gelöscht.", "🗑️");
+                }
+            }, "Zeitraum löschen");
+        }
+
+        // --- KOLLEGEN-PORTAL: EINSATZPLAN ANZEIGE (INKL. HISTORIE ALLER PERIODEN) ---
+        function renderPortalEpSection() {
+            if (!portalUser) return;
+            const yStr = portalYear || appData.schoolYear;
+            const epData = getYearEpData(yStr);
+
+            const select = document.getElementById('portal-ep-period-select');
+            if (!select) return;
+            select.innerHTML = '';
+
+            let todayIso = new Date().toISOString().slice(0, 10);
+            let activePeriod = getTeacherActiveEpPeriod(todayIso, yStr) || epData.periods[epData.periods.length - 1];
+
+            epData.periods.sort((a,b) => a.validFrom.localeCompare(b.validFrom)).forEach(p => {
+                let opt = document.createElement('option');
+                opt.value = p.id;
+                let isActive = (activePeriod && activePeriod.id === p.id);
+                let parts = p.validFrom.split('-');
+                let dateDe = parts.length === 3 ? `${parts[2]}.${parts[1]}.${parts[0]}` : p.validFrom;
+                opt.text = `${p.name} (ab ${dateDe}) ${isActive ? '– [Aktuell gültig]' : '– [Archiv]'}`;
+                if (p.id === (portalEpPeriodId || activePeriod?.id)) {
+                    opt.selected = true;
+                    portalEpPeriodId = p.id;
+                }
+                select.appendChild(opt);
+            });
+
+            if (!portalEpPeriodId && activePeriod) {
+                portalEpPeriodId = activePeriod.id;
+            }
+
+            renderPortalEpDetails();
+        }
+
+        function renderPortalEpDetails() {
+            if (!portalUser) return;
+            const yStr = portalYear || appData.schoolYear;
+            const epData = getYearEpData(yStr);
+            const select = document.getElementById('portal-ep-period-select');
+            if (select && select.value) portalEpPeriodId = select.value;
+
+            const selectedPeriod = epData.periods.find(p => p.id === portalEpPeriodId) || epData.periods[0];
+            const container = document.getElementById('portal-ep-container');
+            if (!container || !selectedPeriod) return;
+
+            let plan = epData.plans?.[selectedPeriod.id]?.[portalUser.id];
+            let calc = calculateTeacherEp(plan);
+
+            let todayIso = new Date().toISOString().slice(0, 10);
+            let activePeriod = getTeacherActiveEpPeriod(todayIso, yStr);
+            let isCurrent = (activePeriod && activePeriod.id === selectedPeriod.id);
+
+            let parts = selectedPeriod.validFrom.split('-');
+            let dateDe = parts.length === 3 ? `${parts[2]}.${parts[1]}.${parts[0]}` : selectedPeriod.validFrom;
+
+            let html = `
+                <div class="mb-4 flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl ${isCurrent ? 'bg-teal-50 border border-teal-200' : 'bg-slate-50 border border-slate-200'}">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold px-2 py-0.5 rounded ${isCurrent ? 'bg-teal-600 text-white' : 'bg-slate-300 text-slate-700'}">
+                            ${isCurrent ? '● Aktuell gültiger Plan' : '📁 Archivierte Vorversion'}
+                        </span>
+                        <span class="text-xs font-bold text-slate-700">Gültig ab Montag, ${dateDe}</span>
+                    </div>
+                    <div class="text-xs font-bold ${calc.rSoll > 0 ? 'text-teal-700' : 'text-slate-600'}">
+                        ${calc.rSoll > 0 ? '🎯 ' + calc.rSoll + ' h Reststunden-Soll (R)' : '✅ Kein Reststunden-Soll (0 h)'}
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-center">
+                        <div class="text-[10px] font-bold text-slate-400 uppercase">Pflichtstunden (Deputat)</div>
+                        <div class="text-xl font-black text-slate-800">${calc.pflichtstunden} h</div>
+                    </div>
+                    <div class="bg-purple-50/50 p-3 rounded-xl border border-purple-100 text-center">
+                        <div class="text-[10px] font-bold text-purple-600 uppercase">Abminderungen</div>
+                        <div class="text-xl font-black text-purple-700">${calc.abminderungenTotal} h</div>
+                    </div>
+                    <div class="bg-blue-50/50 p-3 rounded-xl border border-blue-100 text-center">
+                        <div class="text-[10px] font-bold text-blue-600 uppercase">Fachunterricht</div>
+                        <div class="text-xl font-black text-blue-700">${calc.unterrichtTotal} h</div>
+                    </div>
+                    <div class="bg-teal-50/50 p-3 rounded-xl border border-teal-100 text-center">
+                        <div class="text-[10px] font-bold text-teal-600 uppercase">Reststunden-Soll (R)</div>
+                        <div class="text-xl font-black text-teal-700">${calc.rSoll} h</div>
+                    </div>
+                </div>
+            `;
+
+            // Abminderungen Tabelle
+            if ((plan?.abminderungen || []).length > 0) {
+                html += `
+                    <div class="mb-4">
+                        <div class="text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1">
+                            <span class="text-purple-600">🛡️</span> Abminderungen & Anrechnungsstunden:
+                        </div>
+                        <div class="overflow-x-auto rounded-xl border border-slate-200">
+                            <table class="w-full text-xs text-left">
+                                <thead class="bg-slate-50 text-slate-600 font-bold border-b">
+                                    <tr><th class="p-2">Funktion / Kürzel</th><th class="p-2">Beschreibung</th><th class="p-2 text-right">Stunden</th></tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100">
+                `;
+                plan.abminderungen.forEach(a => {
+                    html += `<tr><td class="p-2 font-bold text-purple-800"><span class="bg-purple-100 px-2 py-0.5 rounded text-[11px]">${a.art}</span></td><td class="p-2 text-slate-700">${a.text || '–'}</td><td class="p-2 text-right font-black text-purple-700">${a.hours} h</td></tr>`;
+                });
+                html += `</tbody></table></div></div>`;
+            }
+
+            // Unterrichtstabelle
+            html += `
+                <div>
+                    <div class="text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1">
+                        <span class="text-blue-600">📚</span> Gehaltener Fachunterricht nach Klassen:
+                    </div>
+                    <div class="overflow-x-auto rounded-xl border border-slate-200">
+                        <table class="w-full text-xs text-left">
+                            <thead class="bg-slate-50 text-slate-600 font-bold border-b">
+                                <tr><th class="p-2 text-center w-16">Stunden</th><th class="p-2 w-24">Fach</th><th class="p-2 w-28">Klasse</th><th class="p-2">Bemerkung</th></tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+            `;
+
+            (plan?.unterricht || []).forEach(u => {
+                html += `<tr><td class="p-2 text-center font-black text-blue-700 bg-blue-50/20">${u.hours} h</td><td class="p-2 font-extrabold uppercase text-slate-800">${u.subject}</td><td class="p-2 font-bold text-slate-700">${u.class}</td><td class="p-2 text-slate-500 italic">${u.note || '–'}</td></tr>`;
+            });
+
+            if ((plan?.unterricht || []).length === 0) {
+                html += `<tr><td colspan="4" class="p-3 text-center text-slate-400 italic">Für diesen Zeitraum sind keine Fachunterrichtsstunden hinterlegt.</td></tr>`;
+            }
+
+            html += `</tbody></table></div></div>`;
+
+            container.innerHTML = html;
+        }
+
+        function printTeacherEpReportForPortal() {
+            if (!portalUser) return;
+            printTeacherEpReport(portalUser.id, portalEpPeriodId || currentEpPeriodId, portalYear || appData.schoolYear);
+        }
+
+        // --- EXPORT & DRUCK DER EINSATZPLANUNG ---
+        function exportEpToExcel() {
+            if (typeof XLSX === 'undefined') {
+                showToast("SheetJS ist noch nicht geladen.", "❌");
+                return;
+            }
+            const yStr = appData.schoolYear;
+            const epData = getYearEpData(yStr);
+            const activePeriod = epData.periods.find(p => p.id === currentEpPeriodId) || epData.periods[0];
+            if (!activePeriod) {
+                showToast("Kein Zeitraum gefunden.", "⚠️");
+                return;
+            }
+
+            const wb = XLSX.utils.book_new();
+
+            // 1. Deckblatt: Übersicht (analog Original-Excel)
+            const overviewData = [
+                ["Einsatzplanung Heimbürgeschule Kahla", "", "", "", "", ""],
+                [`Schuljahr ${yStr} – ${activePeriod.name} (Gültig ab: ${activePeriod.validFrom})`, "", "", "", "", ""],
+                [],
+                ["Name", "Deputat", "Unterricht", "Abm/AA/Fobi", "Rest", "GTS"]
+            ];
+
+            let activeTeachers = appData.teachers.filter(t => isTeacherActiveInYear(t.id, yStr))
+                .sort((a,b) => a.name.localeCompare(b.name));
+
+            let sumDep = 0, sumUnt = 0, sumAbm = 0, sumRest = 0, sumGts = 0;
+
+            activeTeachers.forEach(t => {
+                let plan = epData.plans?.[activePeriod.id]?.[t.id];
+                let calc = calculateTeacherEp(plan);
+                sumDep += calc.pflichtstunden;
+                sumUnt += calc.unterrichtTotal;
+                sumAbm += calc.abminderungenTotal;
+                sumRest += calc.excelRest;
+                sumGts += calc.gts;
+
+                overviewData.push([
+                    t.name,
+                    calc.pflichtstunden,
+                    calc.unterrichtTotal,
+                    calc.abminderungenTotal,
+                    calc.excelRest,
+                    calc.gts
+                ]);
+            });
+
+            overviewData.push([]);
+            overviewData.push([
+                "Summe",
+                sumDep,
+                Math.round(sumUnt * 10) / 10,
+                Math.round(sumAbm * 10) / 10,
+                Math.round(sumRest * 10) / 10,
+                sumGts
+            ]);
+
+            const wsOverview = XLSX.utils.aoa_to_sheet(overviewData);
+            XLSX.utils.book_append_sheet(wb, wsOverview, "Übersicht");
+
+            // 2. Einzelseiten je Lehrkraft (genau wie in der Original-Excel!)
+            activeTeachers.forEach(t => {
+                let plan = epData.plans?.[activePeriod.id]?.[t.id];
+                let calc = calculateTeacherEp(plan);
+
+                let tSheetData = [
+                    [`Hr./Fr. ${t.name}`, "", "Gültig ab:", activePeriod.validFrom, ""],
+                    ["Schuljahr:", yStr, "Zeitraum:", activePeriod.name, ""],
+                    ["Pflichtstunden", calc.pflichtstunden, "", "", ""],
+                ];
+
+                let abms = plan?.abminderungen || [];
+                for (let i = 0; i < 5; i++) {
+                    if (abms[i]) {
+                        tSheetData.push([abms[i].art + (abms[i].text ? ' (' + abms[i].text + ')' : ''), abms[i].hours, "", "", ""]);
+                    } else {
+                        tSheetData.push(["", "", "", "", ""]);
+                    }
+                }
+
+                tSheetData.push(["Unterrichtsstunden", calc.unterrichtTotal, "", "", ""]);
+                tSheetData.push(["Rest", calc.excelRest, "", "", ""]);
+                tSheetData.push([]);
+                tSheetData.push([]);
+                tSheetData.push(["", "Stunden", "Fach", "Klasse", "Bemerkung"]);
+
+                let unts = plan?.unterricht || [];
+                unts.forEach(u => {
+                    tSheetData.push(["", u.hours, u.subject, u.class, u.note || ""]);
+                });
+
+                let safeSheetName = t.name.replace(/[\\\/:\*\?\[\]]/g, '').slice(0, 30);
+                const wsTeacher = XLSX.utils.aoa_to_sheet(tSheetData);
+                XLSX.utils.book_append_sheet(wb, wsTeacher, safeSheetName);
+            });
+
+            const fileName = `Einsatzplanung_HBS_SJ${yStr.replace('/','-')}_${activePeriod.name.replace(/[^a-zA-Z0-9_\-]/g, '_')}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+            showToast(`Excel-Datei erfolgreich exportiert!`, "📊");
+        }
+
+        function printEpView() {
+            if (currentEpSubView === 'dashboard') {
+                printEpOverview(currentEpPeriodId, appData.schoolYear);
+            } else {
+                printTeacherEpReport(currentEpTeacherId, currentEpPeriodId, appData.schoolYear);
+            }
+        }
+
+        function printEpOverview(periodId = currentEpPeriodId, yStr = appData.schoolYear) {
+            const epData = getYearEpData(yStr);
+            const period = epData.periods.find(p => p.id === periodId) || epData.periods[0];
+            if (!period) return;
+
+            let activeTeachers = appData.teachers.filter(t => isTeacherActiveInYear(t.id, yStr))
+                .sort((a,b) => a.name.localeCompare(b.name));
+
+            let parts = period.validFrom.split('-');
+            let dateDe = parts.length === 3 ? `${parts[2]}.${parts[1]}.${parts[0]}` : period.validFrom;
+
+            let printHtml = `
+                <div class="print-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                    <div>
+                        <h1 style="font-size: 15pt; font-weight: 800; color: #0284c7; margin: 0 0 2px 0;">Staatliche Regelschule Heimbürgeschule Kahla</h1>
+                        <h2 style="font-size: 11pt; font-weight: 700; color: #0f172a; margin: 2px 0 4px 0;">Einsatzplanung – Kollegiums-Gesamtübersicht</h2>
+                        <div style="font-size: 8.5pt; color: #64748b;">Schuljahr ${yStr} | Plan: <b>${period.name}</b> (Gültig ab ${dateDe}) | Druckdatum: ${new Date().toLocaleDateString('de-DE')}</div>
+                    </div>
+                    <img src="logo.png" alt="Logo HBS" style="height: 60px; width: 60px; object-fit: contain;" onerror="this.src='image.png'; this.onerror=null;">
+                </div>
+                <hr style="border: none; border-top: 1.5px solid #0284c7; margin: 6px 0 14px 0;">
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 5%; text-align: center;">Nr.</th>
+                            <th style="width: 30%;">Name der Lehrkraft</th>
+                            <th class="print-num" style="width: 12%;">Deputat</th>
+                            <th class="print-num" style="width: 13%;">Unterricht</th>
+                            <th class="print-num" style="width: 15%;">Abminderungen</th>
+                            <th class="print-num" style="width: 12%;">R-Soll</th>
+                            <th class="print-num" style="width: 13%;">Bilanz</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            let sumDep = 0, sumUnt = 0, sumAbm = 0, sumRSoll = 0, sumRest = 0;
+
+            activeTeachers.forEach((t, idx) => {
+                let plan = epData.plans?.[period.id]?.[t.id];
+                let calc = calculateTeacherEp(plan);
+                sumDep += calc.pflichtstunden;
+                sumUnt += calc.unterrichtTotal;
+                sumAbm += calc.abminderungenTotal;
+                sumRSoll += calc.rSoll;
+                sumRest += calc.excelRest;
+
+                printHtml += `
+                    <tr>
+                        <td class="print-num" style="text-align: center;">${idx + 1}</td>
+                        <td style="font-weight: bold;">${t.name}</td>
+                        <td class="print-num">${calc.pflichtstunden} h</td>
+                        <td class="print-num" style="color: #1d4ed8; font-weight: bold;">${calc.unterrichtTotal} h</td>
+                        <td class="print-num" style="color: #6b21a8;">${calc.abminderungenTotal} h</td>
+                        <td class="print-num" style="color: #0d9488; font-weight: bold;">${calc.rSoll > 0 ? calc.rSoll + ' h' : '–'}</td>
+                        <td class="print-num font-bold" style="color: ${calc.excelRest < 0 ? '#0d9488' : (calc.excelRest > 0 ? '#b45309' : '#475569')};">
+                            ${calc.excelRest > 0 ? '+' : ''}${calc.excelRest} h
+                        </td>
+                    </tr>
+                `;
+            });
+
+            printHtml += `
+                    </tbody>
+                    <tfoot>
+                        <tr style="font-weight: bold; background-color: #f1f5f9; border-top: 2px solid #cbd5e1;">
+                            <td colspan="2">GESAMTSUMME:</td>
+                            <td class="print-num">${sumDep} h</td>
+                            <td class="print-num" style="color: #1d4ed8;">${Math.round(sumUnt * 10) / 10} h</td>
+                            <td class="print-num" style="color: #6b21a8;">${Math.round(sumAbm * 10) / 10} h</td>
+                            <td class="print-num" style="color: #0d9488;">${sumRSoll} h</td>
+                            <td class="print-num">${sumRest > 0 ? '+' : ''}${Math.round(sumRest * 10) / 10} h</td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <div class="signature-block">
+                    <table style="width:100%; border:none; margin-top: 30px;">
+                        <tr>
+                            <td style="width:50%; border:none;">Kahla, den ${new Date().toLocaleDateString('de-DE')}</td>
+                            <td style="width:50%; text-align:right; border:none;">____________________________________<br><span style="font-size:8pt; color:#64748b;">Schulleitung / Genehmigung</span></td>
+                        </tr>
+                    </table>
+                </div>
+            `;
+
+            document.getElementById('view-print').innerHTML = printHtml;
+            window.print();
+        }
+
+        function printTeacherEpReport(tId, periodId = currentEpPeriodId, yStr = appData.schoolYear) {
+            const t = appData.teachers.find(teacher => teacher.id === tId);
+            if (!t) return;
+            const epData = getYearEpData(yStr);
+            const period = epData.periods.find(p => p.id === periodId) || epData.periods[0];
+            if (!period) return;
+
+            let plan = epData.plans?.[period.id]?.[tId];
+            let calc = calculateTeacherEp(plan);
+
+            let parts = period.validFrom.split('-');
+            let dateDe = parts.length === 3 ? `${parts[2]}.${parts[1]}.${parts[0]}` : period.validFrom;
+
+            let printHtml = `
+                <div class="print-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                    <div>
+                        <h1 style="font-size: 15pt; font-weight: 800; color: #0284c7; margin: 0 0 2px 0;">Staatliche Regelschule Heimbürgeschule Kahla</h1>
+                        <h2 style="font-size: 11pt; font-weight: 700; color: #0f172a; margin: 2px 0 4px 0;">Einsatzplan für Lehrkraft: ${t.name}</h2>
+                        <div style="font-size: 8.5pt; color: #64748b;">Schuljahr ${yStr} | Version: <b>${period.name}</b> (Gültig ab ${dateDe}) | Druckdatum: ${new Date().toLocaleDateString('de-DE')}</div>
+                    </div>
+                    <img src="logo.png" alt="Logo HBS" style="height: 60px; width: 60px; object-fit: contain;" onerror="this.src='image.png'; this.onerror=null;">
+                </div>
+                <hr style="border: none; border-top: 1.5px solid #0284c7; margin: 6px 0 14px 0;">
+
+                <h3>1. Rahmendaten & Stundenbilanz</h3>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td style="width: 65%;"><b>Pflichtstunden (Deputat)</b></td>
+                            <td class="print-num font-bold">${calc.pflichtstunden} h</td>
+                        </tr>
+                        <tr>
+                            <td>Abminderungen & Anrechnungsstunden gesamt</td>
+                            <td class="print-num" style="color: #6b21a8; font-weight: bold;">${calc.abminderungenTotal} h</td>
+                        </tr>
+                        <tr>
+                            <td>Regulärer Fachunterricht gesamt</td>
+                            <td class="print-num" style="color: #1d4ed8; font-weight: bold;">${calc.unterrichtTotal} h</td>
+                        </tr>
+                        <tr style="background-color: #f8fafc;">
+                            <td><b>Verplant gesamt (Unterricht + Abminderungen)</b></td>
+                            <td class="print-num font-bold"><b>${calc.verplantTotal} h</b></td>
+                        </tr>
+                        <tr style="background-color: #f0fdfa;">
+                            <td><b>Wöchentliches Reststunden-Soll (R) für Vertretungsbereitschaft</b></td>
+                            <td class="print-num font-black" style="color: #0d9488; font-size: 11pt;">${calc.rSoll} h</td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+
+            // Abminderungen
+            let abms = plan?.abminderungen || [];
+            if (abms.length > 0) {
+                printHtml += `
+                    <h3>2. Aufstellung der Abminderungen & Anrechnungsstunden</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 25%;">Funktion / Kürzel</th>
+                                <th style="width: 55%;">Beschreibung</th>
+                                <th class="print-num" style="width: 20%;">Stunden</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                abms.forEach(a => {
+                    printHtml += `
+                        <tr>
+                            <td style="font-weight: bold; color: #6b21a8;">${a.art}</td>
+                            <td>${a.text || '–'}</td>
+                            <td class="print-num" style="font-weight: bold;">${a.hours} h</td>
+                        </tr>
+                    `;
+                });
+                printHtml += `</tbody></table>`;
+            }
+
+            // Unterricht
+            let unts = plan?.unterricht || [];
+            printHtml += `
+                <h3>3. Gehaltener Fachunterricht nach Klassen</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="print-num" style="width: 15%;">Wochenstunden</th>
+                            <th style="width: 20%;">Fach</th>
+                            <th style="width: 20%;">Klasse</th>
+                            <th style="width: 45%;">Bemerkung</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            if (unts.length > 0) {
+                unts.forEach(u => {
+                    printHtml += `
+                        <tr>
+                            <td class="print-num" style="font-weight: bold; color: #1d4ed8;">${u.hours} h</td>
+                            <td style="font-weight: bold; text-transform: uppercase;">${u.subject}</td>
+                            <td style="font-weight: bold;">${u.class}</td>
+                            <td style="color: #475569; font-style: italic;">${u.note || '–'}</td>
+                        </tr>
+                    `;
+                });
+            } else {
+                printHtml += `<tr><td colspan="4" style="text-align: center; color: #94a3b8; font-style: italic;">Keine Unterrichtsfächer hinterlegt.</td></tr>`;
+            }
+
+            printHtml += `
+                    </tbody>
+                    <tfoot>
+                        <tr style="font-weight: bold; background-color: #f1f5f9;">
+                            <td class="print-num" style="color: #1d4ed8;">${calc.unterrichtTotal} h</td>
+                            <td colspan="3">Unterrichtssumme</td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <div class="signature-block">
+                    <table style="width:100%; border:none; margin-top: 40px;">
+                        <tr>
+                            <td style="width:45%; border:none;">
+                                ___________________________________<br>
+                                Datum & Unterschrift Schulleitung
+                            </td>
+                            <td style="width:10%; border:none;"></td>
+                            <td style="width:45%; border:none; text-align:right;">
+                                ___________________________________<br>
+                                Datum & Kenntnisnahme Lehrkraft
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            `;
+
+            document.getElementById('view-print').innerHTML = printHtml;
+            window.print();
         }
 
         // --- BERICHTE & EXPORT ---
@@ -4327,7 +5870,12 @@ Vielen Dank!</div>
                 <div class="flex justify-between"><span>Vertretung gesamt:</span> <b class="text-blue-700">${stats.V} h</b></div>
             `;
 
-            // 4. Mehrjahresvergleich (letzte 3 aktive Schuljahre)
+            // 4. Einsatzplan des Kollegen (inkl. Periodenhistorie)
+            let epYearLabel = document.getElementById('portal-ep-year-label');
+            if (epYearLabel) epYearLabel.textContent = portalYear;
+            renderPortalEpSection();
+
+            // 5. Mehrjahresvergleich (letzte 3 aktive Schuljahre)
             renderPortalMultiYearComparison(tId);
 
             // 5. Month Details Table

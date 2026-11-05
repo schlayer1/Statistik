@@ -142,39 +142,57 @@
         /* 1. Viewport & Canvas */
         html.dark {
             color-scheme: dark;
-            background-color: #090d16;
+            background-color: #0b1120;
         }
         html.dark body {
-            background-color: #090d16 !important;
+            background-color: #0b1120 !important;
             color: #f1f5f9 !important;
         }
 
-        /* 2. Top-Header & Navigation */
+        /* 2. Top-Navigation & Header */
+        html.dark nav, 
         html.dark header {
-            background: linear-gradient(135deg, #070d18 0%, #0c182c 50%, #081724 100%) !important;
-            border-bottom: 1px solid #1a273e !important;
-            box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.5) !important;
+            background: linear-gradient(180deg, #070d19 0%, #0f172a 100%) !important;
+            border-bottom: 1px solid #1e293b !important;
+            box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.7) !important;
+        }
+        html.dark nav .bg-white {
+            background-color: #ffffff !important; /* Schulwappen-Kontrast wahren */
         }
         html.dark #nav-tabs-container button:not(.bg-school-600):not(.bg-teal-600) {
-            color: #94a3b8;
+            color: #94a3b8 !important;
         }
         html.dark #nav-tabs-container button:not(.bg-school-600):not(.bg-teal-600):hover {
             background-color: rgba(255, 255, 255, 0.08) !important;
             color: #f8fafc !important;
         }
+        html.dark #nav-tabs-container button.bg-school-600 {
+            background-color: #0d9488 !important;
+            color: #ffffff !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5) !important;
+        }
+        html.dark #theme-toggle-btn,
+        html.dark button[onclick="toggleDarkMode()"] {
+            background-color: #1e293b !important;
+            border-color: #334155 !important;
+        }
+        html.dark #theme-toggle-btn:hover,
+        html.dark button[onclick="toggleDarkMode()"]:hover {
+            background-color: #293548 !important;
+        }
 
         /* 3. Oberflächen- & Tiefenhierarchie */
         /* Level 1: Hauptkarten & Container */
         html.dark .bg-white {
-            background-color: #131b2e !important;
+            background-color: #131d31 !important;
             color: #f1f5f9;
-            border-color: #1e2b42 !important;
+            border-color: #1e293b !important;
             box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.35) !important;
         }
         /* Level 0: Inset-Vertiefungen & Sub-Boxen */
         html.dark .bg-slate-50 {
             background-color: #0b1120 !important;
-            border-color: #1e2b42 !important;
+            border-color: #1e293b !important;
         }
         /* Level 2: Interaktive Flächen, Toolbars & Tabellenzeilen */
         html.dark .bg-slate-100 {
@@ -185,6 +203,10 @@
         html.dark .bg-slate-200 {
             background-color: #22324e !important;
             border-color: #2e4368 !important;
+        }
+        html.dark tr.hover\:bg-slate-50:hover,
+        html.dark tr:hover td {
+            background-color: rgba(255, 255, 255, 0.02) !important;
         }
 
         /* 4. Text-Hierarchie */
@@ -204,12 +226,19 @@
         html.dark .text-slate-400 {
             color: #64748b !important;
         }
+        html.dark td .text-slate-300 {
+            color: #475569 !important;
+        }
 
         /* 5. Rahmen & Divider */
         html.dark .border-slate-100, 
         html.dark .border-slate-200, 
         html.dark .border-slate-300 {
-            border-color: #1e2b42 !important;
+            border-color: #1e293b !important;
+        }
+        html.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
+        html.dark .divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
+            border-color: #1e293b !important;
         }
 
         /* 6. Formular-Elemente (Inputs, Selects, Buttons) */
@@ -228,160 +257,281 @@
             box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.3) !important;
             outline: none !important;
         }
+        html.dark select option {
+            background-color: #131d31 !important;
+            color: #f8fafc !important;
+        }
         html.dark input::placeholder, 
         html.dark textarea::placeholder {
             color: #475569 !important;
         }
+        html.dark #month-table input,
+        html.dark td input.bg-transparent {
+            background-color: transparent !important;
+            border-radius: 0 !important;
+        }
+
+        /* 7. Buttons (White, Slate & Toolbar) */
         html.dark button.bg-white,
         html.dark .bg-white.border {
-            background-color: #141d2f !important;
+            background-color: #172239 !important;
             border-color: #243552 !important;
             color: #e2e8f0 !important;
         }
         html.dark button.bg-white:hover {
-            background-color: #1c273e !important;
+            background-color: #202e4d !important;
             border-color: #384e73 !important;
             color: #ffffff !important;
         }
-
-        /* 7. Farbige Hinweisboxen, Badges & Kacheln (luminous & augenfreundlich) */
-        html.dark .bg-red-50 {
-            background-color: rgba(239, 68, 68, 0.12) !important;
-            border-color: rgba(239, 68, 68, 0.28) !important;
+        html.dark button.bg-white.text-school-800,
+        html.dark button.bg-white.text-school-700 {
+            background-color: #1a2740 !important;
+            border-color: #2e4368 !important;
+            color: #5eead4 !important;
         }
-        html.dark .text-red-900, html.dark .text-red-800, html.dark .text-red-700 {
-            color: #fca5a5 !important;
-        }
-        html.dark .text-red-600 {
-            color: #f87171 !important;
-        }
-
-        html.dark .bg-blue-50 {
-            background-color: rgba(59, 130, 246, 0.12) !important;
-            border-color: rgba(59, 130, 246, 0.28) !important;
-        }
-        html.dark .text-blue-900, html.dark .text-blue-800, html.dark .text-blue-700 {
-            color: #93c5fd !important;
-        }
-        html.dark .text-blue-600 {
-            color: #60a5fa !important;
-        }
-
-        html.dark .bg-green-50, html.dark .bg-emerald-50 {
-            background-color: rgba(16, 185, 129, 0.12) !important;
-            border-color: rgba(16, 185, 129, 0.28) !important;
-        }
-        html.dark .text-green-900, html.dark .text-green-800, html.dark .text-green-700,
-        html.dark .text-emerald-900, html.dark .text-emerald-800, html.dark .text-emerald-700 {
-            color: #a7f3d0 !important;
-        }
-        html.dark .text-green-600, html.dark .text-emerald-600 {
-            color: #34d399 !important;
-        }
-
-        html.dark .bg-amber-50 {
-            background-color: rgba(245, 158, 11, 0.12) !important;
-            border-color: rgba(245, 158, 11, 0.28) !important;
-        }
-        html.dark .text-amber-900, html.dark .text-amber-800, html.dark .text-amber-700 {
-            color: #fde68a !important;
-        }
-        html.dark .text-amber-600 {
-            color: #fbbf24 !important;
-        }
-
-        html.dark .bg-teal-50 {
-            background-color: rgba(20, 184, 166, 0.12) !important;
-            border-color: rgba(20, 184, 166, 0.28) !important;
-        }
-        html.dark .text-teal-900, html.dark .text-teal-800, html.dark .text-teal-700 {
-            color: #99f6e4 !important;
-        }
-        html.dark .text-teal-600 {
+        html.dark button.bg-white.text-school-800:hover,
+        html.dark button.bg-white.text-school-700:hover {
+            background-color: #243552 !important;
             color: #2dd4bf !important;
         }
-
-        html.dark .bg-indigo-50 {
-            background-color: rgba(99, 102, 241, 0.12) !important;
-            border-color: rgba(99, 102, 241, 0.28) !important;
+        html.dark button.bg-amber-100, 
+        html.dark .bg-amber-100 {
+            background-color: rgba(245, 158, 11, 0.16) !important;
+            color: #fde68a !important;
+            border-color: rgba(245, 158, 11, 0.35) !important;
         }
-        html.dark .text-indigo-900, html.dark .text-indigo-800, html.dark .text-indigo-700 {
+        html.dark button.bg-amber-100:hover {
+            background-color: rgba(245, 158, 11, 0.28) !important;
+        }
+        html.dark button.bg-amber-100 svg,
+        html.dark .bg-amber-100 svg {
+            stroke: #fbbf24 !important;
+        }
+        html.dark button.bg-indigo-100,
+        html.dark .bg-indigo-100 {
+            background-color: rgba(99, 102, 241, 0.16) !important;
             color: #c7d2fe !important;
+            border-color: rgba(99, 102, 241, 0.35) !important;
         }
-        html.dark .text-indigo-600 {
-            color: #818cf8 !important;
+        html.dark button.bg-indigo-100:hover {
+            background-color: rgba(99, 102, 241, 0.28) !important;
         }
-
-        html.dark .bg-purple-50 {
-            background-color: rgba(168, 85, 247, 0.12) !important;
-            border-color: rgba(168, 85, 247, 0.28) !important;
+        html.dark button.bg-indigo-100 svg,
+        html.dark .bg-indigo-100 svg {
+            stroke: #818cf8 !important;
         }
-        html.dark .text-purple-900, html.dark .text-purple-800, html.dark .text-purple-700 {
-            color: #e9d5ff !important;
+        html.dark button.bg-slate-100 {
+            background-color: #1a253a !important;
+            color: #e2e8f0 !important;
+            border-color: #2e4368 !important;
         }
-        html.dark .text-purple-600 {
-            color: #c084fc !important;
+        html.dark button.bg-slate-100:hover {
+            background-color: #243552 !important;
         }
-
-        html.dark .bg-orange-50 {
-            background-color: rgba(249, 115, 22, 0.12) !important;
-            border-color: rgba(249, 115, 22, 0.28) !important;
-        }
-        html.dark .text-orange-900, html.dark .text-orange-800, html.dark .text-orange-700 {
-            color: #fed7aa !important;
-        }
-        html.dark .text-orange-600 {
-            color: #fb923c !important;
+        html.dark button.bg-slate-100 svg {
+            stroke: #cbd5e1 !important;
         }
 
-        html.dark .bg-sky-50 {
-            background-color: rgba(14, 165, 233, 0.12) !important;
-            border-color: rgba(14, 165, 233, 0.28) !important;
+        /* 8. Schul-Farben (Teal / School) */
+        html.dark .bg-school-50 {
+            background-color: rgba(13, 148, 136, 0.16) !important;
+            border-color: rgba(20, 184, 166, 0.35) !important;
         }
-        html.dark .text-sky-900, html.dark .text-sky-800, html.dark .text-sky-700 {
-            color: #bae6fd !important;
+        html.dark .bg-school-100 {
+            background-color: rgba(13, 148, 136, 0.25) !important;
+            border-color: rgba(20, 184, 166, 0.45) !important;
         }
-        html.dark .text-sky-600 {
-            color: #38bdf8 !important;
+        html.dark .hover\:bg-school-50:hover {
+            background-color: rgba(13, 148, 136, 0.22) !important;
+        }
+        html.dark .hover\:bg-school-100:hover {
+            background-color: rgba(13, 148, 136, 0.35) !important;
+        }
+        html.dark .text-school-600 {
+            color: #2dd4bf !important;
+        }
+        html.dark .text-school-700,
+        html.dark .text-school-800,
+        html.dark .text-school-900 {
+            color: #5eead4 !important;
+        }
+        html.dark .border-school-100,
+        html.dark .border-school-200 {
+            border-color: rgba(20, 184, 166, 0.3) !important;
         }
 
-        /* 8. Monatsansicht: Matrix, Tage & Kalendereinträge */
+        /* 9. Farbige Hinweisboxen, Badges & Tailwind-Opazitäten */
+        html.dark .bg-red-50 { background-color: rgba(239, 68, 68, 0.12) !important; border-color: rgba(239, 68, 68, 0.28) !important; }
+        html.dark .bg-red-100 { background-color: rgba(239, 68, 68, 0.22) !important; border-color: rgba(239, 68, 68, 0.35) !important; }
+        html.dark .text-red-900, html.dark .text-red-800, html.dark .text-red-700 { color: #fca5a5 !important; }
+        html.dark .text-red-600 { color: #f87171 !important; }
+
+        html.dark .bg-orange-50 { background-color: rgba(249, 115, 22, 0.12) !important; border-color: rgba(249, 115, 22, 0.28) !important; }
+        html.dark .bg-orange-100 { background-color: rgba(249, 115, 22, 0.22) !important; border-color: rgba(249, 115, 22, 0.35) !important; }
+        html.dark .text-orange-900, html.dark .text-orange-800, html.dark .text-orange-700 { color: #fed7aa !important; }
+        html.dark .text-orange-600 { color: #fb923c !important; }
+
+        html.dark .bg-amber-50 { background-color: rgba(245, 158, 11, 0.12) !important; border-color: rgba(245, 158, 11, 0.28) !important; }
+        html.dark .text-amber-900, html.dark .text-amber-800, html.dark .text-amber-700 { color: #fde68a !important; }
+        html.dark .text-amber-600 { color: #fbbf24 !important; }
+
+        html.dark .bg-green-50, html.dark .bg-emerald-50 { background-color: rgba(16, 185, 129, 0.12) !important; border-color: rgba(16, 185, 129, 0.28) !important; }
+        html.dark .bg-green-100, html.dark .bg-emerald-100 { background-color: rgba(16, 185, 129, 0.22) !important; border-color: rgba(16, 185, 129, 0.35) !important; }
+        html.dark .text-green-900, html.dark .text-green-800, html.dark .text-green-700,
+        html.dark .text-emerald-900, html.dark .text-emerald-800, html.dark .text-emerald-700 { color: #a7f3d0 !important; }
+        html.dark .text-green-600, html.dark .text-emerald-600 { color: #34d399 !important; }
+
+        html.dark .bg-teal-50 { background-color: rgba(20, 184, 166, 0.12) !important; border-color: rgba(20, 184, 166, 0.28) !important; }
+        html.dark .bg-teal-100 { background-color: rgba(20, 184, 166, 0.22) !important; border-color: rgba(20, 184, 166, 0.35) !important; }
+        html.dark .text-teal-900, html.dark .text-teal-800, html.dark .text-teal-700 { color: #99f6e4 !important; }
+        html.dark .text-teal-600 { color: #2dd4bf !important; }
+
+        html.dark .bg-blue-50, html.dark .bg-sky-50 { background-color: rgba(59, 130, 246, 0.12) !important; border-color: rgba(59, 130, 246, 0.28) !important; }
+        html.dark .bg-blue-100, html.dark .bg-sky-100 { background-color: rgba(59, 130, 246, 0.22) !important; border-color: rgba(59, 130, 246, 0.35) !important; }
+        html.dark .text-blue-900, html.dark .text-blue-800, html.dark .text-blue-700,
+        html.dark .text-sky-900, html.dark .text-sky-800, html.dark .text-sky-700 { color: #93c5fd !important; }
+        html.dark .text-blue-600, html.dark .text-sky-600 { color: #60a5fa !important; }
+
+        html.dark .bg-indigo-50 { background-color: rgba(99, 102, 241, 0.12) !important; border-color: rgba(99, 102, 241, 0.28) !important; }
+        html.dark .text-indigo-900, html.dark .text-indigo-800, html.dark .text-indigo-700 { color: #c7d2fe !important; }
+        html.dark .text-indigo-600 { color: #818cf8 !important; }
+
+        html.dark .bg-purple-50 { background-color: rgba(168, 85, 247, 0.12) !important; border-color: rgba(168, 85, 247, 0.28) !important; }
+        html.dark .bg-purple-100 { background-color: rgba(168, 85, 247, 0.22) !important; border-color: rgba(168, 85, 247, 0.35) !important; }
+        html.dark .text-purple-900, html.dark .text-purple-800, html.dark .text-purple-700 { color: #e9d5ff !important; }
+        html.dark .text-purple-600 { color: #c084fc !important; }
+
+        html.dark .bg-rose-50 { background-color: rgba(244, 63, 94, 0.12) !important; border-color: rgba(244, 63, 94, 0.28) !important; }
+        html.dark .bg-rose-100 { background-color: rgba(244, 63, 94, 0.22) !important; border-color: rgba(244, 63, 94, 0.35) !important; }
+        html.dark .text-rose-900, html.dark .text-rose-800, html.dark .text-rose-700 { color: #fecdd3 !important; }
+        html.dark .text-rose-600 { color: #fb7185 !important; }
+
+        /* Tailwind Opacity Slash-Classes */
+        html.dark .bg-amber-50\/80 { background-color: rgba(245, 158, 11, 0.16) !important; }
+        html.dark .bg-blue-50\/20, html.dark .bg-blue-50\/30, html.dark .bg-blue-50\/50 { background-color: rgba(59, 130, 246, 0.12) !important; }
+        html.dark .bg-green-50\/50 { background-color: rgba(16, 185, 129, 0.12) !important; }
+        html.dark .bg-purple-50\/30, html.dark .bg-purple-50\/50 { background-color: rgba(168, 85, 247, 0.12) !important; }
+        html.dark .bg-red-50\/50 { background-color: rgba(239, 68, 68, 0.14) !important; }
+        html.dark .bg-slate-50\/50, html.dark .bg-slate-50\/60 { background-color: rgba(255, 255, 255, 0.03) !important; }
+        html.dark .bg-slate-100\/80 { background-color: rgba(255, 255, 255, 0.06) !important; }
+        html.dark .bg-teal-50\/30, html.dark .bg-teal-50\/50, html.dark .bg-teal-50\/70 { background-color: rgba(20, 184, 166, 0.12) !important; }
+
+        /* 10. Monatsansicht: Matrix, Tage & Kalendereinträge */
+        html.dark #month-table-container {
+            background-color: #0b1120 !important;
+            border-color: #1e293b !important;
+        }
+        html.dark #month-table {
+            background-color: #0f172a !important;
+        }
         html.dark #month-table thead th {
-            background-color: #141d2f !important;
+            background-color: #162035 !important;
             color: #f1f5f9 !important;
             border-bottom: 2px solid #243552 !important;
-            border-color: #1e2b42 !important;
+            border-color: #1e293b !important;
         }
         html.dark #month-table thead th.sticky-col {
-            background-color: #0b1120 !important;
-            color: #f1f5f9 !important;
-            border-color: #1e2b42 !important;
+            background-color: #131d31 !important;
+            color: #f8fafc !important;
+            border-color: #1e293b !important;
         }
-        html.dark .sticky-col {
-            background-color: #141d2f !important;
-            color: #f1f5f9 !important;
-            border-color: #1e2b42 !important;
+        html.dark #month-table td.sticky-col {
+            background-color: #131d31 !important;
+            color: #f8fafc !important;
+            border-color: #1e293b !important;
         }
-        html.dark tr:hover .sticky-col {
-            background-color: #1d283f !important;
+        html.dark #month-table tr:hover td.sticky-col {
+            background-color: #1e293b !important;
         }
-        html.dark #month-table tr:hover td {
-            background-color: rgba(255, 255, 255, 0.02);
+        html.dark #month-table td {
+            border-color: #1e293b !important;
+            color: #e2e8f0 !important;
         }
         html.dark .cell-hover:hover {
             background-color: rgba(14, 165, 233, 0.22) !important;
         }
 
+        /* Spalten R und V (Header & Body) */
+        html.dark #month-table th.bg-green-50 {
+            background-color: rgba(16, 185, 129, 0.16) !important;
+            color: #34d399 !important;
+            border-color: #1e293b !important;
+        }
+        html.dark #month-table th.bg-blue-50 {
+            background-color: rgba(59, 130, 246, 0.16) !important;
+            color: #60a5fa !important;
+            border-color: #1e293b !important;
+        }
+        html.dark #month-table td.bg-green-50\/50 {
+            background-color: rgba(16, 185, 129, 0.08) !important;
+            border-color: #1e293b !important;
+        }
+        html.dark #month-table td.bg-blue-50\/50 {
+            background-color: rgba(59, 130, 246, 0.08) !important;
+            border-color: #1e293b !important;
+        }
+        html.dark #month-table td.bg-green-50\/50 input {
+            color: #34d399 !important;
+            border-bottom-color: rgba(16, 185, 129, 0.45) !important;
+        }
+        html.dark #month-table td.bg-blue-50\/50 input {
+            color: #60a5fa !important;
+            border-bottom-color: rgba(59, 130, 246, 0.45) !important;
+        }
+
+        /* Wochen-Badges in Spalte R & Saldo in Spalte V */
+        html.dark .bg-green-100.text-green-700 {
+            background-color: rgba(16, 185, 129, 0.22) !important;
+            color: #34d399 !important;
+            border-color: rgba(16, 185, 129, 0.4) !important;
+        }
+        html.dark .bg-blue-100.text-blue-700 {
+            background-color: rgba(59, 130, 246, 0.22) !important;
+            color: #93c5fd !important;
+            border-color: rgba(59, 130, 246, 0.4) !important;
+        }
+        html.dark .bg-red-100.text-red-700 {
+            background-color: rgba(239, 68, 68, 0.22) !important;
+            color: #fca5a5 !important;
+            border-color: rgba(239, 68, 68, 0.4) !important;
+        }
+        html.dark .bg-slate-100.text-slate-400 {
+            background-color: rgba(148, 163, 184, 0.14) !important;
+            color: #94a3b8 !important;
+            border-color: rgba(148, 163, 184, 0.25) !important;
+        }
+
+        /* Monatsübersicht Summenspalten rechts (K, KK, R, V, E) */
+        html.dark #month-table th.bg-slate-100 {
+            background-color: #162035 !important;
+            color: #cbd5e1 !important;
+            border-color: #1e293b !important;
+        }
+        html.dark #month-table th.text-green-700 { color: #34d399 !important; }
+        html.dark #month-table th.text-blue-700 { color: #60a5fa !important; }
+        html.dark #month-table th.text-red-700 { color: #f87171 !important; }
+
+        html.dark #month-table td.bg-slate-50 {
+            background-color: #131d31 !important;
+            border-color: #1e293b !important;
+        }
+        html.dark #month-table td.text-slate-700 { color: #cbd5e1 !important; }
+        html.dark #month-table td.text-green-700 { color: #34d399 !important; }
+        html.dark #month-table td.text-blue-700 { color: #60a5fa !important; }
+        html.dark #month-table td.text-red-700 { color: #f87171 !important; }
+
+        /* Wochenende & Ferien */
         html.dark .weekend-header {
-            background-color: #101726 !important;
+            background-color: #0b1120 !important;
             color: #64748b !important;
             border-color: #1a2538 !important;
         }
         html.dark .weekend-cell {
-            background-color: #0b101c !important;
+            background-color: #090e1c !important;
             border-color: #172236 !important;
         }
 
+        /* Heute-Markierung */
         html.dark .today-header {
             background-color: rgba(245, 158, 11, 0.22) !important;
             color: #fef08a !important;
@@ -389,48 +539,61 @@
             border-bottom: 2px solid #d97706 !important;
         }
         html.dark .today-cell {
-            background-color: rgba(245, 158, 11, 0.07) !important;
+            background-color: rgba(245, 158, 11, 0.08) !important;
             border-left: 1.5px dashed rgba(245, 158, 11, 0.45) !important;
             border-right: 1.5px dashed rgba(245, 158, 11, 0.45) !important;
         }
         html.dark tr:hover .today-cell {
-            background-color: rgba(245, 158, 11, 0.14) !important;
+            background-color: rgba(245, 158, 11, 0.15) !important;
         }
 
         /* Kalender-Eintragungs-Badges im Dark Mode */
         html.dark .entry-K {
-            background-color: rgba(244, 63, 94, 0.22) !important;
-            color: #fda4af !important;
-            border: 1px solid rgba(244, 63, 94, 0.35) !important;
+            background-color: #dc2626 !important;
+            color: #ffffff !important;
+            font-weight: 800 !important;
+            border-radius: 4px !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+            border: 1px solid #ef4444 !important;
         }
         html.dark .entry-KK {
-            background-color: rgba(245, 158, 11, 0.22) !important;
-            color: #fde047 !important;
-            border: 1px solid rgba(245, 158, 11, 0.35) !important;
+            background-color: #d97706 !important;
+            color: #ffffff !important;
+            font-weight: 800 !important;
+            border-radius: 4px !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+            border: 1px solid #f59e0b !important;
         }
         html.dark .entry-AZV {
-            background-color: rgba(168, 85, 247, 0.22) !important;
-            color: #e9d5ff !important;
-            border: 1px solid rgba(168, 85, 247, 0.35) !important;
+            background-color: #7c3aed !important;
+            color: #ffffff !important;
+            font-weight: 800 !important;
+            border-radius: 4px !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+            border: 1px solid #8b5cf6 !important;
         }
         html.dark .entry-V {
             color: #60a5fa !important;
-            font-weight: 800;
+            font-weight: 800 !important;
+            text-shadow: 0 0 6px rgba(96, 165, 250, 0.35) !important;
         }
         html.dark .entry-R {
             color: #34d399 !important;
-            font-weight: 800;
+            font-weight: 800 !important;
+            text-shadow: 0 0 6px rgba(52, 211, 153, 0.35) !important;
         }
         html.dark .entry-E {
             color: #f87171 !important;
-            font-weight: 800;
+            font-weight: 800 !important;
+            text-shadow: 0 0 6px rgba(248, 113, 113, 0.35) !important;
         }
         html.dark .entry-AZVgeh {
             color: #2dd4bf !important;
-            font-weight: 800;
+            font-weight: 800 !important;
+            text-shadow: 0 0 6px rgba(45, 212, 191, 0.35) !important;
         }
 
-        /* 9. Dashboard Tabellen & Spalten */
+        /* 11. Dashboard Tabellen & Spalten */
         html.dark .dash-table th {
             background-color: #0f1728 !important;
             color: #e2e8f0 !important;
@@ -443,47 +606,59 @@
             border-bottom: 1px solid #1a2538 !important;
             color: #cbd5e1 !important;
         }
-        html.dark .dash-table tr:hover td {
-            background-color: rgba(255, 255, 255, 0.02) !important;
+        html.dark .dash-table tr.bg-slate-100 {
+            background-color: #1a273e !important;
+            color: #f8fafc !important;
+            border-top: 2px solid #2e4368 !important;
         }
-        html.dark .dash-table .bg-red-50\/50 {
-            background-color: rgba(239, 68, 68, 0.12) !important;
-        }
-        html.dark .dash-table .bg-green-50\/50 {
-            background-color: rgba(16, 185, 129, 0.12) !important;
-        }
-        html.dark .dash-table .bg-teal-50\/30 {
-            background-color: rgba(20, 184, 166, 0.12) !important;
-        }
-        html.dark .dash-table .bg-slate-100 {
-            background-color: #0e1626 !important;
-            color: #94a3b8 !important;
-        }
+        html.dark .dash-table th.bg-red-50 { background-color: rgba(239, 68, 68, 0.16) !important; color: #fca5a5 !important; }
+        html.dark .dash-table th.bg-orange-50 { background-color: rgba(249, 115, 22, 0.16) !important; color: #fed7aa !important; }
+        html.dark .dash-table th.bg-purple-50 { background-color: rgba(168, 85, 247, 0.16) !important; color: #e9d5ff !important; }
+        html.dark .dash-table th.bg-green-50 { background-color: rgba(16, 185, 129, 0.16) !important; color: #a7f3d0 !important; }
+        html.dark .dash-table th.bg-blue-50 { background-color: rgba(59, 130, 246, 0.16) !important; color: #93c5fd !important; }
+        html.dark .dash-table th.bg-red-100 { background-color: rgba(239, 68, 68, 0.22) !important; color: #fca5a5 !important; }
+        html.dark .dash-table th.bg-teal-50 { background-color: rgba(20, 184, 166, 0.16) !important; color: #99f6e4 !important; }
 
-        /* 10. Modale & Popups */
+        /* 12. Modale & Popups */
         html.dark .modal-bg {
             background-color: rgba(3, 7, 18, 0.82) !important;
             backdrop-filter: blur(8px) !important;
         }
         html.dark .modal-bg > div {
-            background-color: #131b2e !important;
+            background-color: #131d31 !important;
             border: 1px solid #243552 !important;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.04) !important;
             color: #f1f5f9 !important;
         }
 
-        /* 11. BEM Alert Pill */
+        /* 13. BEM Alert Pill */
         html.dark .bem-alert {
             background-color: rgba(239, 68, 68, 0.22) !important;
             color: #fca5a5 !important;
             border-color: rgba(239, 68, 68, 0.4) !important;
         }
 
-        /* 12. Toast */
+        /* 14. Toast */
         html.dark #toast {
             background-color: #172239 !important;
             border: 1px solid #243552 !important;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.6) !important;
+        }
+
+        /* 15. Dark Scrollbars */
+        html.dark ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        html.dark ::-webkit-scrollbar-track {
+            background: #0b1120;
+        }
+        html.dark ::-webkit-scrollbar-thumb {
+            background: #243552;
+            border-radius: 4px;
+        }
+        html.dark ::-webkit-scrollbar-thumb:hover {
+            background: #334b73;
         }
 
         @media print {

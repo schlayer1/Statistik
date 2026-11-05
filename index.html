@@ -2909,13 +2909,58 @@
 
             let yd = getYearData();
             if (!yd.records[m]) yd.records[m] = {}; if (!yd.monthConfigs[m]) yd.monthConfigs[m] = {};
-            const markedHolidays = yd.holidays?.[m] || []; let weekends = []; let distinctMondays = [];
+            const markedHolidays = yd.holidays?.[m] || []; 
+            let weekends = [];
             for (let d = 1; d <= days; d++) {
                 let date = new Date(y, m - 1, d);
                 if (date.getDay() === 0 || date.getDay() === 6) weekends.push(d);
-                let mon = new Date(date); let dayNum = mon.getDay() || 7; 
-                mon.setDate(mon.getDate() - (dayNum - 1)); mon.setHours(0,0,0,0); 
-                if (!distinctMondays.some(mDate => mDate.getTime() === mon.getTime())) distinctMondays.push(mon);
+            }
+
+            // Echte Schulwochen für diesen Monat ermitteln:
+            // 1. DIN ISO 8601 Donnerstag-Regel: Eine Woche gehört zu dem Monat, in dem ihr Donnerstag liegt
+            //    (Dadurch gehört z. B. die Woche Mo 26.10.–So 01.11. eindeutig zum Oktober und Mo 30.11.–So 06.12. zum Dezember)
+            // 2. Schultags-Prüfung: Die Woche muss mindestens einen Schultag (Mo–Fr) in diesem Monat haben, der nicht als Ferien markiert ist
+            let distinctMondays = [];
+            let firstDayOfMonth = new Date(y, m - 1, 1);
+            let lastDayOfMonth = new Date(y, m, 0); // Letzter Tag des Monats
+            let iterDate = new Date(firstDayOfMonth);
+            let firstDayWeekDay = iterDate.getDay() || 7; // 1=Mo .. 7=So
+            iterDate.setDate(iterDate.getDate() - (firstDayWeekDay - 1));
+            iterDate.setHours(0, 0, 0, 0);
+
+            while (iterDate <= lastDayOfMonth) {
+                let mon = new Date(iterDate);
+                let thu = new Date(mon);
+                thu.setDate(thu.getDate() + 3);
+
+                // Regel 1: Gehört die Woche zu diesem Monat? (Donnerstag liegt im Monat m)
+                let belongsToThisMonth = (thu.getFullYear() === y && (thu.getMonth() + 1) === m);
+
+                if (belongsToThisMonth) {
+                    // Regel 2: Hat die Woche mindestens einen echten Unterrichtstag (Mo-Fr) in diesem Monat m, der kein Ferientag ist?
+                    let hasActiveSchoolDay = false;
+                    for (let i = 0; i < 5; i++) {
+                        let workDay = new Date(mon);
+                        workDay.setDate(workDay.getDate() + i);
+                        let wYear = workDay.getFullYear();
+                        let wMonth = workDay.getMonth() + 1;
+                        let wDay = workDay.getDate();
+
+                        if (wYear === y && wMonth === m) {
+                            let isMarkedHoliday = (yd.holidays?.[m] || []).includes(wDay);
+                            if (!isMarkedHoliday) {
+                                hasActiveSchoolDay = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (hasActiveSchoolDay) {
+                        distinctMondays.push(mon);
+                    }
+                }
+
+                iterDate.setDate(iterDate.getDate() + 7);
             }
 
             let { tStats } = calculateStatsForYear(appData.schoolYear) || { tStats: {} }; 
@@ -2957,7 +3002,7 @@
                 activeTeachers.sort((a,b) => a.name.localeCompare(b.name)).forEach(t => {
                 let currentR = yd.monthConfigs?.[m]?.[t.id]?.r !== undefined 
                     ? yd.monthConfigs[m][t.id].r 
-                    : getTeacherWeeklyRSoll(t.id, new Date(y, m - 1, 1), appData.schoolYear);
+                    : getTeacherWeeklyRSoll(t.id, (distinctMondays.length > 0 ? distinctMondays[0] : new Date(y, m - 1, 1)), appData.schoolYear);
                 let currentV = yd.monthConfigs?.[m]?.[t.id]?.v !== undefined ? yd.monthConfigs[m][t.id].v : t.v;
                 let sums = { K: 0, KK: 0, R: 0, V: 0, E: 0 }; let tRecs = yd.records?.[m]?.[t.id] || {};
                 
@@ -2970,20 +3015,24 @@
                 }
 
                 let rBadgesHtml = '<div class="flex flex-wrap gap-1 justify-center p-1 mt-1">';
-                distinctMondays.forEach((mon) => {
-                    let rSumThisWeek = 0; let dIter = new Date(mon);
-                    for(let i=0; i<7; i++) {
-                        let recM = dIter.getMonth() + 1; let recD = dIter.getDate();
-                        if (yd.records?.[recM]?.[t.id]?.[recD]?.type === 'R') rSumThisWeek += (parseInt(yd.records[recM][t.id][recD].h) || 0);
-                        dIter.setDate(dIter.getDate() + 1);
-                    }
-                    let weekRSoll = (yd.monthConfigs?.[m]?.[t.id]?.r !== undefined)
-                        ? yd.monthConfigs[m][t.id].r
-                        : getTeacherWeeklyRSoll(t.id, new Date(mon), appData.schoolYear);
-                    let remW = weekRSoll - rSumThisWeek;
-                    let badgeClass = remW > 0 ? 'bg-green-100 text-green-700 border border-green-200' : (remW === 0 ? 'bg-slate-100 text-slate-400 border border-slate-200' : 'bg-red-100 text-red-700 border border-red-200');
-                    rBadgesHtml += `<div class="text-[10px] font-bold px-1.5 rounded-md shadow-sm cursor-help ${badgeClass}" title="KW-Start ${new Date(mon).getDate()}.${new Date(mon).getMonth()+1}.: Soll ${weekRSoll} h, Gehalten ${rSumThisWeek} h">${remW}</div>`;
-                });
+                if (distinctMondays.length === 0) {
+                    rBadgesHtml += '<span class="text-[10px] text-slate-400 font-medium italic">Ferien</span>';
+                } else {
+                    distinctMondays.forEach((mon) => {
+                        let rSumThisWeek = 0; let dIter = new Date(mon);
+                        for(let i=0; i<7; i++) {
+                            let recM = dIter.getMonth() + 1; let recD = dIter.getDate();
+                            if (yd.records?.[recM]?.[t.id]?.[recD]?.type === 'R') rSumThisWeek += (parseInt(yd.records[recM][t.id][recD].h) || 0);
+                            dIter.setDate(dIter.getDate() + 1);
+                        }
+                        let weekRSoll = (yd.monthConfigs?.[m]?.[t.id]?.r !== undefined)
+                            ? yd.monthConfigs[m][t.id].r
+                            : getTeacherWeeklyRSoll(t.id, new Date(mon), appData.schoolYear);
+                        let remW = weekRSoll - rSumThisWeek;
+                        let badgeClass = remW > 0 ? 'bg-green-100 text-green-700 border border-green-200' : (remW === 0 ? 'bg-slate-100 text-slate-400 border border-slate-200' : 'bg-red-100 text-red-700 border border-red-200');
+                        rBadgesHtml += `<div class="text-[10px] font-bold px-1.5 rounded-md shadow-sm cursor-help ${badgeClass}" title="KW-Start ${new Date(mon).getDate()}.${new Date(mon).getMonth()+1}.: Soll ${weekRSoll} h, Gehalten ${rSumThisWeek} h">${remW}</div>`;
+                    });
+                }
                 rBadgesHtml += '</div>';
                 let remV = currentV - sums.V;
 

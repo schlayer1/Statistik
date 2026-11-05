@@ -25,7 +25,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
     
-    <!-- 🎨 FARBANPASSUNG (Exakt abgestimmt auf das Logo der Heimbürgeschule Kahla) -->
+    <!-- FARBANPASSUNG (Exakt abgestimmt auf das Logo der Heimbürgeschule Kahla) -->
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -377,18 +377,18 @@
                 </div>
                 <div id="mobile-admin-actions" class="hidden flex gap-1.5 items-center">
                     <button onclick="toggleDarkMode()" class="bg-school-700 hover:bg-school-600 p-1.5 rounded-lg text-xs shadow" title="Dunkelmodus umschalten">
-                        <span class="theme-icon">🌙</span>
+                        <span class="theme-icon inline-flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-sky-100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></span>
                     </button>
                     <button onclick="manualSyncWithCloud(this)" class="bg-teal-700 hover:bg-teal-600 px-2.5 py-1.5 rounded-lg text-xs font-bold shadow flex items-center gap-1 border border-teal-500/50 text-white" title="Jetzt mit Cloud abgleichen">
-                        <span class="sync-icon text-xs">🔄</span>
+                        <span class="sync-icon inline-flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg></span>
                         <span class="text-[11px]">Sync</span>
                     </button>
                     <button onclick="openCloudModal()" id="mobile-cloud-btn" class="bg-school-700 hover:bg-school-600 px-2 py-1.5 rounded-lg text-xs font-bold shadow flex items-center gap-1 border border-school-500/50" title="Cloud Sync">
                         <span id="mobile-cloud-dot" class="w-2 h-2 rounded-full bg-amber-400"></span>
                         <span class="text-[11px]">Cloud</span>
                     </button>
-                    <button onclick="exportData()" class="bg-school-600 hover:bg-school-500 p-1.5 rounded-lg text-xs shadow flex items-center" title="Backup">💾</button>
-                    <label class="bg-slate-600 hover:bg-slate-500 p-1.5 rounded-lg text-xs shadow cursor-pointer flex items-center" title="Laden">📂<input type="file" class="hidden" accept=".json" onchange="importData(event)"></label>
+                    <button onclick="exportData()" class="bg-school-600 hover:bg-school-500 p-1.5 rounded-lg text-xs shadow flex items-center justify-center text-white" title="Datensicherung (Backup)"><svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg></button>
+                    <label class="bg-slate-600 hover:bg-slate-500 p-1.5 rounded-lg text-xs shadow cursor-pointer flex items-center justify-center text-white" title="Datensicherung laden"><svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2"/></svg><input type="file" class="hidden" accept=".json" onchange="importData(event)"></label>
                 </div>
             </div>
         </div>
@@ -398,20 +398,20 @@
             <button onclick="switchTab('dashboard')" id="tab-dashboard" class="whitespace-nowrap px-4 py-2 text-sm font-semibold rounded-lg hover:bg-school-600/50 transition">Dashboard</button>
             <button onclick="switchTab('azv')" id="tab-azv" class="whitespace-nowrap px-4 py-2 text-sm font-semibold rounded-lg hover:bg-school-600/50 transition">AZV-Konto</button>
             <button onclick="switchTab('staff')" id="tab-staff" class="whitespace-nowrap px-4 py-2 text-sm font-semibold rounded-lg hover:bg-school-600/50 transition">Kollegium</button>
-            <button onclick="switchTab('survey')" id="tab-survey" class="whitespace-nowrap px-4 py-2 text-sm font-semibold rounded-lg hover:bg-school-600/50 transition text-amber-300 flex items-center gap-1.5" title="Einsatzplanung für das Schuljahr"><span>📋</span> Einsatzplanung</button>
+            <button onclick="switchTab('survey')" id="tab-survey" class="whitespace-nowrap px-4 py-2 text-sm font-semibold rounded-lg hover:bg-school-600/50 transition text-amber-300 flex items-center gap-1.5" title="Einsatzplanung für das Schuljahr"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-amber-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg> Einsatzplanung</button>
             <button onclick="switchTab('reports')" id="tab-reports" class="whitespace-nowrap px-4 py-2 text-sm font-semibold rounded-lg hover:bg-school-600/50 transition">Berichte</button>
-            <button onclick="openPortalView()" id="tab-portal" class="whitespace-nowrap px-3.5 py-2 text-sm font-bold rounded-lg bg-teal-600 hover:bg-teal-500 text-white shadow transition flex items-center gap-1.5 border border-teal-400/50">🧑‍🏫 Kollegenzugang</button>
+            <button onclick="openPortalView()" id="tab-portal" class="whitespace-nowrap px-3.5 py-2 text-sm font-bold rounded-lg bg-teal-600 hover:bg-teal-500 text-white shadow transition flex items-center gap-1.5 border border-teal-400/50"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/></svg> Kollegenzugang</button>
         </div>
 
         <div class="hidden md:flex space-x-2 items-center" id="nav-admin-actions">
             <!-- THEME TOGGLE BUTTON -->
             <button onclick="toggleDarkMode()" id="theme-toggle-btn" class="bg-school-700 hover:bg-school-600 border border-school-500/50 p-2 rounded-lg text-sm shadow flex items-center justify-center transition cursor-pointer" title="Dunkelmodus umschalten">
-                <span class="theme-icon text-sm">🌙</span>
+                <span class="theme-icon inline-flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-sky-100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></span>
             </button>
 
             <!-- MANUAL SYNC BUTTON -->
             <button onclick="manualSyncWithCloud(this)" class="bg-teal-700 hover:bg-teal-600 border border-teal-500/50 px-3 py-2 rounded-lg text-xs font-bold text-white shadow flex items-center gap-1.5 transition active:scale-95 cursor-pointer" title="Jetzt manuell mit Cloud abgleichen">
-                <span class="sync-icon text-xs">🔄</span>
+                <span class="sync-icon inline-flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg></span>
                 <span>Jetzt Sync</span>
             </button>
 
@@ -422,8 +422,8 @@
             </button>
             
             <span id="save-indicator" class="text-xs text-school-100 font-medium"></span>
-            <button onclick="exportData()" class="bg-school-600 hover:bg-school-500 px-3 py-2 rounded-lg text-xs font-semibold shadow flex items-center gap-1.5" title="Datensicherung als JSON">💾 Backup</button>
-            <label class="bg-slate-600 hover:bg-slate-500 px-3 py-2 rounded-lg text-xs font-semibold shadow cursor-pointer flex items-center gap-1.5" title="Datensicherung laden">📂 Laden<input type="file" class="hidden" accept=".json" onchange="importData(event)"></label>
+            <button onclick="exportData()" class="bg-school-600 hover:bg-school-500 px-3 py-2 rounded-lg text-xs font-semibold shadow flex items-center gap-1.5 text-white" title="Datensicherung als JSON"><svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg> Backup</button>
+            <label class="bg-slate-600 hover:bg-slate-500 px-3 py-2 rounded-lg text-xs font-semibold shadow cursor-pointer flex items-center gap-1.5 text-white" title="Datensicherung laden"><svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2"/></svg> Laden<input type="file" class="hidden" accept=".json" onchange="importData(event)"></label>
         </div>
     </nav>
 
@@ -432,7 +432,7 @@
         <!-- DYNAMISCHES SYNC- & OFFLINE-WARNBANNER -->
         <div id="sync-warning-banner" class="hidden mb-3 p-3.5 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-xs transition-all z-20">
             <div class="flex items-center gap-2.5 font-medium">
-                <span id="sync-warning-icon" class="text-lg">⚠️</span>
+                <span id="sync-warning-icon" class="inline-flex items-center text-amber-500"><svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg></span>
                 <span id="sync-warning-text">Warnung</span>
             </div>
             <div class="flex items-center gap-2 self-end sm:self-auto">
@@ -450,24 +450,24 @@
                 </h2>
                 
                 <div class="flex flex-wrap items-center gap-2 bg-slate-50 p-2 rounded-lg border border-slate-200 w-full md:w-auto">
-                    <button onclick="jumpToToday()" class="bg-amber-100 text-amber-900 hover:bg-amber-200 border border-amber-300 font-bold px-3 py-1.5 rounded-md text-sm shadow-sm transition flex items-center gap-1" title="Direkt zum heutigen Tag springen">
-                        📍 Heute
+                    <button onclick="jumpToToday()" class="bg-amber-100 text-amber-900 hover:bg-amber-200 border border-amber-300 font-bold px-3 py-1.5 rounded-md text-sm shadow-sm transition flex items-center gap-1.5" title="Direkt zum heutigen Tag springen">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-amber-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="m9 16 2 2 4-4"/></svg> <span>Heute</span>
                     </button>
-                    <button onclick="printMonthReport()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1.5 rounded-md text-sm shadow-sm transition flex items-center gap-1" title="Offizielle Monatsabrechnung drucken oder als PDF speichern">
-                        🖨️ Abrechnung
+                    <button onclick="printMonthReport()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1.5 rounded-md text-sm shadow-sm transition flex items-center gap-1.5" title="Offizielle Monatsabrechnung drucken oder als PDF speichern">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg> <span>Abrechnung</span>
                     </button>
-                    <button onclick="exportMonthToExcel()" class="bg-emerald-700 hover:bg-emerald-600 text-white font-bold px-3 py-1.5 rounded-md text-sm shadow-sm transition flex items-center gap-1" title="Aktuellen Monat als Excel (.xlsx) herunterladen">
-                        📊 Excel
+                    <button onclick="exportMonthToExcel()" class="bg-emerald-700 hover:bg-emerald-600 text-white font-bold px-3 py-1.5 rounded-md text-sm shadow-sm transition flex items-center gap-1.5" title="Aktuellen Monat als Excel (.xlsx) herunterladen">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M8 13h2"/><path d="M14 13h2"/><path d="M8 17h2"/><path d="M14 17h2"/></svg> <span>Excel</span>
                     </button>
-                    <button onclick="openHolidayModal()" class="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 font-bold px-3 py-1.5 rounded-md text-sm shadow-sm transition flex items-center gap-1">
-                        🏖️ Ferien
+                    <button onclick="openHolidayModal()" class="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 font-bold px-3 py-1.5 rounded-md text-sm shadow-sm transition flex items-center gap-1.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-indigo-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 8c0-2.76-2.46-5-5.5-5S2 5.24 2 8h2s1-4 4-4 4 4 4 4"/><path d="M13 7.14A5.82 5.82 0 0 1 16.5 6c3.04 0 5.5 2.24 5.5 5h-2s-1-4-4-4-2.5 1.84-2.5 1.84"/><path d="M16 11c0 2.76 2.46 5 5.5 5v-2s-4-1-4-4"/><path d="M9 13c-2.76 0-5 2.24-5 5h2s1-4 4-4"/><path d="M12 8v14"/><path d="M8 22h8"/></svg> <span>Ferien</span>
                     </button>
-                    <button onclick="openRolloverWizard()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 font-bold px-3 py-1.5 rounded-md text-sm shadow-sm transition flex items-center gap-1" title="Schuljahreswechsel-Assistent">
-                        🔄 Jahreswechsel
+                    <button onclick="openRolloverWizard()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 font-bold px-3 py-1.5 rounded-md text-sm shadow-sm transition flex items-center gap-1.5" title="Schuljahreswechsel-Assistent">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg> <span>Jahreswechsel</span>
                     </button>
                     <div class="flex items-center gap-1.5 border-l pl-3 border-slate-300">
                         <select id="school-year" class="border-slate-300 rounded-md p-1.5 min-w-[5.5rem] text-center font-bold bg-white text-school-800 shadow-sm outline-none" onchange="changeYear()"></select>
-                        <button onclick="promptAddNewSchoolYear()" title="Neues oder älteres Schuljahr manuell anlegen" class="bg-white hover:bg-school-50 text-school-700 border border-slate-300 px-2 py-1.5 rounded-md text-xs font-bold shadow-sm transition" type="button">➕</button>
+                        <button onclick="promptAddNewSchoolYear()" title="Neues oder älteres Schuljahr manuell anlegen" class="bg-white hover:bg-school-50 text-school-700 border border-slate-300 px-2 py-1.5 rounded-md text-xs font-bold shadow-sm transition flex items-center justify-center" type="button"><svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg></button>
                     </div>
                     <div class="flex items-center gap-2">
                         <select id="month-select" class="border-slate-300 rounded-md p-1.5 bg-white font-bold text-slate-800 shadow-sm outline-none" onchange="changeMonth()">
@@ -500,11 +500,11 @@
             <!-- CHARTS ROW 1: LANGZEIT & BELASTUNG -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-                    <h3 class="font-bold text-slate-700 text-sm mb-3 uppercase tracking-wider">📈 Fieberkurve (Krankentage Schule)</h3>
+                    <h3 class="font-bold text-slate-700 text-sm mb-3 uppercase tracking-wider flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-rose-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg> Fieberkurve (Krankentage Schule)</h3>
                     <div class="relative h-56 w-full"><canvas id="chart-illness"></canvas></div>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-                    <h3 class="font-bold text-slate-700 text-sm mb-3 uppercase tracking-wider">📊 Vertretungsbelastung nach Monaten</h3>
+                    <h3 class="font-bold text-slate-700 text-sm mb-3 uppercase tracking-wider flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-school-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg> Vertretungsbelastung nach Monaten</h3>
                     <div class="relative h-56 w-full"><canvas id="chart-extra"></canvas></div>
                 </div>
             </div>
@@ -514,7 +514,7 @@
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 lg:col-span-2">
                     <div class="flex justify-between items-center mb-3">
                         <h3 class="font-bold text-slate-700 text-sm uppercase tracking-wider flex items-center gap-2">
-                            <span>📅</span> Wochentags-Analyse (Mo – Fr)
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-school-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg> Wochentags-Analyse (Mo – Fr)
                         </h3>
                         <span class="text-xs text-slate-400">Aufteilung im aktuellen Schuljahr</span>
                     </div>
@@ -523,7 +523,7 @@
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col justify-between">
                     <div>
                         <h3 class="font-bold text-slate-800 text-sm uppercase tracking-wider mb-4 flex items-center gap-2">
-                            <span>💡</span> Belastungserkenntnisse
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg> Belastungserkenntnisse
                         </h3>
                         <div class="space-y-3">
                             <div class="p-3 bg-red-50 rounded-xl border border-red-100">
@@ -546,16 +546,16 @@
 
             <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 md:p-6">
-                    <h3 class="text-lg font-bold text-slate-800 mb-4 pb-2 flex items-center gap-2"><span class="bg-red-100 text-red-600 p-1.5 rounded-md leading-none">🤒</span> Fehlzeiten pro Person</h3>
+                    <h3 class="text-lg font-bold text-slate-800 mb-4 pb-2 flex items-center gap-2"><span class="bg-red-100 text-red-600 p-1.5 rounded-lg inline-flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" x2="22" y1="8" y2="13"/><line x1="22" x2="17" y1="8" y2="13"/></svg></span> Fehlzeiten pro Person</h3>
                     <div class="overflow-x-auto rounded-lg border border-slate-100"><table class="w-full text-sm dash-table whitespace-nowrap" id="dash-absences"></table></div>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 md:p-6">
-                    <h3 class="text-lg font-bold text-slate-800 mb-4 pb-2 flex items-center gap-2"><span class="bg-green-100 text-green-600 p-1.5 rounded-md leading-none">💪</span> Mehrleistungen pro Person</h3>
+                    <h3 class="text-lg font-bold text-slate-800 mb-4 pb-2 flex items-center gap-2"><span class="bg-green-100 text-green-600 p-1.5 rounded-lg inline-flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span> Mehrleistungen pro Person</h3>
                     <div class="overflow-x-auto rounded-lg border border-slate-100"><table class="w-full text-sm dash-table whitespace-nowrap" id="dash-extra"></table></div>
                 </div>
             </div>
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 md:p-6">
-                <h3 class="text-lg font-bold text-slate-800 mb-2 pb-2">📋 Schule Gesamt: Monats-Zusammenfassung</h3>
+                <h3 class="text-lg font-bold text-slate-800 mb-2 pb-2 flex items-center gap-2"><span class="text-school-600 inline-flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg></span> Schule Gesamt: Monats-Zusammenfassung</h3>
                 <div class="overflow-x-auto rounded-lg border border-slate-100"><table class="w-full text-sm dash-table text-center whitespace-nowrap" id="dash-months"></table></div>
             </div>
         </div>
@@ -565,8 +565,8 @@
             <!-- HEADER & TOOLBAR -->
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-slate-200">
                 <div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-2xl">📋</span>
+                    <div class="flex items-center gap-2.5">
+                        <span class="text-school-600 inline-flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg></span>
                         <h2 class="text-xl md:text-2xl font-black text-slate-800">Einsatzplanung</h2>
                         <span class="dash-year-title text-school-600 bg-school-50 px-2 py-0.5 rounded-lg border border-school-100 text-sm font-bold"></span>
                     </div>
@@ -579,27 +579,27 @@
                         <span class="text-xs font-bold text-slate-500 pl-2">Gültigkeit:</span>
                         <select id="ep-period-select" onchange="changeEpPeriod(this.value)" class="bg-white border border-slate-200 text-xs font-bold rounded-lg p-1.5 text-slate-800 outline-none focus:border-school-500 shadow-2xs">
                         </select>
-                        <button onclick="openNewEpPeriodModal()" class="bg-school-50 hover:bg-school-100 text-school-700 px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer" title="Neue Version anlegen (Klon)">
-                            <span>➕</span> <span class="hidden sm:inline">Neuer Zeitraum</span>
+                        <button onclick="openNewEpPeriodModal()" class="bg-school-50 hover:bg-school-100 text-school-700 px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer" title="Neue Version anlegen (Klon)">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg> <span class="hidden sm:inline">Neuer Zeitraum</span>
                         </button>
                         <button onclick="openEditEpPeriodModal()" class="text-slate-500 hover:text-slate-800 hover:bg-slate-200 p-1.5 rounded-lg text-xs transition cursor-pointer" title="Zeitraum bearbeiten / löschen">
-                            <span>⚙️</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
                         </button>
                     </div>
 
                     <!-- Ansichts-Umschalter -->
                     <div class="flex bg-slate-100 p-1 rounded-xl text-xs font-bold">
-                        <button id="ep-btn-dash" onclick="switchEpSubView('dashboard')" class="px-3 py-1.5 rounded-lg bg-white shadow-2xs text-school-700 font-black transition">📊 Gesamt-Dashboard</button>
-                        <button id="ep-btn-teacher" onclick="switchEpSubView('teacher')" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition">👤 Lehrkraft-Detailplan</button>
+                        <button id="ep-btn-dash" onclick="switchEpSubView('dashboard')" class="px-3 py-1.5 rounded-lg bg-white shadow-2xs text-school-700 font-black transition flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-school-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg> <span>Gesamt-Dashboard</span></button>
+                        <button id="ep-btn-teacher" onclick="switchEpSubView('teacher')" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> <span>Lehrkraft-Detailplan</span></button>
                     </div>
 
                     <!-- Export & Druck -->
                     <div class="flex items-center gap-1.5">
-                        <button onclick="exportEpToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl text-xs font-bold shadow-2xs transition flex items-center gap-1 cursor-pointer" title="Einsatzplanung als Excel-Datei exportieren (Deckblatt + alle Lehrkraftblätter)">
-                            <span>📥</span> <span>Excel (.xlsx)</span>
+                        <button onclick="exportEpToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl text-xs font-bold shadow-2xs transition flex items-center gap-1.5 cursor-pointer" title="Einsatzplanung als Excel-Datei exportieren (Deckblatt + alle Lehrkraftblätter)">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M8 13h2"/><path d="M14 13h2"/><path d="M8 17h2"/><path d="M14 17h2"/></svg> <span>Excel (.xlsx)</span>
                         </button>
-                        <button onclick="printEpView()" class="bg-slate-800 hover:bg-slate-700 text-white px-3 py-2 rounded-xl text-xs font-bold shadow-2xs transition flex items-center gap-1 cursor-pointer" title="Aktuelle Ansicht drucken (A4)">
-                            <span>🖨️</span> <span>Drucken</span>
+                        <button onclick="printEpView()" class="bg-slate-800 hover:bg-slate-700 text-white px-3 py-2 rounded-xl text-xs font-bold shadow-2xs transition flex items-center gap-1.5 cursor-pointer" title="Aktuelle Ansicht drucken (A4)">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg> <span>Drucken</span>
                         </button>
                     </div>
                 </div>
@@ -639,7 +639,7 @@
                             <p class="text-xs text-slate-500">Klicken Sie auf eine Lehrkraft, um deren Detailplan zu öffnen und zu bearbeiten.</p>
                         </div>
                         <div class="flex items-center gap-2">
-                            <input type="text" id="ep-search-input" onkeyup="filterEpDashboardTable()" placeholder="🔍 Lehrkraft suchen..." class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs outline-none focus:border-school-500 w-44">
+                            <input type="text" id="ep-search-input" onkeyup="filterEpDashboardTable()" placeholder="Lehrkraft suchen..." class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs outline-none focus:border-school-500 w-44">
                         </div>
                     </div>
 
@@ -683,10 +683,10 @@
 
                     <div class="flex items-center gap-2">
                         <button onclick="printTeacherEpReport(currentEpTeacherId, currentEpPeriodId, appData.schoolYear)" class="bg-school-50 hover:bg-school-100 text-school-700 px-3.5 py-2 rounded-xl text-xs font-bold border border-school-200 transition flex items-center gap-1.5 cursor-pointer">
-                            <span>🖨️</span> <span>A4-Druckplan für Lehrkraft</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg> <span>A4-Druckplan für Lehrkraft</span>
                         </button>
-                        <button onclick="switchEpSubView('dashboard')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer">
-                            <span>↩</span> <span>Zurück zur Gesamtübersicht</span>
+                        <button onclick="switchEpSubView('dashboard')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" x2="5" y1="12" y2="12"/><polyline points="12 19 5 12 12 5"/></svg> <span>Zurück zur Gesamtübersicht</span>
                         </button>
                     </div>
                 </div>
@@ -696,8 +696,8 @@
                     <!-- SPALTE 1: RAHMENDATEN & LIVE-SALDO (4 SPALTEN) -->
                     <div class="lg:col-span-4 flex flex-col gap-4">
                         <div class="bg-white p-5 rounded-2xl shadow-xs border border-slate-200 space-y-4">
-                            <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                                <span>⚙️</span> Rahmendaten
+                            <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg> Rahmendaten
                             </h3>
 
                             <div>
@@ -720,8 +720,8 @@
 
                         <!-- LIVE SALDO KACHEL -->
                         <div class="bg-white p-5 rounded-2xl shadow-xs border border-slate-200 space-y-3" id="ep-teacher-saldo-box">
-                            <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                                <span>⚖️</span> Berechneter Saldo
+                            <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-teal-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg> Berechneter Saldo
                             </h3>
                             <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center" id="ep-teacher-saldo-badge">
                                 <!-- Dynamisch befüllt -->
@@ -741,8 +741,8 @@
                         <div class="bg-white p-5 rounded-2xl shadow-xs border border-slate-200">
                             <div class="flex items-center justify-between gap-2 mb-3">
                                 <div>
-                                    <h3 class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
-                                        <span class="text-purple-600">🛡️</span> Abminderungen & Anrechnungsstunden
+                                    <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                                        <span class="text-purple-600 inline-flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg></span> Abminderungen & Anrechnungsstunden
                                     </h3>
                                     <p class="text-[11px] text-slate-500">Entlastungen für Klassenleitung, Funktionen, Schulleitung oder Abordnungen</p>
                                 </div>
@@ -777,8 +777,8 @@
                                     <input type="number" id="ep-new-abm-hours" value="1" min="0.5" step="0.5" max="30" class="w-16 bg-white border border-slate-200 rounded-lg p-2 text-xs font-bold text-center outline-none focus:border-purple-500">
                                     <span class="text-xs font-bold text-slate-500">h</span>
                                 </div>
-                                <button onclick="addEpAbminderung()" class="bg-purple-600 hover:bg-purple-700 text-white px-3.5 py-2 rounded-lg text-xs font-bold transition shadow-2xs whitespace-nowrap cursor-pointer">
-                                    ➕ Hinzufügen
+                                <button onclick="addEpAbminderung()" class="bg-purple-600 hover:bg-purple-700 text-white px-3.5 py-2 rounded-lg text-xs font-bold transition shadow-2xs whitespace-nowrap cursor-pointer flex items-center gap-1.5">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg> <span>Hinzufügen</span>
                                 </button>
                             </div>
                         </div>
@@ -787,8 +787,8 @@
                         <div class="bg-white p-5 rounded-2xl shadow-xs border border-slate-200">
                             <div class="flex items-center justify-between gap-2 mb-3">
                                 <div>
-                                    <h3 class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
-                                        <span class="text-blue-600">📚</span> Unterrichtsstunden (Fach & Klasse)
+                                    <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                                        <span class="text-blue-600 inline-flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span> Unterrichtsstunden (Fach & Klasse)
                                     </h3>
                                     <p class="text-[11px] text-slate-500">Reguläre Unterrichtsstunden laut Einsatzplanung</p>
                                 </div>
@@ -841,8 +841,8 @@
                                 </datalist>
                                 <input type="text" id="ep-new-unt-class" placeholder="Klasse (z. B. 6a, 7c, 10b)" class="bg-white border border-slate-200 rounded-lg p-2 text-xs w-32 outline-none focus:border-blue-500 font-bold">
                                 <input type="text" id="ep-new-unt-note" placeholder="Bemerkung (optional)" class="bg-white border border-slate-200 rounded-lg p-2 text-xs flex-grow outline-none focus:border-blue-500">
-                                <button onclick="addEpUnterricht()" class="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-2 rounded-lg text-xs font-bold transition shadow-2xs whitespace-nowrap cursor-pointer">
-                                    ➕ Fach hinzufügen
+                                <button onclick="addEpUnterricht()" class="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-2 rounded-lg text-xs font-bold transition shadow-2xs whitespace-nowrap cursor-pointer flex items-center gap-1.5">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg> <span>Fach hinzufügen</span>
                                 </button>
                             </div>
                         </div>
@@ -858,37 +858,37 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- EXPORT BEREICH -->
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                    <h3 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2">🏫 Für Schulamt & Personalrat <span class="dash-year-title text-school-600 bg-school-50 px-2 py-1 rounded-lg border border-school-100 ml-2 text-sm"></span></h3>
+                    <h3 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-school-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg> Für Schulamt & Personalrat <span class="dash-year-title text-school-600 bg-school-50 px-2 py-1 rounded-lg border border-school-100 ml-2 text-sm"></span></h3>
                     <p class="text-sm text-slate-500 mb-6">Generiert eine Gesamtabrechnung aller geleisteten Stunden und Fehlzeiten des aktuellen Schuljahres.</p>
                     <div class="space-y-3">
-                        <button onclick="exportYearToExcel()" class="w-full bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-3 px-4 rounded-lg shadow transition flex items-center justify-center gap-2"><span>📊</span> Gesamtes Schuljahr als Excel (.xlsx) exportieren</button>
-                        <button onclick="exportCSVReport()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-2.5 px-4 rounded-lg shadow transition flex items-center justify-center gap-2 text-sm"><span>📄</span> Als CSV-Tabelle exportieren</button>
-                        <button onclick="printSchoolReport()" class="w-full bg-school-600 hover:bg-school-500 text-white font-bold py-2.5 px-4 rounded-lg shadow transition flex items-center justify-center gap-2 text-sm"><span>🖨️</span> Schul-Bericht drucken (PDF)</button>
+                        <button onclick="exportYearToExcel()" class="w-full bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-3 px-4 rounded-lg shadow transition flex items-center justify-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M8 13h2"/><path d="M14 13h2"/><path d="M8 17h2"/><path d="M14 17h2"/></svg> Gesamtes Schuljahr als Excel (.xlsx) exportieren</button>
+                        <button onclick="exportCSVReport()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-2.5 px-4 rounded-lg shadow transition flex items-center justify-center gap-2 text-sm"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg> Als CSV-Tabelle exportieren</button>
+                        <button onclick="printSchoolReport()" class="w-full bg-school-600 hover:bg-school-500 text-white font-bold py-2.5 px-4 rounded-lg shadow transition flex items-center justify-center gap-2 text-sm"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg> Schul-Bericht drucken (PDF)</button>
                     </div>
                 </div>
                 
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                    <h3 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2">🧑‍🏫 Für einzelne Kollegen <span class="dash-year-title text-school-600 bg-school-50 px-2 py-1 rounded-lg border border-school-100 ml-2 text-sm"></span></h3>
+                    <h3 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-school-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/></svg> Für einzelne Kollegen <span class="dash-year-title text-school-600 bg-school-50 px-2 py-1 rounded-lg border border-school-100 ml-2 text-sm"></span></h3>
                     <p class="text-sm text-slate-500 mb-6">Generiert einen personalisierten Jahres-Auszug inkl. AZV-Historie zur Vorlage beim Mitarbeiter.</p>
                     <div class="space-y-4">
                         <div>
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Lehrkraft auswählen:</label>
                             <select id="report-teacher-select" class="w-full border-2 border-slate-200 rounded-lg p-2.5 bg-slate-50 focus:outline-none focus:border-school-500 font-semibold"></select>
                         </div>
-                        <button onclick="printTeacherReport()" class="w-full bg-school-600 hover:bg-school-500 text-white font-bold py-3 px-4 rounded-lg shadow transition flex items-center justify-center gap-2 mt-2"><span>🖨️</span> Personal-Bericht drucken</button>
+                        <button onclick="printTeacherReport()" class="w-full bg-school-600 hover:bg-school-500 text-white font-bold py-3 px-4 rounded-lg shadow transition flex items-center justify-center gap-2 mt-2"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg> Personal-Bericht drucken</button>
                     </div>
                 </div>
             </div>
 
             <!-- EXCEL (.XLSX) IMPORT BEREICH -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mt-4 border-l-4 border-l-amber-400">
-                <h3 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2">📥 Ganze alte Excel-Datei importieren</h3>
+                <h3 class="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M8 13h2"/><path d="M14 13h2"/><path d="M8 17h2"/><path d="M14 17h2"/></svg> Ganze alte Excel-Datei importieren</h3>
                 <p class="text-sm text-slate-500 mb-4">Laden Sie hier direkt Ihre historische <b>.xlsx</b> Datei hoch (z. B. <i>Vertretungsberichte SJ2526.xlsx</i>). Die App liest alle Monats-Reiter (August bis Juli) auf einen Schlag vollautomatisch ein und übernimmt Ihre Kollegen und Eintragungen!</p>
                 <div class="bg-amber-50 p-4 rounded-lg border border-amber-200 text-sm font-medium text-amber-900 mb-5">
                     <b>Tipp:</b> Sie müssen nichts als CSV exportieren. Die App kann das Excel-Format nativ lesen. Das Kürzel "AZV GEH" wird vom Importer erkannt und automatisch als positiver Wert in Ihr AZV-Konto gebucht.
                 </div>
                 <label class="w-full bg-white hover:bg-slate-50 text-slate-700 font-bold py-4 px-4 rounded-lg border-2 border-dashed border-slate-300 cursor-pointer flex items-center justify-center gap-3 transition hover:border-school-500 hover:text-school-600">
-                    <span class="text-2xl">📊</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-school-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M8 13h2"/><path d="M14 13h2"/><path d="M8 17h2"/><path d="M14 17h2"/></svg>
                     <span>Excel-Datei (.xlsx) auswählen & importieren</span>
                     <input type="file" id="excel-import" accept=".xlsx, .xls, .csv" class="hidden" onchange="importOldExcel(event)">
                 </label>
@@ -899,9 +899,9 @@
         <div id="view-azv" class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 md:p-6 hidden flex-col">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-bold text-slate-800">AZV-Konto <span class="dash-year-title text-school-600"></span></h2>
-                <button onclick="openAzvForm()" class="bg-school-600 hover:bg-school-700 text-white px-4 py-2 rounded-lg font-semibold shadow">➕ Manuell</button>
+                <button onclick="openAzvForm()" class="bg-school-600 hover:bg-school-700 text-white px-4 py-2 rounded-lg font-semibold shadow flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg> Manuell</button>
             </div>
-            <div class="mb-6 border-b pb-4"><h3 class="font-bold text-slate-700 mb-3 text-sm">💰 Salden</h3><div id="azv-summary" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div></div>
+            <div class="mb-6 border-b pb-4"><h3 class="font-bold text-slate-700 mb-3 text-sm flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg> Salden</h3><div id="azv-summary" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div></div>
             <div class="overflow-x-auto rounded-lg border border-slate-200"><table class="w-full text-sm text-left bg-white whitespace-nowrap"><tbody id="azv-table-body" class="divide-y divide-slate-100"></tbody></table></div>
         </div>
 
@@ -913,12 +913,12 @@
                     <p class="text-xs text-slate-500">Verwalten Sie hier Lehrkräfte, PINs für den Kollegenzugang und den Aktivitätsstatus für das ausgewählte Schuljahr.</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
-                    <button onclick="printTeacherPinList()" class="px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold shadow-sm transition flex items-center gap-1.5" title="PIN-Liste für das Kollegium ausdrucken">🖨️ PIN-Liste drucken</button>
+                    <button onclick="printTeacherPinList()" class="px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold shadow-sm transition flex items-center gap-1.5" title="PIN-Liste für das Kollegium ausdrucken"><svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg> PIN-Liste drucken</button>
                     <div class="inline-flex rounded-lg border border-slate-200 p-1 bg-slate-50 text-xs font-semibold">
                         <button onclick="setStaffFilter('active')" id="staff-filter-active" class="px-3 py-1 rounded-md bg-white text-school-800 shadow-sm transition">Nur Aktiv <span class="dash-year-title font-bold"></span></button>
                         <button onclick="setStaffFilter('all')" id="staff-filter-all" class="px-3 py-1 rounded-md text-slate-500 hover:text-slate-800 transition">Alle (inkl. Archiv)</button>
                     </div>
-                    <button onclick="openTeacherForm()" class="bg-school-600 hover:bg-school-500 text-white px-4 py-2 rounded-lg font-semibold shadow flex items-center gap-1.5 transition">🧑‍🏫 Neu</button>
+                    <button onclick="openTeacherForm()" class="bg-school-600 hover:bg-school-500 text-white px-4 py-2 rounded-lg font-semibold shadow flex items-center gap-1.5 transition"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg> Neu</button>
                 </div>
             </div>
             <div class="overflow-x-auto rounded-lg border border-slate-200"><table class="w-full text-sm text-left bg-white"><tbody id="staff-table-body" class="divide-y divide-slate-100"></tbody></table></div>
@@ -931,7 +931,7 @@
                 <div class="flex justify-center mb-4">
                     <div class="bg-white p-2 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center">
                         <img src="logo.png" alt="Heimbürgeschule Kahla" class="h-20 w-20 object-contain" onerror="this.src='image.png'; this.onerror=function(){ this.style.display='none'; this.nextElementSibling.style.display='flex'; };">
-                        <div class="w-16 h-16 bg-teal-100 text-teal-700 rounded-2xl hidden items-center justify-center text-3xl shadow-sm">🧑‍🏫</div>
+                        <div class="w-16 h-16 bg-teal-100 text-teal-700 rounded-2xl hidden items-center justify-center text-3xl shadow-sm"><svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-teal-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/></svg></div>
                     </div>
                 </div>
                 <h2 class="text-2xl font-black text-slate-800 mb-1">Mein Stundenkonto</h2>
@@ -951,7 +951,7 @@
                         <input type="password" maxlength="4" id="portal-user-pin" class="w-full border-2 border-slate-200 rounded-xl p-3 text-center font-black tracking-widest text-2xl text-slate-800 outline-none focus:border-teal-500" placeholder="••••" onkeyup="if(event.key==='Enter') loginPortal()">
                     </div>
                     <button onclick="loginPortal()" class="w-full bg-teal-600 hover:bg-teal-500 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg transition text-base flex items-center justify-center gap-2 mt-2">
-                        <span>🔓</span> Anmelden
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg> <span>Anmelden</span>
                     </button>
                 </div>
 
@@ -960,7 +960,7 @@
                         <span id="portal-login-cloud-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
                         <span id="portal-login-cloud-label">Live verbunden</span>
                     </div>
-                    <button onclick="promptAdminLogin()" class="text-slate-500 hover:text-slate-800 font-semibold underline">🔐 Schulleitungs-Login</button>
+                    <button onclick="promptAdminLogin()" class="text-slate-500 hover:text-slate-800 font-semibold underline flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Schulleitungs-Login</button>
                 </div>
             </div>
 
@@ -978,8 +978,8 @@
                             <span id="portal-dash-cloud-label">Live verbunden</span>
                         </div>
                         <select id="portal-year-select" class="border-2 border-slate-200 rounded-lg p-2 font-bold text-slate-800 bg-slate-50 text-sm outline-none focus:border-teal-500" onchange="changePortalYear()"></select>
-                        <button onclick="logoutPortal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-2 rounded-lg text-xs transition flex items-center gap-1">🚪 Abmelden</button>
-                        <button onclick="promptAdminLogin()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold px-3 py-2 rounded-lg text-xs shadow transition flex items-center gap-1">🔐 Schulleitung</button>
+                        <button onclick="logoutPortal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-2 rounded-lg text-xs transition flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg> Abmelden</button>
+                        <button onclick="promptAdminLogin()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold px-3 py-2 rounded-lg text-xs shadow transition flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Schulleitung</button>
                     </div>
                 </div>
 
@@ -1006,7 +1006,7 @@
                     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col justify-between">
                         <span class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Jahresübersicht</span>
                         <div id="portal-year-totals-box" class="space-y-1 my-1 text-xs"></div>
-                        <button onclick="printTeacherReportForPortal()" class="mt-2 text-xs text-teal-700 hover:text-teal-900 font-bold underline flex items-center gap-1">🖨️ Persönlichen Bericht drucken</button>
+                        <button onclick="printTeacherReportForPortal()" class="mt-2 text-xs text-teal-700 hover:text-teal-900 font-bold underline flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg> Persönlichen Bericht drucken</button>
                     </div>
                 </div>
 
@@ -1015,7 +1015,7 @@
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                         <div>
                             <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
-                                <span>📋</span> Mein Einsatzplan
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-teal-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg> Mein Einsatzplan
                             </h3>
                             <p class="text-xs text-slate-500">Stunden- und Fächerverteilung für Schuljahr <span id="portal-ep-year-label" class="font-bold text-slate-700"></span></p>
                         </div>
@@ -1027,7 +1027,7 @@
                                 </select>
                             </div>
                             <button onclick="printTeacherEpReportForPortal()" class="bg-teal-50 hover:bg-teal-100 text-teal-800 font-bold px-3 py-2 rounded-xl text-xs border border-teal-200 shadow-2xs flex items-center gap-1.5 transition cursor-pointer">
-                                <span>🖨️</span> <span>Einsatzplan drucken (A4)</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg> <span>Einsatzplan drucken (A4)</span>
                             </button>
                         </div>
                     </div>
@@ -1040,7 +1040,7 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 gap-2">
                         <div>
-                            <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">📈 Mehrjahresvergleich (letzte aktive Schuljahre)</h3>
+                            <h3 class="text-base font-bold text-slate-800 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-teal-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg> Mehrjahresvergleich (letzte aktive Schuljahre)</h3>
                             <p class="text-xs text-slate-500">Übersicht deiner Fehlzeiten, Vertretungsstunden und AZV-Salden im Zeitverlauf</p>
                         </div>
                         <span class="text-xs font-bold px-2.5 py-1 bg-teal-50 text-teal-700 rounded-lg border border-teal-200">Bis zu 3 Schuljahre</span>
@@ -1050,13 +1050,13 @@
 
                 <!-- MONATSKALENDER DETAILS -->
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-                    <h3 id="portal-month-details-heading" class="text-base font-bold text-slate-800 mb-3 flex items-center gap-2">📅 Eintragungen im ausgewählten Monat</h3>
+                    <h3 id="portal-month-details-heading" class="text-base font-bold text-slate-800 mb-3 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-teal-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg> Eintragungen im ausgewählten Monat</h3>
                     <div id="portal-month-details-table" class="overflow-x-auto"></div>
                 </div>
 
                 <!-- AZV PROTOKOLL TABELLE -->
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-                    <h3 class="text-base font-bold text-slate-800 mb-3 flex items-center gap-2">⏳ AZV-Buchungshistorie</h3>
+                    <h3 class="text-base font-bold text-slate-800 mb-3 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-teal-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> AZV-Buchungshistorie</h3>
                     <div id="portal-azv-history-table" class="overflow-x-auto"></div>
                 </div>
             </div>
@@ -1073,7 +1073,7 @@
         <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-xl max-h-[90vh] overflow-y-auto hide-scrollbar">
             <div class="flex justify-between items-start mb-4">
                 <div>
-                    <h3 class="text-2xl font-black text-slate-800 flex items-center gap-2">☁️ Firebase Cloud-Sync</h3>
+                    <h3 class="text-2xl font-black text-slate-800 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-sky-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg> Firebase Cloud-Sync</h3>
                     <p class="text-xs text-slate-500">Echtzeit-Synchronisation für dezentrales Arbeiten im Kollegium</p>
                 </div>
                 <button onclick="closeCloudModal()" class="text-slate-400 hover:text-slate-800 text-2xl font-bold">&times;</button>
@@ -1093,7 +1093,7 @@
 
             <!-- Schul-ID / Mandant -->
             <div class="mb-4">
-                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">🏫 Schul-Kennung / Dokument-ID:</label>
+                <label class="block text-xs font-bold text-slate-600 uppercase mb-1 flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg> Schul-Kennung / Dokument-ID:</label>
                 <input type="text" id="fb-school-id" class="w-full border-2 border-slate-200 rounded-lg p-2.5 font-bold text-slate-800 outline-none focus:border-school-500" placeholder="z. B. schule-mitte-erfurt">
                 <p class="text-[11px] text-slate-400 mt-1">Alle Kollegen mit derselben Kennung arbeiten auf demselben gemeinsamen Datenbestand.</p>
             </div>
@@ -1101,7 +1101,7 @@
             <!-- Firebase Config Input -->
             <div class="mb-5">
                 <div class="flex justify-between items-center mb-1">
-                    <label class="block text-xs font-bold text-slate-600 uppercase">🔑 Firebase Konfiguration (JSON oder Snippet):</label>
+                    <label class="block text-xs font-bold text-slate-600 uppercase flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4"/></svg> Firebase Konfiguration (JSON oder Snippet):</label>
                     <button type="button" onclick="loadSampleFirebaseConfig()" class="text-xs text-school-600 hover:text-school-800 font-bold underline">Vorlage einfügen</button>
                 </div>
                 <textarea id="fb-config-raw" rows="6" class="w-full border-2 border-slate-200 rounded-lg p-2.5 font-mono text-xs text-slate-700 outline-none focus:border-school-500" placeholder='{
@@ -1118,30 +1118,30 @@
             <div class="space-y-3 pt-2 border-t border-slate-100">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <button onclick="saveAndConnectFirebase()" class="bg-school-600 hover:bg-school-700 text-white font-bold py-2.5 px-4 rounded-lg shadow transition flex items-center justify-center gap-2">
-                        <span>⚡</span> <span>Verbinden & Speichern</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> <span>Verbinden & Speichern</span>
                     </button>
                     <button onclick="disconnectFirebase()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 px-4 rounded-lg transition flex items-center justify-center gap-2">
-                        <span>📴</span> <span>Cloud trennen (Nur Lokal)</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg> <span>Cloud trennen (Nur Lokal)</span>
                     </button>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <button onclick="forcePushToCloud()" class="border-2 border-school-600 text-school-700 hover:bg-school-50 font-bold py-2 px-3 rounded-lg text-xs transition flex items-center justify-center gap-1.5" title="Überschreibt die Cloud mit dem aktuellen lokalen Stand">
-                        <span>⬆️</span> <span>Lokalen Stand in Cloud hochladen</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg> <span>Lokalen Stand in Cloud hochladen</span>
                     </button>
                     <button onclick="forcePullFromCloud()" class="border-2 border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-2 px-3 rounded-lg text-xs transition flex items-center justify-center gap-1.5" title="Lädt den Stand aus der Cloud herunter">
-                        <span>⬇️</span> <span>Aus Cloud neu laden</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg> <span>Aus Cloud neu laden</span>
                     </button>
                 </div>
             </div>
 
             <!-- Hilfe Akkordeon / Kurzanleitung -->
             <details class="mt-5 bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-600">
-                <summary class="font-bold cursor-pointer text-slate-700">ℹ️ Wie richte ich Firebase kostenlos ein?</summary>
+                <summary class="font-bold cursor-pointer text-slate-700">Wie richte ich Firebase kostenlos ein?</summary>
                 <div class="mt-3 space-y-2 leading-relaxed">
                     <p><b>1.</b> Gehe auf <a href="https://console.firebase.google.com" target="_blank" class="text-school-600 underline font-bold">console.firebase.google.com</a> und erstelle ein kostenloses Projekt.</p>
                     <p><b>2.</b> Klicke im Menü auf <b>Firestore Database</b> &rarr; <i>Datenbank erstellen</i> (im Testmodus oder mit den bereitgestellten Regeln).</p>
-                    <p><b>3.</b> Klicke auf das <b>Zahnrad ⚙️ (Projekteinstellungen)</b> &rarr; App hinzufügen (Web <code>&lt;/&gt;</code>) und kopiere das <code>firebaseConfig</code>-Objekt.</p>
+                    <p><b>3.</b> Klicke auf das <b>Zahnrad (Projekteinstellungen)</b> &rarr; App hinzufügen (Web <code>&lt;/&gt;</code>) und kopiere das <code>firebaseConfig</code>-Objekt.</p>
                     <p><b>4.</b> Füge den Code hier in das Textfeld ein und klicke auf <i>Verbinden & Speichern</i>. Fertig!</p>
                 </div>
             </details>
@@ -1164,14 +1164,14 @@
     <div id="modal-holidays" class="fixed inset-0 hidden items-center justify-center z-50 modal-bg p-4">
         <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto hide-scrollbar">
             <div class="flex justify-between items-start mb-4">
-                <h3 class="text-2xl font-black text-slate-800 flex items-center gap-2">🏖️ Ferien-Zentrale</h3>
+                <h3 class="text-2xl font-black text-slate-800 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 8c0-2.76-2.46-5-5.5-5S2 5.24 2 8h2s1-4 4-4 4 4 4 4"/><path d="M13 7.14A5.82 5.82 0 0 1 16.5 6c3.04 0 5.5 2.24 5.5 5h-2s-1-4-4-4-2.5 1.84-2.5 1.84"/><path d="M16 11c0 2.76 2.46 5 5.5 5v-2s-4-1-4-4"/><path d="M9 13c-2.76 0-5 2.24-5 5h2s1-4 4-4"/><path d="M12 8v14"/><path d="M8 22h8"/></svg> Ferien-Zentrale</h3>
                 <button onclick="closeHolidayModal()" class="text-slate-400 hover:text-slate-800 text-xl font-bold">&times;</button>
             </div>
             
             <div class="bg-indigo-50 border border-indigo-200 p-4 rounded-xl mb-6 shadow-sm">
                 <h4 class="font-bold text-indigo-900 mb-2">1. Automatisch abrufen</h4>
                 <p class="text-xs text-indigo-700 mb-3">Zieht offizielle Schulferien für Thüringen aus der Datenbank und berechnet gesetzliche Feiertage.</p>
-                <button id="api-fetch-btn" onclick="fetchHolidaysAPI()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-lg shadow-md transition flex justify-center items-center gap-2">🌐 Daten online laden (Thüringen)</button>
+                <button id="api-fetch-btn" onclick="fetchHolidaysAPI()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-lg shadow-md transition flex justify-center items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg> Daten online laden (Thüringen)</button>
             </div>
 
             <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl">
@@ -1296,7 +1296,7 @@
                         <button onclick="saveCalEntry('AZVgeh', document.getElementById('cal-modal-hours').value)" class="bg-teal-100 hover:bg-teal-200 text-teal-800 py-2 rounded-lg font-black text-sm transition shadow-2xs">AZV bezahlt</button>
                     </div>
                 </div>
-                <button onclick="saveCalEntry('')" class="w-full bg-white hover:bg-rose-50 text-slate-600 hover:text-rose-700 py-2 rounded-lg font-bold border border-slate-200 transition text-xs flex items-center justify-center gap-1">🗑️ Eintrag / Zeitraum löschen</button>
+                <button onclick="saveCalEntry('')" class="w-full bg-white hover:bg-rose-50 text-slate-600 hover:text-rose-700 py-2 rounded-lg font-bold border border-slate-200 transition text-xs flex items-center justify-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg> <span>Eintrag / Zeitraum löschen</span></button>
             </div>
         </div>
     </div>
@@ -1306,7 +1306,7 @@
         <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-xl max-h-[90vh] overflow-y-auto hide-scrollbar">
             <div class="flex justify-between items-start mb-4">
                 <div>
-                    <h3 class="text-2xl font-black text-slate-800 flex items-center gap-2">🔄 Schuljahreswechsel-Assistent</h3>
+                    <h3 class="text-2xl font-black text-slate-800 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg> Schuljahreswechsel-Assistent</h3>
                     <p class="text-xs text-slate-500">Übergabe ins neue Schuljahr inklusive Kollegiums- und AZV-Saldenübertrag</p>
                 </div>
                 <button onclick="closeRolloverWizard()" class="text-slate-400 hover:text-slate-800 text-2xl font-bold">&times;</button>
@@ -1315,11 +1315,11 @@
             <!-- Wizard Step Indicator -->
             <div class="flex items-center justify-between mb-6 bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-xs font-bold">
                 <div id="step-ind-1" class="text-amber-600 font-extrabold flex items-center gap-1">1. Schuljahr</div>
-                <span class="text-slate-300">➔</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" x2="19" y1="12" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                 <div id="step-ind-2" class="text-slate-400 flex items-center gap-1">2. Kollegium</div>
-                <span class="text-slate-300">➔</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" x2="19" y1="12" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                 <div id="step-ind-3" class="text-slate-400 flex items-center gap-1">3. AZV-Salden</div>
-                <span class="text-slate-300">➔</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" x2="19" y1="12" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                 <div id="step-ind-4" class="text-slate-400 flex items-center gap-1">4. Starten</div>
             </div>
 
@@ -1334,7 +1334,7 @@
                     <input type="text" id="rollover-target-year" class="w-full border-2 border-slate-200 rounded-xl p-3 font-black text-xl text-school-800 outline-none focus:border-school-500" placeholder="z. B. 26/27">
                     <p class="text-[11px] text-slate-400 mt-1">Format: YY/YY (z. B. 26/27)</p>
                 </div>
-                <div class="flex justify-end pt-4"><button onclick="goToRolloverStep(2)" class="bg-school-600 hover:bg-school-500 text-white font-bold px-5 py-2.5 rounded-xl shadow transition">Weiter: Kollegium ➔</button></div>
+                <div class="flex justify-end pt-4"><button onclick="goToRolloverStep(2)" class="bg-school-600 hover:bg-school-500 text-white font-bold px-5 py-2.5 rounded-xl shadow transition flex items-center gap-1.5"><span>Weiter: Kollegium</span> <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" x2="19" y1="12" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button></div>
             </div>
 
             <!-- STEP 2: Kollegium abgleichen -->
@@ -1345,8 +1345,8 @@
                 </div>
                 <div id="rollover-teachers-list" class="max-h-60 overflow-y-auto border rounded-xl divide-y p-1 bg-slate-50"></div>
                 <div class="flex justify-between pt-4">
-                    <button onclick="goToRolloverStep(1)" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 font-semibold rounded-xl text-xs">⬅️ Zurück</button>
-                    <button onclick="goToRolloverStep(3)" class="bg-school-600 hover:bg-school-500 text-white font-bold px-5 py-2.5 rounded-xl shadow transition text-xs">Weiter: AZV-Salden ➔</button>
+                    <button onclick="goToRolloverStep(1)" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 font-semibold rounded-xl text-xs flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" x2="5" y1="12" y2="12"/><polyline points="12 19 5 12 12 5"/></svg> <span>Zurück</span></button>
+                    <button onclick="goToRolloverStep(3)" class="bg-school-600 hover:bg-school-500 text-white font-bold px-5 py-2.5 rounded-xl shadow transition text-xs flex items-center gap-1.5"><span>Weiter: AZV-Salden</span> <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" x2="19" y1="12" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
                 </div>
             </div>
 
@@ -1358,8 +1358,8 @@
                 </label>
                 <div id="rollover-azv-preview" class="max-h-48 overflow-y-auto border rounded-xl p-2 bg-slate-50 text-xs"></div>
                 <div class="flex justify-between pt-4">
-                    <button onclick="goToRolloverStep(2)" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 font-semibold rounded-xl text-xs">⬅️ Zurück</button>
-                    <button onclick="goToRolloverStep(4)" class="bg-school-600 hover:bg-school-500 text-white font-bold px-5 py-2.5 rounded-xl shadow transition text-xs">Weiter: Bestätigen ➔</button>
+                    <button onclick="goToRolloverStep(2)" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 font-semibold rounded-xl text-xs flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" x2="5" y1="12" y2="12"/><polyline points="12 19 5 12 12 5"/></svg> <span>Zurück</span></button>
+                    <button onclick="goToRolloverStep(4)" class="bg-school-600 hover:bg-school-500 text-white font-bold px-5 py-2.5 rounded-xl shadow transition text-xs flex items-center gap-1.5"><span>Weiter: Bestätigen</span> <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" x2="19" y1="12" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
                 </div>
             </div>
 
@@ -1372,8 +1372,8 @@
                     <label class="flex items-center gap-2 text-xs font-medium cursor-pointer"><input type="radio" name="rollover-quota" value="reset" class="accent-school-600"> Alle Basis-Werte auf 0 setzen (neu abfragen via Jahresstart)</label>
                 </div>
                 <div class="flex justify-between pt-4">
-                    <button onclick="goToRolloverStep(3)" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 font-semibold rounded-xl text-xs">⬅️ Zurück</button>
-                    <button onclick="executeRollover()" class="bg-school-600 hover:bg-school-500 text-white font-black px-6 py-3 rounded-xl shadow-lg transition text-sm flex items-center gap-2">🚀 Neues Schuljahr anlegen & starten</button>
+                    <button onclick="goToRolloverStep(3)" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 font-semibold rounded-xl text-xs flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" x2="5" y1="12" y2="12"/><polyline points="12 19 5 12 12 5"/></svg> <span>Zurück</span></button>
+                    <button onclick="executeRollover()" class="bg-school-600 hover:bg-school-500 text-white font-black px-6 py-3 rounded-xl shadow-lg transition text-sm flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-amber-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> <span>Neues Schuljahr anlegen & starten</span></button>
                 </div>
             </div>
         </div>
@@ -1384,7 +1384,7 @@
         <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md">
             <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
                 <div class="flex items-center gap-2">
-                    <span class="text-2xl">📅</span>
+                    <span class="text-school-600 inline-flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg></span>
                     <h3 class="text-lg font-bold text-slate-800" id="ep-modal-title">Gültigkeitszeitraum festlegen</h3>
                 </div>
                 <button onclick="closeEpPeriodModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer">&times;</button>
@@ -1419,8 +1419,8 @@
             </div>
 
             <div class="flex items-center justify-between gap-2 mt-6 pt-4 border-t border-slate-100">
-                <button type="button" id="ep-modal-delete-btn" onclick="deleteEpPeriod()" class="hidden px-3.5 py-2 text-rose-600 hover:bg-rose-50 border border-rose-200 rounded-xl font-bold text-xs transition cursor-pointer">
-                    🗑️ Zeitraum löschen
+                <button type="button" id="ep-modal-delete-btn" onclick="deleteEpPeriod()" class="hidden px-3.5 py-2 text-rose-600 hover:bg-rose-50 border border-rose-200 rounded-xl font-bold text-xs transition cursor-pointer flex items-center gap-1.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg> <span>Zeitraum löschen</span>
                 </button>
                 <div class="flex items-center gap-2 ml-auto">
                     <button type="button" onclick="closeEpPeriodModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold text-xs cursor-pointer">Abbrechen</button>
@@ -1433,7 +1433,7 @@
     <!-- MODAL: ADMIN / MASTER-PASSWORT LOGIN -->
     <div id="modal-admin-login" class="fixed inset-0 hidden items-center justify-center z-50 modal-bg p-4">
         <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm text-center">
-            <div class="w-12 h-12 bg-slate-100 text-slate-700 rounded-xl flex items-center justify-center text-2xl mx-auto mb-3">🔐</div>
+            <div class="w-12 h-12 bg-slate-100 text-slate-700 rounded-xl flex items-center justify-center mx-auto mb-3"><svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-slate-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
             <h3 class="text-xl font-bold text-slate-800 mb-1">Schulleitungs-Bereich</h3>
             <p class="text-xs text-slate-500 mb-4">Bitte Masterpasswort der Schulleitung eingeben</p>
             <input type="password" id="admin-master-pin-input" class="w-full border-2 border-slate-200 rounded-xl p-3 text-center font-bold text-lg mb-4 outline-none focus:border-slate-800" placeholder="Passwort eingeben" onkeyup="if(event.key==='Enter') confirmAdminLogin()">
@@ -1463,6 +1463,85 @@
         const storageKey = 'vertretungsStatistikDB_v2'; 
         const cloudConfigKey = 'fb_config_vertretungsstatistik';
         const cloudSchoolKey = 'fb_school_id_vertretungsstatistik';
+
+        // --- PROFESSIONELLE VEKTOR-ICON ENGINE (Lucide-Stil, 100% Offline-fähig & Retina-scharf) ---
+        const APP_ICONS = {
+            "calendar": `<rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/>`,
+            "calendar-check": `<rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="m9 16 2 2 4-4"/>`,
+            "printer": `<polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/>`,
+            "file-spreadsheet": `<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M8 13h2"/><path d="M14 13h2"/><path d="M8 17h2"/><path d="M14 17h2"/>`,
+            "file-text": `<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>`,
+            "sun": `<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>`,
+            "moon": `<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>`,
+            "refresh-cw": `<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>`,
+            "cloud": `<path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>`,
+            "download": `<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>`,
+            "upload": `<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/>`,
+            "folder-open": `<path d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2"/>`,
+            "clipboard-list": `<rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/>`,
+            "clipboard-check": `<rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/>`,
+            "users": `<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>`,
+            "user": `<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>`,
+            "user-plus": `<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/>`,
+            "user-x": `<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" x2="22" y1="8" y2="13"/><line x1="22" x2="17" y1="8" y2="13"/>`,
+            "bar-chart-3": `<path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>`,
+            "trending-up": `<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>`,
+            "trending-down": `<polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/>`,
+            "settings": `<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>`,
+            "shield": `<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>`,
+            "shield-alert": `<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>`,
+            "book-open": `<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>`,
+            "scale": `<path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>`,
+            "target": `<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>`,
+            "plus": `<line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/>`,
+            "minus": `<line x1="5" x2="19" y1="12" y2="12"/>`,
+            "trash-2": `<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>`,
+            "edit-3": `<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>`,
+            "search": `<circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/>`,
+            "lock": `<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>`,
+            "unlock": `<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/>`,
+            "key": `<circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4"/>`,
+            "log-out": `<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/>`,
+            "alert-triangle": `<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/>`,
+            "check-circle": `<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>`,
+            "check": `<polyline points="20 6 9 17 4 12"/>`,
+            "x-circle": `<circle cx="12" cy="12" r="10"/><line x1="15" x2="9" y1="9" y2="15"/><line x1="9" x2="15" y1="9" y2="15"/>`,
+            "x": `<line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/>`,
+            "sparkles": `<path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>`,
+            "palmtree": `<path d="M13 8c0-2.76-2.46-5-5.5-5S2 5.24 2 8h2s1-4 4-4 4 4 4 4"/><path d="M13 7.14A5.82 5.82 0 0 1 16.5 6c3.04 0 5.5 2.24 5.5 5h-2s-1-4-4-4-2.5 1.84-2.5 1.84"/><path d="M16 11c0 2.76 2.46 5 5.5 5v-2s-4-1-4-4"/><path d="M9 13c-2.76 0-5 2.24-5 5h2s1-4 4-4"/><path d="M12 8v14"/><path d="M8 22h8"/>`,
+            "zap": `<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>`,
+            "lightbulb": `<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>`,
+            "wallet": `<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>`,
+            "graduation-cap": `<path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>`,
+            "building-2": `<path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>`,
+            "clock": `<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>`,
+            "arrow-right": `<line x1="5" x2="19" y1="12" y2="12"/><polyline points="12 5 19 12 12 19"/>`,
+            "arrow-left": `<line x1="19" x2="5" y1="12" y2="12"/><polyline points="12 19 5 12 12 5"/>`
+        };
+
+        const EMOJI_TO_ICON = {
+            "🌙": "moon", "☀️": "sun", "☀": "sun", "🔄": "refresh-cw", "💾": "download", "📂": "folder-open",
+            "📋": "clipboard-list", "🧑‍🏫": "graduation-cap", "🧑": "graduation-cap", "🏫": "building-2",
+            "⚠️": "alert-triangle", "⚠": "alert-triangle", "📍": "calendar-check", "🖨️": "printer", "🖨": "printer",
+            "📊": "bar-chart-3", "🏖️": "palmtree", "🏖": "palmtree", "➕": "plus", "📈": "trending-up",
+            "📅": "calendar", "💡": "lightbulb", "🤒": "user-x", "💪": "zap", "⚙️": "settings", "⚙": "settings",
+            "👤": "user", "📥": "file-spreadsheet", "🔍": "search", "⚖️": "scale", "⚖": "scale", "🛡️": "shield",
+            "🛡": "shield", "📚": "book-open", "📄": "file-text", "💰": "wallet", "🔓": "unlock", "🔐": "lock",
+            "🚪": "log-out", "☁️": "cloud", "☁": "cloud", "🔑": "key", "⚡": "zap", "🗑️": "trash-2", "🗑": "trash-2",
+            "✏️": "edit-3", "✏": "edit-3", "🎯": "target", "✅": "check-circle", "✓": "check", "❌": "x",
+            "✗": "x", "🚨": "shield-alert", "🎉": "sparkles", "👋": "user", "🚀": "sparkles", "➖": "minus",
+            "🔺": "trending-up", "🔻": "trending-down", "⏳": "clock", "➔": "arrow-right", "⬅️": "arrow-left",
+            "📴": "cloud", "🌐": "cloud", "🔴": "alert-triangle", "🟢": "check-circle", "✨": "sparkles",
+            "⬇️": "download", "⬇": "download"
+        };
+
+        function uiIcon(nameOrEmoji, className = "w-4 h-4 inline-block") {
+            let key = nameOrEmoji;
+            if (EMOJI_TO_ICON[key]) key = EMOJI_TO_ICON[key];
+            const inner = APP_ICONS[key] || APP_ICONS[nameOrEmoji];
+            if (!inner) return nameOrEmoji || "";
+            return `<svg xmlns="http://www.w3.org/2000/svg" class="${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${inner}</svg>`;
+        }
 
         // Standard-Projektkonfiguration
         const DEFAULT_FIREBASE_CONFIG = {
@@ -1563,7 +1642,7 @@
                 if (!isInitialSyncDone) {
                     hideSyncGate(true);
                     if (cloudStatus === 'local' || cloudStatus === 'error') {
-                        showToast("Offline-Modus aktiv (Lokal)", "📴");
+                        showToast("Offline-Modus aktiv (Lokal)", "cloud");
                     }
                 }
             }, 2000);
@@ -1580,9 +1659,23 @@
         }
 
         // --- TOAST & DIALOGE ---
-        function showToast(msg, icon = "✅") { 
+        function showToast(msg, icon = "check-circle") { 
             const t = document.getElementById('toast'); 
-            t.innerHTML = `<span>${icon}</span> <span>${msg}</span>`; 
+            if (!t) return;
+            let iconClass = "w-5 h-5 text-emerald-400 shrink-0";
+            let key = EMOJI_TO_ICON[icon] || icon;
+            if (key === 'alert-triangle') iconClass = "w-5 h-5 text-amber-400 shrink-0";
+            else if (key === 'x-circle' || key === 'x') iconClass = "w-5 h-5 text-rose-400 shrink-0";
+            else if (key === 'calendar' || key === 'calendar-check') iconClass = "w-5 h-5 text-sky-400 shrink-0";
+            else if (key === 'sparkles') iconClass = "w-5 h-5 text-purple-400 shrink-0";
+            else if (key === 'trash-2') iconClass = "w-5 h-5 text-rose-400 shrink-0";
+            else if (key === 'cloud') iconClass = "w-5 h-5 text-sky-400 shrink-0";
+            else if (key === 'download') iconClass = "w-5 h-5 text-sky-400 shrink-0";
+            else if (key === 'bar-chart-3') iconClass = "w-5 h-5 text-indigo-400 shrink-0";
+            else if (key === 'shield') iconClass = "w-5 h-5 text-emerald-400 shrink-0";
+            else if (key === 'book-open') iconClass = "w-5 h-5 text-amber-400 shrink-0";
+
+            t.innerHTML = `<span class="inline-flex items-center justify-center">${uiIcon(icon, iconClass)}</span> <span class="font-medium text-slate-100">${msg}</span>`; 
             t.classList.remove('hidden'); 
             setTimeout(() => t.classList.add('hidden'), 3500); 
         }
@@ -1594,7 +1687,7 @@
             document.getElementById('confirm-msg').innerText = msg; 
             const btn = document.getElementById('confirm-btn');
             if (btn) {
-                btn.innerText = btnText;
+                btn.innerHTML = btnText;
                 btn.className = `px-4 py-2 rounded-lg font-bold transition shadow cursor-pointer text-sm ${btnClass}`;
             }
             confirmCallback = cb; 
@@ -1616,13 +1709,15 @@
             updateSyncWarningBanner();
             
             let ind = document.getElementById('save-indicator');
-            if (fbDb && cloudStatus === 'connected') {
-                ind.textContent = "✓ Gespeichert (Lokal & Cloud)";
-                queueCloudSync();
-            } else {
-                ind.textContent = "✓ Gespeichert (Lokal)";
+            if (ind) {
+                if (fbDb && cloudStatus === 'connected') {
+                    ind.innerHTML = `${uiIcon("check-circle", "w-3.5 h-3.5 inline mr-1 text-emerald-500")} Gespeichert (Lokal & Cloud)`;
+                    queueCloudSync();
+                } else {
+                    ind.innerHTML = `${uiIcon("check-circle", "w-3.5 h-3.5 inline mr-1 text-emerald-500")} Gespeichert (Lokal)`;
+                }
+                setTimeout(() => { if (ind) ind.innerHTML = ""; }, 2500);
             }
-            setTimeout(() => { if (ind) ind.textContent = ""; }, 2500);
         }
 
         function loadFromLocal() {
@@ -1666,7 +1761,7 @@
                     init(); 
                     showToast("Daten erfolgreich importiert!"); 
                 } catch (err) { 
-                    showToast("Fehler beim Laden der JSON-Datei.", "❌"); 
+                    showToast("Fehler beim Laden der JSON-Datei.", "x"); 
                 } 
             }; 
             reader.readAsText(file); 
@@ -1752,10 +1847,10 @@
 
             if (hasUnsyncedChanges && cloudStatus !== 'connected') {
                 banner.className += "bg-amber-50 border-amber-300 text-amber-900";
-                if (iconEl) iconEl.textContent = "⚠️";
+                if (iconEl) iconEl.innerHTML = uiIcon("alert-triangle", "w-5 h-5 text-amber-600 shrink-0");
                 if (textEl) textEl.innerHTML = "<b>Ungespeicherte Cloud-Änderungen:</b> Deine letzten Eintragungen liegen nur lokal in diesem Browser und wurden noch nicht mit der Schul-Cloud synchronisiert!";
                 if (btnEl) {
-                    btnEl.textContent = "☁️ Jetzt synchronisieren";
+                    btnEl.innerHTML = `${uiIcon("refresh-cw", "w-3.5 h-3.5 inline mr-1")} Jetzt synchronisieren`;
                     btnEl.className = "bg-amber-600 hover:bg-amber-700 text-white px-3.5 py-1.5 rounded-lg font-bold shadow-xs transition text-xs whitespace-nowrap cursor-pointer";
                     btnEl.onclick = () => manualSyncWithCloud();
                 }
@@ -1763,10 +1858,10 @@
                 banner.classList.add('flex');
             } else if (cloudStatus === 'local') {
                 banner.className += "bg-amber-50/80 border-amber-200 text-amber-800";
-                if (iconEl) iconEl.textContent = "📴";
+                if (iconEl) iconEl.innerHTML = uiIcon("cloud", "w-5 h-5 text-amber-600 shrink-0");
                 if (textEl) textEl.innerHTML = "<b>Offline-Modus aktiv:</b> Keine Cloud-Synchronisation aktiv. Daten werden nur im lokalen Speicher dieses Browsers gesichert.";
                 if (btnEl) {
-                    btnEl.textContent = "⚡ Cloud verbinden";
+                    btnEl.innerHTML = `${uiIcon("zap", "w-3.5 h-3.5 inline mr-1")} Cloud verbinden`;
                     btnEl.className = "bg-school-600 hover:bg-school-700 text-white px-3.5 py-1.5 rounded-lg font-bold shadow-xs transition text-xs whitespace-nowrap cursor-pointer";
                     btnEl.onclick = () => openCloudModal();
                 }
@@ -1774,10 +1869,10 @@
                 banner.classList.add('flex');
             } else if (cloudStatus === 'error') {
                 banner.className += "bg-rose-50 border-rose-200 text-rose-800";
-                if (iconEl) iconEl.textContent = "🔴";
+                if (iconEl) iconEl.innerHTML = uiIcon("alert-triangle", "w-5 h-5 text-rose-600 shrink-0");
                 if (textEl) textEl.innerHTML = "<b>Verbindungsfehler:</b> Keine Verbindung zu Firestore. Änderungen werden derzeit nur lokal auf diesem Rechner gesichert.";
                 if (btnEl) {
-                    btnEl.textContent = "🔄 Verbindung prüfen";
+                    btnEl.innerHTML = `${uiIcon("refresh-cw", "w-3.5 h-3.5 inline mr-1")} Verbindung prüfen`;
                     btnEl.className = "bg-rose-600 hover:bg-rose-700 text-white px-3.5 py-1.5 rounded-lg font-bold shadow-xs transition text-xs whitespace-nowrap cursor-pointer";
                     btnEl.onclick = () => manualSyncWithCloud();
                 }
@@ -1941,7 +2036,7 @@
                             populateYearDropdown();
                             renderCurrentView();
                             isSyncingFromRemote = false;
-                            showToast(`Daten mit Cloud synchronisiert (${nowStr})`, "☁️");
+                            showToast(`Daten mit Cloud synchronisiert (${nowStr})`, "cloud");
                         } else if (localHasRealData && !remoteHasRealData) {
                             // Lokaler Stand hat echte Daten (z. B. auf dem Mac), Cloud war noch leer -> In Cloud hochladen!
                             console.log("Lokale Daten sind vollständiger als Cloud-Stand. Synchronisiere zur Cloud...");
@@ -1949,7 +2044,7 @@
                             docRef.set(prepareDataForCloud(appData), { merge: true });
                             hasUnsyncedChanges = false;
                             updateSyncWarningBanner();
-                            showToast(`Lokaler Stand in Cloud übertragen!`, "☁️");
+                            showToast(`Lokaler Stand in Cloud übertragen!`, "cloud");
                         } else if (remoteTs > localTs) {
                             isSyncingFromRemote = true;
                             const currentActiveYear = appData.schoolYear;
@@ -2043,7 +2138,7 @@
 
         // --- AUTOMATISCHE WIEDERVERBINDUNG BEI NETZWERK-STATUSWECHSEL ---
         window.addEventListener('online', () => {
-            showToast("Internetverbindung aktiv! Prüfe Cloud-Sync...", "🌐");
+            showToast("Internetverbindung aktiv! Prüfe Cloud-Sync...", "cloud");
             if (!fbDb) {
                 initFirebaseFromStorage();
             } else if (hasUnsyncedChanges) {
@@ -2056,7 +2151,7 @@
 
         window.addEventListener('offline', () => {
             updateCloudUIStatus('local', 'Offline (Kein Internet)', 'Keine aktive Internetverbindung.');
-            showToast("Internet getrennt (Offline-Modus)", "📴");
+            showToast("Internet getrennt (Offline-Modus)", "cloud");
             updateSyncWarningBanner();
         });
 
@@ -2071,12 +2166,12 @@
 
             if (!fbDb) {
                 if (icon) icon.classList.remove('animate-spin');
-                showToast("Keine Cloud-Verbindung aktiv (Offline)", "📴");
+                showToast("Keine Cloud-Verbindung aktiv (Offline)", "cloud");
                 return;
             }
 
             try {
-                showToast("Prüfe Cloud-Datenbestand...", "🔄");
+                showToast("Prüfe Cloud-Datenbestand...", "refresh-cw");
                 const schoolId = getSchoolDocId();
                 const docSnap = await fbDb.collection("schools").doc(schoolId).get({ source: 'server' });
 
@@ -2102,29 +2197,29 @@
                         populateYearDropdown();
                         renderCurrentView();
                         isSyncingFromRemote = false;
-                        showToast("✓ Daten erfolgreich aus Cloud aktualisiert!", "🟢");
+                        showToast("Daten erfolgreich aus Cloud aktualisiert!", "check-circle");
                     } else if (localHasRealData && (localTs > remoteTs || !remoteHasRealData)) {
                         appData.lastModified = Date.now();
                         await fbDb.collection("schools").doc(schoolId).set(prepareDataForCloud(appData), { merge: true });
                         hasUnsyncedChanges = false;
                         updateSyncWarningBanner();
-                        showToast("✓ Lokaler Stand in Cloud hochgeladen!", "☁️");
+                        showToast("Lokaler Stand in Cloud hochgeladen!", "cloud");
                     } else {
                         hasUnsyncedChanges = false;
                         updateSyncWarningBanner();
-                        showToast("✓ Datenbestand ist auf dem neuesten Stand!", "✨");
+                        showToast("Datenbestand ist auf dem neuesten Stand!", "sparkles");
                     }
                 } else {
                     appData.lastModified = Date.now();
                     await fbDb.collection("schools").doc(schoolId).set(prepareDataForCloud(appData), { merge: true });
                     hasUnsyncedChanges = false;
                     updateSyncWarningBanner();
-                    showToast("✓ Datenbestand in Cloud angelegt!", "☁️");
+                    showToast("Datenbestand in Cloud angelegt!", "cloud");
                 }
                 updateCloudUIStatus('connected', 'Live-Sync aktiv', `Echtzeit-Synchronisation aktiv`);
             } catch (err) {
                 console.error("Manueller Sync Fehler:", err);
-                showToast("Sync-Fehler: " + (err.message || 'Server nicht erreichbar'), "❌");
+                showToast("Sync-Fehler: " + (err.message || 'Server nicht erreichbar'), "x");
             } finally {
                 if (icon) icon.classList.remove('animate-spin');
             }
@@ -2174,7 +2269,7 @@
                 localStorage.setItem(cloudSchoolKey, schoolIdInput);
 
                 startFirebase(config, schoolIdInput);
-                showToast("Firebase-Verbindung wird hergestellt...", "⚡");
+                showToast("Firebase-Verbindung wird hergestellt...", "zap");
                 closeCloudModal();
             } catch (err) {
                 alert("Fehler bei der Konfiguration:\n" + err.message);
@@ -2189,7 +2284,7 @@
             fbDb = null;
             localStorage.removeItem(cloudConfigKey);
             updateCloudUIStatus('local', 'Lokal (Offline)', 'Cloud-Verbindung getrennt. Daten werden nur im Browser gespeichert.');
-            showToast("Cloud-Sync deaktiviert. Sie arbeiten jetzt lokal.", "📴");
+            showToast("Cloud-Sync deaktiviert. Sie arbeiten jetzt lokal.", "cloud");
             closeCloudModal();
         }
 
@@ -2204,13 +2299,13 @@
                         await fbDb.collection("schools").doc(schoolId).set(prepareDataForCloud(appData), { merge: true });
                         hasUnsyncedChanges = false;
                         updateSyncWarningBanner();
-                        showToast("Lokaler Stand erfolgreich in Cloud hochgeladen!", "☁️");
+                        showToast("Lokaler Stand erfolgreich in Cloud hochgeladen!", "cloud");
                         closeCloudModal();
                     } catch (err) {
                         alert("Upload-Fehler: " + err.message);
                     }
                 },
-                "☁️ Jetzt in Cloud hochladen",
+                `${uiIcon("cloud", "w-4 h-4 inline mr-1 text-white")} Jetzt in Cloud hochladen`,
                 "bg-school-600 hover:bg-school-700 text-white",
                 "Lokalen Stand hochladen?"
             );
@@ -2231,7 +2326,7 @@
                             updateSyncWarningBanner();
                             populateYearDropdown();
                             renderCurrentView();
-                            showToast("Daten frisch aus der Cloud geladen!", "⬇️");
+                            showToast("Daten frisch aus der Cloud geladen!", "download");
                             closeCloudModal();
                         } else {
                             alert("In der Cloud existiert noch kein Datenbestand für diese Schul-ID.");
@@ -2240,7 +2335,7 @@
                         alert("Download-Fehler: " + err.message);
                     }
                 },
-                "⬇️ Aus Cloud neu laden",
+                `${uiIcon("download", "w-4 h-4 inline mr-1 text-white")} Aus Cloud neu laden`,
                 "bg-amber-600 hover:bg-amber-700 text-white",
                 "Cloud-Stand laden?"
             );
@@ -2249,7 +2344,7 @@
         function loadSampleFirebaseConfig() {
             document.getElementById('fb-config-raw').value = JSON.stringify(DEFAULT_FIREBASE_CONFIG, null, 2);
             document.getElementById('fb-school-id').value = DEFAULT_SCHOOL_ID;
-            showToast("Projekt-Konfiguration geladen!", "📋");
+            showToast("Projekt-Konfiguration geladen!", "clipboard-list");
         }
 
         // --- TABS & NAVIGATION ---
@@ -2307,7 +2402,7 @@
             // Option zum manuellen Anlegen eines weiteren Schuljahres
             let addOpt = document.createElement('option');
             addOpt.value = '__add_new__';
-            addOpt.text = '➕ Schuljahr anlegen...';
+            addOpt.text = '+ Schuljahr anlegen...';
             select.appendChild(addOpt);
 
             select.value = allYears.includes(appData.schoolYear) ? appData.schoolYear : (allYears[0] || "25/26");
@@ -2327,7 +2422,7 @@
             localStorage.setItem(storageKey, JSON.stringify(appData));
             updateTitleYears();
             renderCurrentView();
-            showToast(`Schuljahr SJ ${appData.schoolYear} geladen`, "📅");
+            showToast(`Schuljahr SJ ${appData.schoolYear} geladen`, "calendar");
         }
 
         function promptAddNewSchoolYear() {
@@ -2604,7 +2699,7 @@
                     });
                 } else console.warn("API offline.");
                 generateHolidays(true); saveToLocal(); renderMonthView(); showToast("Ferien & Feiertage geladen!"); closeHolidayModal();
-            } catch (e) { alert("API Fehler. Bitte manuell eingeben."); } finally { btn.innerHTML = "🌐 Daten online laden (Thüringen)"; }
+            } catch (e) { alert("API Fehler. Bitte manuell eingeben."); } finally { btn.innerHTML = `${uiIcon("cloud", "w-4 h-4 text-white inline mr-1.5")} Daten online laden (Thüringen)`; }
         }
 
         function addDateRangeToHolidays(startId, endId) {
@@ -3036,7 +3131,7 @@
                 rBadgesHtml += '</div>';
                 let remV = currentV - sums.V;
 
-                let bemFlag = tStats?.[t.id]?.bem ? `<span class="bem-alert text-red-600 text-sm" title="Achtung: >30 Kranktage erreicht! BEM anbieten.">🚨</span>` : '';
+                let bemFlag = tStats?.[t.id]?.bem ? `<span class="bem-alert inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-red-100 text-red-700 text-[10px] font-black border border-red-200 shadow-2xs ml-1" title="Achtung: >30 Kranktage erreicht! BEM anbieten.">${uiIcon('shield-alert', 'w-3 h-3')} BEM</span>` : '';
 
                 html += `<tr class="hover:bg-slate-50 transition"><td class="font-bold text-left sticky-col pl-3 text-slate-700">${t.name} ${bemFlag}</td>
                     <td class="bg-green-50/50 p-1 align-top"><input type="number" min="0" value="${currentR}" class="w-full text-center bg-transparent outline-none font-extrabold border-b border-green-200 focus:border-green-500" onchange="updateQuota('${t.id}', 'r', this.value)">${rBadgesHtml}</td>
@@ -3084,7 +3179,7 @@
             updateTitleYears();
             renderMonthView();
             scrollToToday();
-            showToast(`Zu heute (${now.getDate()}. ${monthNames[appData.currentMonth]}) gewechselt`, "📍");
+            showToast(`Zu heute (${now.getDate()}. ${monthNames[appData.currentMonth]}) gewechselt`, "calendar-check");
         }
 
         function updateQuota(tId, type, val) { 
@@ -3176,7 +3271,7 @@
             let teacherObj = appData.teachers.find(t => t.id === tId);
             let tName = teacherObj ? teacherObj.name : "Lehrkraft";
             if (isBulk) {
-                showToast(`${countSet} Tage (${type || 'Gelöscht'}) für ${tName} erfasst`, "📅");
+                showToast(`${countSet} Tage (${type || 'Gelöscht'}) für ${tName} erfasst`, "calendar");
             }
         }
 
@@ -3219,16 +3314,16 @@
             let icon = ''; let colorClass = '';
             
             if(Math.abs(diff) < 0.5) { 
-                icon = '➖'; colorClass = 'bg-slate-100 text-slate-500'; 
+                icon = uiIcon('minus', 'w-2.5 h-2.5 inline'); colorClass = 'bg-slate-100 text-slate-500'; 
             } 
             else if (val > avg) { 
-                icon = '🔺'; colorClass = isAbsence ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'; 
+                icon = uiIcon('trending-up', 'w-2.5 h-2.5 inline'); colorClass = isAbsence ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'; 
             } 
             else { 
-                icon = '🔻'; colorClass = isAbsence ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'; 
+                icon = uiIcon('trending-down', 'w-2.5 h-2.5 inline'); colorClass = isAbsence ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'; 
             }
             
-            return `<span class="font-extrabold text-base">${val}</span> <span class="text-[10px] text-slate-400 font-medium ml-1">${avgStr}</span> <span class="text-[10px] px-1.5 py-0.5 rounded-md ${colorClass} ml-1 shadow-sm" title="Trend (Vergleich zum Ø)">${icon}</span>`;
+            return `<span class="font-extrabold text-base">${val}</span> <span class="text-[10px] text-slate-400 font-medium ml-1">${avgStr}</span> <span class="inline-flex items-center px-1.5 py-0.5 rounded-md ${colorClass} ml-1 shadow-2xs" title="Trend (Vergleich zum Ø)">${icon}</span>`;
         }
 
         function renderDashboardView() {
@@ -3291,7 +3386,7 @@
             
             let activeTList = Object.values(tStats).filter(t => t.active).sort((a,b) => a.name.localeCompare(b.name));
             activeTList.forEach(t => {
-                let bemFlag = t.bem ? `<span class="bem-alert text-red-600 text-sm" title="Achtung: >30 Kranktage. BEM!">🚨</span>` : '';
+                let bemFlag = t.bem ? `<span class="bem-alert inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-red-100 text-red-700 text-[10px] font-black border border-red-200 shadow-2xs ml-1" title="Achtung: >30 Kranktage. BEM!">${uiIcon('shield-alert', 'w-3 h-3')} BEM</span>` : '';
                 let totalAbs = t.K + t.KK + t.AZV; let totalEx = t.R + t.V + t.E + t.AZVgeh;
                 hAbsences += `<tr class="hover:bg-slate-50 transition"><td class="font-bold text-slate-700">${t.name} ${bemFlag}</td><td>${formatStat(t.K, avgs.K, true)}</td><td>${formatStat(t.KK, avgs.KK, true)}</td><td>${formatStat(t.AZV, avgs.AZV, true)}</td><td class="bg-red-50/50">${formatStat(totalAbs, avgs.K+avgs.KK+avgs.AZV, true)}</td></tr>`;
                 hExtra += `<tr class="hover:bg-slate-50 transition"><td class="font-bold text-slate-700">${t.name}</td><td>${formatStat(t.R, avgs.R, false)}</td><td>${formatStat(t.V, avgs.V, false)}</td><td>${formatStat(t.E, avgs.E, false)}</td><td class="bg-teal-50/30">${formatStat(t.AZVgeh, avgs.AZVgeh, false)}</td><td class="bg-green-50/50">${formatStat(totalEx, avgs.R+avgs.V+avgs.E+avgs.AZVgeh, false)}</td></tr>`;
@@ -3519,7 +3614,7 @@
         function changeEpPeriod(periodId) {
             currentEpPeriodId = periodId;
             renderSurveyView();
-            showToast("Gültigkeitszeitraum gewechselt", "📅");
+            showToast("Gültigkeitszeitraum gewechselt", "calendar");
         }
 
         // --- SUBVIEW 1: SCHUL-DASHBOARD (ANALOG EXCEL DECKBLATT) ---
@@ -3565,7 +3660,7 @@
                     <tr class="hover:bg-slate-50 transition cursor-pointer" onclick="openTeacherEp('${t.id}')">
                         <td class="p-3 text-center font-bold text-slate-400">${idx + 1}</td>
                         <td class="p-3 font-extrabold text-slate-800 flex items-center gap-2">
-                            <span>👤 ${t.name}</span>
+                            <span class="flex items-center gap-1.5">${uiIcon('user', 'w-4 h-4 text-slate-400')} ${t.name}</span>
                         </td>
                         <td class="p-3 text-center font-bold bg-slate-50/50 text-slate-700">${calc.pflichtstunden} h</td>
                         <td class="p-3 text-center font-black bg-blue-50/30 text-blue-700">${calc.unterrichtTotal} h</td>
@@ -3574,8 +3669,8 @@
                         <td class="p-3 text-center">${saldoBadge}</td>
                         <td class="p-3 text-center font-medium text-slate-500">${calc.gts > 0 ? calc.gts + ' h' : '–'}</td>
                         <td class="p-3 text-right" onclick="event.stopPropagation()">
-                            <button onclick="openTeacherEp('${t.id}')" class="bg-school-50 hover:bg-school-100 text-school-700 px-2.5 py-1 rounded-lg font-bold text-xs transition border border-school-200 shadow-2xs">
-                                ✏️ Bearbeiten
+                            <button onclick="openTeacherEp('${t.id}')" class="bg-school-50 hover:bg-school-100 text-school-700 px-2.5 py-1 rounded-lg font-bold text-xs transition border border-school-200 shadow-2xs inline-flex items-center gap-1">
+                                ${uiIcon('edit-3', 'w-3 h-3')} <span>Bearbeiten</span>
                             </button>
                         </td>
                     </tr>
@@ -3665,7 +3760,7 @@
                 .sort((a,b) => a.name.localeCompare(b.name));
 
             if (activeTeachers.length === 0) {
-                showToast("Keine aktiven Lehrkräfte vorhanden", "⚠️");
+                showToast("Keine aktiven Lehrkräfte vorhanden", "alert-triangle");
                 switchEpSubView('dashboard');
                 return;
             }
@@ -3714,21 +3809,21 @@
                     saldoBadge.className = "p-4 rounded-xl bg-teal-50 border border-teal-200 text-center";
                     saldoBadge.innerHTML = `
                         <div class="text-3xl font-black text-teal-700">${calc.rSoll} h</div>
-                        <div class="text-xs font-bold text-teal-800 mt-1">🎯 Wöchentliches Reststunden-Soll (R)</div>
+                        <div class="text-xs font-bold text-teal-800 mt-1 flex items-center justify-center gap-1.5">${uiIcon('target', 'w-3.5 h-3.5 text-teal-700')} Wöchentliches Reststunden-Soll (R)</div>
                         <div class="text-[11px] text-teal-600 mt-0.5">Bereitschaft / Vertretung (${calc.excelRest} h Excel-Rest)</div>
                     `;
                 } else if (calc.excelRest === 0) {
                     saldoBadge.className = "p-4 rounded-xl bg-blue-50 border border-blue-200 text-center";
                     saldoBadge.innerHTML = `
                         <div class="text-3xl font-black text-blue-700">0 h</div>
-                        <div class="text-xs font-bold text-blue-800 mt-1">✅ Exakt im Soll verplant</div>
+                        <div class="text-xs font-bold text-blue-800 mt-1 flex items-center justify-center gap-1.5">${uiIcon('check-circle', 'w-3.5 h-3.5 text-blue-700')} Exakt im Soll verplant</div>
                         <div class="text-[11px] text-blue-600 mt-0.5">Keine offenen Reststunden (R = 0 h)</div>
                     `;
                 } else {
                     saldoBadge.className = "p-4 rounded-xl bg-amber-50 border border-amber-200 text-center";
                     saldoBadge.innerHTML = `
                         <div class="text-3xl font-black text-amber-700">+${calc.excelRest} h</div>
-                        <div class="text-xs font-bold text-amber-800 mt-1">⚠️ Überhang / Mehrarbeit</div>
+                        <div class="text-xs font-bold text-amber-800 mt-1 flex items-center justify-center gap-1.5">${uiIcon('alert-triangle', 'w-3.5 h-3.5 text-amber-700')} Überhang / Mehrarbeit</div>
                         <div class="text-[11px] text-amber-600 mt-0.5">Lehrkraft unterrichtet über Deputat</div>
                     `;
                 }
@@ -3754,8 +3849,8 @@
                             </div>
                             <div class="flex items-center gap-3">
                                 <span class="font-black text-purple-700 text-sm">${a.hours} h</span>
-                                <button onclick="removeEpAbminderung(${idx})" class="text-slate-400 hover:text-rose-600 hover:bg-rose-50 p-1 rounded-lg transition cursor-pointer" title="Löschen">
-                                    🗑️
+                                <button onclick="removeEpAbminderung(${idx})" class="text-slate-400 hover:text-rose-600 hover:bg-rose-50 p-1.5 rounded-lg transition cursor-pointer flex items-center justify-center" title="Löschen">
+                                    ${uiIcon('trash-2', 'w-3.5 h-3.5')}
                                 </button>
                             </div>
                         </div>
@@ -3779,8 +3874,8 @@
                             <td class="p-2.5 font-bold text-slate-700">${u.class}</td>
                             <td class="p-2.5 text-slate-500 italic text-[11px]">${u.note || '–'}</td>
                             <td class="p-2.5 text-center">
-                                <button onclick="removeEpUnterricht(${idx})" class="text-slate-400 hover:text-rose-600 hover:bg-rose-50 p-1 rounded-lg transition cursor-pointer" title="Zeile löschen">
-                                    🗑️
+                                <button onclick="removeEpUnterricht(${idx})" class="text-slate-400 hover:text-rose-600 hover:bg-rose-50 p-1.5 rounded-lg transition cursor-pointer inline-flex items-center justify-center" title="Zeile löschen">
+                                    ${uiIcon('trash-2', 'w-3.5 h-3.5')}
                                 </button>
                             </td>
                         </tr>
@@ -3833,7 +3928,7 @@
             const hours = parseFloat(document.getElementById('ep-new-abm-hours').value) || 0;
 
             if (hours <= 0) {
-                showToast("Bitte gültige Stundenanzahl angeben", "⚠️");
+                showToast("Bitte gültige Stundenanzahl angeben", "alert-triangle");
                 return;
             }
 
@@ -3853,7 +3948,7 @@
             saveToLocal();
             document.getElementById('ep-new-abm-text').value = '';
             renderEpTeacherEditor(epData, epData.periods.find(p => p.id === pId));
-            showToast(`Abminderung (${art}) hinzugefügt`, "🛡️");
+            showToast(`Abminderung (${art}) hinzugefügt`, "shield");
         }
 
         function removeEpAbminderung(idx) {
@@ -3876,7 +3971,7 @@
             const note = document.getElementById('ep-new-unt-note').value.trim();
 
             if (hours <= 0 || !subject || !klass) {
-                showToast("Bitte Stunden, Fach und Klasse angeben", "⚠️");
+                showToast("Bitte Stunden, Fach und Klasse angeben", "alert-triangle");
                 return;
             }
 
@@ -3902,7 +3997,7 @@
             document.getElementById('ep-new-unt-subject').focus();
 
             renderEpTeacherEditor(epData, epData.periods.find(p => p.id === pId));
-            showToast(`${hours}h ${subject} (${klass}) hinzugefügt`, "📚");
+            showToast(`${hours}h ${subject} (${klass}) hinzugefügt`, "book-open");
         }
 
         function removeEpUnterricht(idx) {
@@ -3981,7 +4076,7 @@
             let shouldClone = document.getElementById('ep-modal-clone-check').checked;
 
             if (!name || !validFrom) {
-                showToast("Bitte Name und Startdatum angeben", "⚠️");
+                showToast("Bitte Name und Startdatum angeben", "alert-triangle");
                 return;
             }
 
@@ -4025,14 +4120,14 @@
             saveToLocal();
             closeEpPeriodModal();
             renderSurveyView();
-            showToast("Gültigkeitszeitraum gespeichert!", "✅");
+            showToast("Gültigkeitszeitraum gespeichert!", "check-circle");
         }
 
         function deleteEpPeriod() {
             let pId = document.getElementById('ep-modal-period-id').value;
             let epData = getYearEpData(appData.schoolYear);
             if (epData.periods.length <= 1) {
-                showToast("Der einzige Gültigkeitszeitraum kann nicht gelöscht werden.", "⚠️");
+                showToast("Der einzige Gültigkeitszeitraum kann nicht gelöscht werden.", "alert-triangle");
                 return;
             }
 
@@ -4045,7 +4140,7 @@
                     saveToLocal();
                     closeEpPeriodModal();
                     renderSurveyView();
-                    showToast("Zeitraum gelöscht.", "🗑️");
+                    showToast("Zeitraum gelöscht.", "trash-2");
                 }
             }, "Zeitraum löschen");
         }
@@ -4108,13 +4203,13 @@
             let html = `
                 <div class="mb-4 flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl ${isCurrent ? 'bg-teal-50 border border-teal-200' : 'bg-slate-50 border border-slate-200'}">
                     <div class="flex items-center gap-2">
-                        <span class="text-xs font-bold px-2 py-0.5 rounded ${isCurrent ? 'bg-teal-600 text-white' : 'bg-slate-300 text-slate-700'}">
-                            ${isCurrent ? '● Aktuell gültiger Plan' : '📁 Archivierte Vorversion'}
+                        <span class="text-xs font-bold px-2 py-0.5 rounded flex items-center gap-1 ${isCurrent ? 'bg-teal-600 text-white' : 'bg-slate-200 text-slate-700'}">
+                            ${isCurrent ? '<span class="w-1.5 h-1.5 rounded-full bg-emerald-300"></span> Aktuell gültiger Plan' : uiIcon('folder-open', 'w-3 h-3 text-slate-500') + ' Archivierte Vorversion'}
                         </span>
                         <span class="text-xs font-bold text-slate-700">Gültig ab Montag, ${dateDe}</span>
                     </div>
-                    <div class="text-xs font-bold ${calc.rSoll > 0 ? 'text-teal-700' : 'text-slate-600'}">
-                        ${calc.rSoll > 0 ? '🎯 ' + calc.rSoll + ' h Reststunden-Soll (R)' : '✅ Kein Reststunden-Soll (0 h)'}
+                    <div class="text-xs font-bold flex items-center gap-1.5 ${calc.rSoll > 0 ? 'text-teal-700' : 'text-slate-600'}">
+                        ${calc.rSoll > 0 ? uiIcon('target', 'w-3.5 h-3.5 text-teal-700') + ' ' + calc.rSoll + ' h Reststunden-Soll (R)' : uiIcon('check-circle', 'w-3.5 h-3.5 text-blue-700') + ' Kein Reststunden-Soll (0 h)'}
                     </div>
                 </div>
 
@@ -4142,8 +4237,8 @@
             if ((plan?.abminderungen || []).length > 0) {
                 html += `
                     <div class="mb-4">
-                        <div class="text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1">
-                            <span class="text-purple-600">🛡️</span> Abminderungen & Anrechnungsstunden:
+                        <div class="text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
+                            <span class="text-purple-600 inline-flex items-center">${uiIcon('shield', 'w-4 h-4')}</span> Abminderungen & Anrechnungsstunden:
                         </div>
                         <div class="overflow-x-auto rounded-xl border border-slate-200">
                             <table class="w-full text-xs text-left">
@@ -4161,8 +4256,8 @@
             // Unterrichtstabelle
             html += `
                 <div>
-                    <div class="text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1">
-                        <span class="text-blue-600">📚</span> Gehaltener Fachunterricht nach Klassen:
+                    <div class="text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
+                        <span class="text-blue-600 inline-flex items-center">${uiIcon('book-open', 'w-4 h-4')}</span> Gehaltener Fachunterricht nach Klassen:
                     </div>
                     <div class="overflow-x-auto rounded-xl border border-slate-200">
                         <table class="w-full text-xs text-left">
@@ -4193,14 +4288,14 @@
         // --- EXPORT & DRUCK DER EINSATZPLANUNG ---
         function exportEpToExcel() {
             if (typeof XLSX === 'undefined') {
-                showToast("SheetJS ist noch nicht geladen.", "❌");
+                showToast("SheetJS ist noch nicht geladen.", "x");
                 return;
             }
             const yStr = appData.schoolYear;
             const epData = getYearEpData(yStr);
             const activePeriod = epData.periods.find(p => p.id === currentEpPeriodId) || epData.periods[0];
             if (!activePeriod) {
-                showToast("Kein Zeitraum gefunden.", "⚠️");
+                showToast("Kein Zeitraum gefunden.", "alert-triangle");
                 return;
             }
 
@@ -4289,7 +4384,7 @@
 
             const fileName = `Einsatzplanung_HBS_SJ${yStr.replace('/','-')}_${activePeriod.name.replace(/[^a-zA-Z0-9_\-]/g, '_')}.xlsx`;
             XLSX.writeFile(wb, fileName);
-            showToast(`Excel-Datei erfolgreich exportiert!`, "📊");
+            showToast(`Excel-Datei erfolgreich exportiert!`, "bar-chart-3");
         }
 
         function printEpView() {
@@ -4840,7 +4935,7 @@
         // --- EXCEL EXPORT (.XLSX) ---
         function exportMonthToExcel() {
             if (typeof XLSX === 'undefined') {
-                showToast("Excel-Exportmodul nicht verfügbar", "⚠️");
+                showToast("Excel-Exportmodul nicht verfügbar", "alert-triangle");
                 return;
             }
 
@@ -4898,12 +4993,12 @@
             
             const fileName = `Vertretungsbericht_HBS_SJ${String(appData.schoolYear).replace('/', '-')}_${monthNames[m]}_${y}.xlsx`;
             XLSX.writeFile(wb, fileName);
-            showToast(`Excel-Datei "${fileName}" erfolgreich exportiert!`, "📊");
+            showToast(`Excel-Datei "${fileName}" erfolgreich exportiert!`, "bar-chart-3");
         }
 
         function exportYearToExcel() {
             if (typeof XLSX === 'undefined') {
-                showToast("Excel-Exportmodul nicht verfügbar", "⚠️");
+                showToast("Excel-Exportmodul nicht verfügbar", "alert-triangle");
                 return;
             }
 
@@ -4980,7 +5075,7 @@
 
             const fileName = `Jahresbericht_HBS_SJ${String(yStr).replace('/', '-')}_Komplett.xlsx`;
             XLSX.writeFile(wb, fileName);
-            showToast(`Gesamtes Schuljahr in "${fileName}" exportiert!`, "📊");
+            showToast(`Gesamtes Schuljahr in "${fileName}" exportiert!`, "bar-chart-3");
         }
 
         // --- DARK MODE THEME MANAGEMENT ---
@@ -4999,13 +5094,13 @@
             const isDark = document.documentElement.classList.toggle('dark');
             localStorage.setItem('theme_mode', isDark ? 'dark' : 'light');
             updateThemeIcons();
-            showToast(isDark ? "Dunkelmodus aktiviert 🌙" : "Hellmodus aktiviert ☀️", "🎨");
+            showToast(isDark ? "Dunkelmodus aktiviert" : "Hellmodus aktiviert", isDark ? "moon" : "sun");
         }
 
         function updateThemeIcons() {
             const isDark = document.documentElement.classList.contains('dark');
             document.querySelectorAll('.theme-icon').forEach(el => {
-                el.textContent = isDark ? '☀️' : '🌙';
+                el.innerHTML = isDark ? uiIcon('sun', 'w-4 h-4 text-amber-300') : uiIcon('moon', 'w-4 h-4 text-sky-100');
             });
             const btn = document.getElementById('theme-toggle-btn');
             if (btn) {
@@ -5017,7 +5112,7 @@
             const tId = targetTeacherId || document.getElementById('report-teacher-select')?.value; 
             let teacher = appData.teachers.find(t => t.id === tId); 
             if(!teacher) {
-                showToast("Bitte Lehrkraft auswählen", "⚠️");
+                showToast("Bitte Lehrkraft auswählen", "alert-triangle");
                 return;
             }
             let yStr = targetSchoolYear || appData.schoolYear;
@@ -5200,7 +5295,7 @@
             let type = document.getElementById('azv-type').value; 
             let hours = parseInt(document.getElementById('azv-hours').value); 
             
-            if (!fromVal || isNaN(hours)) return showToast("Bitte Startdatum und gültige Stunden eingeben.", "⚠️"); 
+            if (!fromVal || isNaN(hours)) return showToast("Bitte Startdatum und gültige Stunden eingeben.", "alert-triangle"); 
             
             let dateStr = "";
             let d1 = new Date(fromVal);
@@ -5241,7 +5336,7 @@
                 renderAzvView(); 
                 renderMonthView();
                 showToast("Erfolgreich gelöscht."); 
-            }, "🗑️ Löschen", "bg-red-600 hover:bg-red-700 text-white", "AZV-Eintrag löschen?"); 
+            }, `${uiIcon("trash-2", "w-4 h-4 inline mr-1 text-white")} Löschen`, "bg-red-600 hover:bg-red-700 text-white", "AZV-Eintrag löschen?"); 
         }
 
         // --- PERSONALVERWALTUNG ---
@@ -5280,12 +5375,12 @@
             });
 
             if (list.length === 0) {
-                html = `<tr><td colspan="5" class="p-8 text-center text-slate-400 italic">Keine aktiven Lehrkräfte für SJ ${appData.schoolYear} gefunden. Klicken Sie oben auf "Alle (inkl. Archiv)" oder auf "🧑‍🏫 Neu".</td></tr>`;
+                html = `<tr><td colspan="5" class="p-8 text-center text-slate-400 italic">Keine aktiven Lehrkräfte für SJ ${appData.schoolYear} gefunden. Klicken Sie oben auf "Alle (inkl. Archiv)" oder auf "+ Neu".</td></tr>`;
             } else {
                 html += `<thead><tr class="text-slate-500 bg-slate-50 border-b border-slate-200 text-xs font-bold uppercase"><th class="p-2.5">Name der Lehrkraft</th><th class="p-2.5 text-center">Basis R / Wo</th><th class="p-2.5 text-center">Basis V / Mo</th><th class="p-2.5 text-center">PIN (Portal)</th><th class="p-2.5 text-center">Status in SJ ${appData.schoolYear}</th></tr></thead><tbody>`;
                 list.forEach(t => {
                     let isActive = isTeacherActiveInYear(t.id, appData.schoolYear);
-                    let bemFlag = tStats[t.id]?.bem ? `<span class="bem-alert text-red-600 text-sm">🚨 BEM</span>` : '';
+                    let bemFlag = tStats[t.id]?.bem ? `<span class="bem-alert inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-red-100 text-red-700 text-[10px] font-black border border-red-200 shadow-2xs ml-1" title="Achtung: >30 Kranktage. BEM!">${uiIcon('shield-alert', 'w-3 h-3')} BEM</span>` : '';
                     let teacherPin = t.pin || '1234';
                     html += `<tr class="hover:bg-slate-50 transition ${!isActive ? 'opacity-60 bg-slate-50/60' : ''}">
                         <td class="p-2 flex items-center gap-2">
@@ -5302,7 +5397,7 @@
                         </td>
                         <td class="p-2 text-center w-48">
                             <button onclick="toggleStaffStatus('${t.id}')" class="w-full px-3 py-2 rounded-lg shadow-sm text-xs font-black uppercase tracking-wider transition active:scale-95 ${isActive ? 'bg-green-100 text-green-800 border border-green-200 hover:bg-green-200' : 'bg-slate-200 text-slate-500 hover:bg-slate-300'}" title="Aktivität für Schuljahr ${appData.schoolYear} an- oder ausschalten">
-                                ${isActive ? `✓ Aktiv in SJ ${appData.schoolYear}` : `✗ Inaktiv in SJ ${appData.schoolYear}`}
+                                ${isActive ? `<span class="inline-flex items-center justify-center gap-1">${uiIcon('check', 'w-3.5 h-3.5')} Aktiv in SJ ${appData.schoolYear}</span>` : `<span class="inline-flex items-center justify-center gap-1">${uiIcon('x', 'w-3.5 h-3.5')} Inaktiv in SJ ${appData.schoolYear}</span>`}
                             </button>
                         </td>
                     </tr>`;
@@ -5397,7 +5492,7 @@
             if (step === 2) {
                 let targetY = document.getElementById('rollover-target-year').value.trim();
                 if (!targetY.match(/^\d{2}\/\d{2}$/)) {
-                    showToast("Bitte gültiges Format eingeben (z. B. 26/27)", "⚠️");
+                    showToast("Bitte gültiges Format eingeben (z. B. 26/27)", "alert-triangle");
                     return;
                 }
                 renderRolloverTeachersList();
@@ -5516,7 +5611,7 @@
         function executeRollover() {
             let targetY = document.getElementById('rollover-target-year').value.trim();
             if (!targetY.match(/^\d{2}\/\d{2}$/)) {
-                showToast("Ungültiges Schuljahr-Format", "⚠️");
+                showToast("Ungültiges Schuljahr-Format", "alert-triangle");
                 return;
             }
 
@@ -5564,7 +5659,7 @@
             populateYearDropdown();
             closeRolloverWizard();
             switchTab('month');
-            showToast(`Schuljahr ${targetY} erfolgreich angelegt!`, "🚀");
+            showToast(`Schuljahr ${targetY} erfolgreich angelegt!`, "sparkles");
         }
 
         // --- PIN-GESCHÜTZTER KOLLEGENZUGANG (READ-ONLY) ---
@@ -5674,7 +5769,7 @@
             const teacher = appData.teachers.find(t => t.id === tId);
 
             if (!teacher) {
-                showToast("Bitte Lehrkraft auswählen", "⚠️");
+                showToast("Bitte Lehrkraft auswählen", "alert-triangle");
                 return;
             }
 
@@ -5684,10 +5779,10 @@
             if (pin === teacherPin || pin === masterPin) {
                 portalUser = teacher;
                 portalYear = chosenYear;
-                showToast(`Willkommen, ${teacher.name}!`, "👋");
+                showToast(`Willkommen, ${teacher.name}!`, "user");
                 renderPortalDashboard();
             } else {
-                showToast("Falsche PIN. Bitte erneut versuchen.", "❌");
+                showToast("Falsche PIN. Bitte erneut versuchen.", "x");
                 document.getElementById('portal-user-pin').value = '';
                 document.getElementById('portal-user-pin').focus();
             }
@@ -5715,7 +5810,7 @@
                 let singleYear = compareList[0] || appData.schoolYear;
                 container.innerHTML = `
                     <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 text-center text-xs text-slate-500">
-                        <div class="text-xl mb-1">📅</div>
+                        <div class="mb-1">${uiIcon("calendar", "w-6 h-6 text-slate-400 mx-auto")}</div>
                         <div class="font-bold text-slate-700">Bisher Daten für Schuljahr ${singleYear} vorhanden</div>
                         <div class="mt-1 text-[11px] text-slate-400">Sobald weitere Schuljahre für dich erfasst sind, werden dir hier bis zu 3 Schuljahre im direkten Vergleich gegenübergestellt.</div>
                     </div>
@@ -5806,7 +5901,7 @@
             // Populate month select
             let mSelect = document.getElementById('portal-month-select');
             let curMonthVal = mSelect.value || String(appData.currentMonth);
-            mSelect.innerHTML = '<option value="all">📅 Ganzes Schuljahr (Kumuliert)</option>';
+            mSelect.innerHTML = '<option value="all">Ganzes Schuljahr (Kumuliert)</option>';
             monthOrder.forEach(m => {
                 let opt = document.createElement('option');
                 opt.value = String(m);
@@ -5881,8 +5976,8 @@
                 <div class="text-3xl font-black ${isPlus ? 'text-teal-600' : 'text-rose-600'} mb-1">
                     ${isPlus ? '+' : ''}${azvBalance} <span class="text-base font-bold text-slate-600">Stunden</span>
                 </div>
-                <div class="text-xs font-semibold ${isPlus ? 'text-teal-800' : 'text-rose-800'}">
-                    ${isPlus ? '🎉 Positiver Saldo (Guthaben)' : '⏳ Ausgleich / Minus offen'}
+                <div class="text-xs font-semibold ${isPlus ? 'text-teal-800' : 'text-rose-800'} flex items-center justify-center gap-1">
+                    ${isPlus ? uiIcon("check-circle", "w-3.5 h-3.5 text-teal-600 inline") + ' Positiver Saldo (Guthaben)' : uiIcon("clock", "w-3.5 h-3.5 text-rose-600 inline") + ' Ausgleich / Minus offen'}
                 </div>
             `;
 
@@ -5933,7 +6028,7 @@
             let periodLabel = isAllYear ? `gesamten Schuljahr SJ ${portalYear}` : monthNames[selMonth];
             let headerTitleEl = document.getElementById('portal-month-details-heading');
             if (headerTitleEl) {
-                headerTitleEl.innerHTML = isAllYear ? `📅 Alle Eintragungen im Schuljahr SJ ${portalYear}` : `📅 Eintragungen im ${monthNames[selMonth]}`;
+                headerTitleEl.innerHTML = `${uiIcon("calendar", "w-4 h-4 inline mr-1.5 text-indigo-500")}${isAllYear ? `Alle Eintragungen im Schuljahr SJ ${portalYear}` : `Eintragungen im ${monthNames[selMonth]}`}`;
             }
 
             if (entriesList.length === 0) {
@@ -5979,7 +6074,7 @@
 
         function printTeacherReportForPortal() {
             if (!portalUser) {
-                showToast("Bitte zuerst anmelden", "⚠️");
+                showToast("Bitte zuerst anmelden", "alert-triangle");
                 return;
             }
             printTeacherReport(portalUser.id, portalYear || appData.schoolYear);
@@ -6005,9 +6100,9 @@
                 sessionStorage.setItem('admin_unlocked', 'true');
                 closeAdminLoginModal();
                 closePortalView();
-                showToast("Schulleitungs-Bereich entsperrt", "🔓");
+                showToast("Schulleitungs-Bereich entsperrt", "unlock");
             } else {
-                showToast("Falsches Masterpasswort!", "❌");
+                showToast("Falsches Masterpasswort!", "x");
                 document.getElementById('admin-master-pin-input').value = '';
                 document.getElementById('admin-master-pin-input').focus();
             }

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="color-scheme" content="light dark">
     <title>Statistik HBS Kahla</title>
     
     <!-- PWA & Apple Web App Meta Tags -->
@@ -133,32 +134,62 @@
         @keyframes pulse-sync { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.9); } }
         .sync-active { animation: pulse-sync 1.5s infinite ease-in-out; }
 
-        /* DARK MODE REGELN */
+        /* ==========================================================================
+           PROFESSIONELLES DARK-MODE DESIGN SYSTEM
+           (Modernes, augenfreundliches Slate-Navy Farbschema mit optimierter Tiefenhierarchie)
+           ========================================================================== */
+        
+        /* 1. Viewport & Canvas */
         html.dark {
             color-scheme: dark;
+            background-color: #090d16;
         }
         html.dark body {
-            background-color: #0f172a !important;
+            background-color: #090d16 !important;
+            color: #f1f5f9 !important;
+        }
+
+        /* 2. Top-Header & Navigation */
+        html.dark header {
+            background: linear-gradient(135deg, #070d18 0%, #0c182c 50%, #081724 100%) !important;
+            border-bottom: 1px solid #1a273e !important;
+            box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.5) !important;
+        }
+        html.dark #nav-tabs-container button:not(.bg-school-600):not(.bg-teal-600) {
+            color: #94a3b8;
+        }
+        html.dark #nav-tabs-container button:not(.bg-school-600):not(.bg-teal-600):hover {
+            background-color: rgba(255, 255, 255, 0.08) !important;
             color: #f8fafc !important;
         }
+
+        /* 3. Oberflächen- & Tiefenhierarchie */
+        /* Level 1: Hauptkarten & Container */
         html.dark .bg-white {
-            background-color: #1e293b !important;
-            color: #f8fafc;
-            border-color: #334155 !important;
+            background-color: #131b2e !important;
+            color: #f1f5f9;
+            border-color: #1e2b42 !important;
+            box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.35) !important;
         }
+        /* Level 0: Inset-Vertiefungen & Sub-Boxen */
         html.dark .bg-slate-50 {
-            background-color: #0f172a !important;
-            border-color: #334155 !important;
+            background-color: #0b1120 !important;
+            border-color: #1e2b42 !important;
         }
+        /* Level 2: Interaktive Flächen, Toolbars & Tabellenzeilen */
         html.dark .bg-slate-100 {
-            background-color: #1e293b !important;
+            background-color: #172239 !important;
             color: #e2e8f0 !important;
-            border-color: #334155 !important;
+            border-color: #243552 !important;
         }
         html.dark .bg-slate-200 {
-            background-color: #334155 !important;
+            background-color: #22324e !important;
+            border-color: #2e4368 !important;
         }
-        html.dark .text-slate-800, html.dark .text-slate-900 {
+
+        /* 4. Text-Hierarchie */
+        html.dark .text-slate-800, 
+        html.dark .text-slate-900 {
             color: #f8fafc !important;
         }
         html.dark .text-slate-700 {
@@ -173,65 +204,286 @@
         html.dark .text-slate-400 {
             color: #64748b !important;
         }
+
+        /* 5. Rahmen & Divider */
         html.dark .border-slate-100, 
         html.dark .border-slate-200, 
         html.dark .border-slate-300 {
-            border-color: #334155 !important;
+            border-color: #1e2b42 !important;
         }
-        html.dark select, html.dark input {
-            background-color: #1e293b !important;
+
+        /* 6. Formular-Elemente (Inputs, Selects, Buttons) */
+        html.dark input:not([type="checkbox"]):not([type="radio"]), 
+        html.dark select, 
+        html.dark textarea {
+            background-color: #0b1120 !important;
             color: #f8fafc !important;
-            border-color: #475569 !important;
+            border: 1px solid #243552 !important;
+            border-radius: 0.5rem;
         }
+        html.dark input:focus, 
+        html.dark select:focus, 
+        html.dark textarea:focus {
+            border-color: #0284c7 !important;
+            box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.3) !important;
+            outline: none !important;
+        }
+        html.dark input::placeholder, 
+        html.dark textarea::placeholder {
+            color: #475569 !important;
+        }
+        html.dark button.bg-white,
+        html.dark .bg-white.border {
+            background-color: #141d2f !important;
+            border-color: #243552 !important;
+            color: #e2e8f0 !important;
+        }
+        html.dark button.bg-white:hover {
+            background-color: #1c273e !important;
+            border-color: #384e73 !important;
+            color: #ffffff !important;
+        }
+
+        /* 7. Farbige Hinweisboxen, Badges & Kacheln (luminous & augenfreundlich) */
+        html.dark .bg-red-50 {
+            background-color: rgba(239, 68, 68, 0.12) !important;
+            border-color: rgba(239, 68, 68, 0.28) !important;
+        }
+        html.dark .text-red-900, html.dark .text-red-800, html.dark .text-red-700 {
+            color: #fca5a5 !important;
+        }
+        html.dark .text-red-600 {
+            color: #f87171 !important;
+        }
+
+        html.dark .bg-blue-50 {
+            background-color: rgba(59, 130, 246, 0.12) !important;
+            border-color: rgba(59, 130, 246, 0.28) !important;
+        }
+        html.dark .text-blue-900, html.dark .text-blue-800, html.dark .text-blue-700 {
+            color: #93c5fd !important;
+        }
+        html.dark .text-blue-600 {
+            color: #60a5fa !important;
+        }
+
+        html.dark .bg-green-50, html.dark .bg-emerald-50 {
+            background-color: rgba(16, 185, 129, 0.12) !important;
+            border-color: rgba(16, 185, 129, 0.28) !important;
+        }
+        html.dark .text-green-900, html.dark .text-green-800, html.dark .text-green-700,
+        html.dark .text-emerald-900, html.dark .text-emerald-800, html.dark .text-emerald-700 {
+            color: #a7f3d0 !important;
+        }
+        html.dark .text-green-600, html.dark .text-emerald-600 {
+            color: #34d399 !important;
+        }
+
+        html.dark .bg-amber-50 {
+            background-color: rgba(245, 158, 11, 0.12) !important;
+            border-color: rgba(245, 158, 11, 0.28) !important;
+        }
+        html.dark .text-amber-900, html.dark .text-amber-800, html.dark .text-amber-700 {
+            color: #fde68a !important;
+        }
+        html.dark .text-amber-600 {
+            color: #fbbf24 !important;
+        }
+
+        html.dark .bg-teal-50 {
+            background-color: rgba(20, 184, 166, 0.12) !important;
+            border-color: rgba(20, 184, 166, 0.28) !important;
+        }
+        html.dark .text-teal-900, html.dark .text-teal-800, html.dark .text-teal-700 {
+            color: #99f6e4 !important;
+        }
+        html.dark .text-teal-600 {
+            color: #2dd4bf !important;
+        }
+
+        html.dark .bg-indigo-50 {
+            background-color: rgba(99, 102, 241, 0.12) !important;
+            border-color: rgba(99, 102, 241, 0.28) !important;
+        }
+        html.dark .text-indigo-900, html.dark .text-indigo-800, html.dark .text-indigo-700 {
+            color: #c7d2fe !important;
+        }
+        html.dark .text-indigo-600 {
+            color: #818cf8 !important;
+        }
+
+        html.dark .bg-purple-50 {
+            background-color: rgba(168, 85, 247, 0.12) !important;
+            border-color: rgba(168, 85, 247, 0.28) !important;
+        }
+        html.dark .text-purple-900, html.dark .text-purple-800, html.dark .text-purple-700 {
+            color: #e9d5ff !important;
+        }
+        html.dark .text-purple-600 {
+            color: #c084fc !important;
+        }
+
+        html.dark .bg-orange-50 {
+            background-color: rgba(249, 115, 22, 0.12) !important;
+            border-color: rgba(249, 115, 22, 0.28) !important;
+        }
+        html.dark .text-orange-900, html.dark .text-orange-800, html.dark .text-orange-700 {
+            color: #fed7aa !important;
+        }
+        html.dark .text-orange-600 {
+            color: #fb923c !important;
+        }
+
+        html.dark .bg-sky-50 {
+            background-color: rgba(14, 165, 233, 0.12) !important;
+            border-color: rgba(14, 165, 233, 0.28) !important;
+        }
+        html.dark .text-sky-900, html.dark .text-sky-800, html.dark .text-sky-700 {
+            color: #bae6fd !important;
+        }
+        html.dark .text-sky-600 {
+            color: #38bdf8 !important;
+        }
+
+        /* 8. Monatsansicht: Matrix, Tage & Kalendereinträge */
         html.dark #month-table thead th {
-            background-color: #1e293b !important;
+            background-color: #141d2f !important;
             color: #f1f5f9 !important;
-            border-bottom: 2px solid #475569 !important;
-            border-color: #334155 !important;
+            border-bottom: 2px solid #243552 !important;
+            border-color: #1e2b42 !important;
         }
         html.dark #month-table thead th.sticky-col {
-            background-color: #0f172a !important;
+            background-color: #0b1120 !important;
             color: #f1f5f9 !important;
+            border-color: #1e2b42 !important;
         }
         html.dark .sticky-col {
-            background-color: #1e293b !important;
+            background-color: #141d2f !important;
             color: #f1f5f9 !important;
+            border-color: #1e2b42 !important;
         }
         html.dark tr:hover .sticky-col {
-            background-color: #334155 !important;
+            background-color: #1d283f !important;
         }
-        html.dark .weekend-header {
-            background-color: #334155 !important;
-            color: #94a3b8 !important;
-        }
-        html.dark .weekend-cell {
-            background-color: #0f172a !important;
+        html.dark #month-table tr:hover td {
+            background-color: rgba(255, 255, 255, 0.02);
         }
         html.dark .cell-hover:hover {
-            background-color: #0369a1 !important;
+            background-color: rgba(14, 165, 233, 0.22) !important;
         }
+
+        html.dark .weekend-header {
+            background-color: #101726 !important;
+            color: #64748b !important;
+            border-color: #1a2538 !important;
+        }
+        html.dark .weekend-cell {
+            background-color: #0b101c !important;
+            border-color: #172236 !important;
+        }
+
         html.dark .today-header {
-            background-color: #713f12 !important;
+            background-color: rgba(245, 158, 11, 0.22) !important;
             color: #fef08a !important;
-            border-top: 3px solid #eab308 !important;
-            border-bottom: 3px solid #ca8a04 !important;
+            border-top: 3px solid #f59e0b !important;
+            border-bottom: 2px solid #d97706 !important;
         }
         html.dark .today-cell {
-            background-color: #451a03 !important;
-            border-left: 1.5px dashed #eab308 !important;
-            border-right: 1.5px dashed #eab308 !important;
+            background-color: rgba(245, 158, 11, 0.07) !important;
+            border-left: 1.5px dashed rgba(245, 158, 11, 0.45) !important;
+            border-right: 1.5px dashed rgba(245, 158, 11, 0.45) !important;
         }
         html.dark tr:hover .today-cell {
-            background-color: #713f12 !important;
+            background-color: rgba(245, 158, 11, 0.14) !important;
         }
+
+        /* Kalender-Eintragungs-Badges im Dark Mode */
+        html.dark .entry-K {
+            background-color: rgba(244, 63, 94, 0.22) !important;
+            color: #fda4af !important;
+            border: 1px solid rgba(244, 63, 94, 0.35) !important;
+        }
+        html.dark .entry-KK {
+            background-color: rgba(245, 158, 11, 0.22) !important;
+            color: #fde047 !important;
+            border: 1px solid rgba(245, 158, 11, 0.35) !important;
+        }
+        html.dark .entry-AZV {
+            background-color: rgba(168, 85, 247, 0.22) !important;
+            color: #e9d5ff !important;
+            border: 1px solid rgba(168, 85, 247, 0.35) !important;
+        }
+        html.dark .entry-V {
+            color: #60a5fa !important;
+            font-weight: 800;
+        }
+        html.dark .entry-R {
+            color: #34d399 !important;
+            font-weight: 800;
+        }
+        html.dark .entry-E {
+            color: #f87171 !important;
+            font-weight: 800;
+        }
+        html.dark .entry-AZVgeh {
+            color: #2dd4bf !important;
+            font-weight: 800;
+        }
+
+        /* 9. Dashboard Tabellen & Spalten */
         html.dark .dash-table th {
-            background-color: #1e293b !important;
-            color: #f8fafc !important;
-            border-color: #334155 !important;
+            background-color: #0f1728 !important;
+            color: #e2e8f0 !important;
+            border-bottom: 2px solid #1e2b42 !important;
+        }
+        html.dark .dash-table th:hover {
+            background-color: #172239 !important;
         }
         html.dark .dash-table td {
-            border-color: #334155 !important;
-            color: #e2e8f0 !important;
+            border-bottom: 1px solid #1a2538 !important;
+            color: #cbd5e1 !important;
+        }
+        html.dark .dash-table tr:hover td {
+            background-color: rgba(255, 255, 255, 0.02) !important;
+        }
+        html.dark .dash-table .bg-red-50\/50 {
+            background-color: rgba(239, 68, 68, 0.12) !important;
+        }
+        html.dark .dash-table .bg-green-50\/50 {
+            background-color: rgba(16, 185, 129, 0.12) !important;
+        }
+        html.dark .dash-table .bg-teal-50\/30 {
+            background-color: rgba(20, 184, 166, 0.12) !important;
+        }
+        html.dark .dash-table .bg-slate-100 {
+            background-color: #0e1626 !important;
+            color: #94a3b8 !important;
+        }
+
+        /* 10. Modale & Popups */
+        html.dark .modal-bg {
+            background-color: rgba(3, 7, 18, 0.82) !important;
+            backdrop-filter: blur(8px) !important;
+        }
+        html.dark .modal-bg > div {
+            background-color: #131b2e !important;
+            border: 1px solid #243552 !important;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.04) !important;
+            color: #f1f5f9 !important;
+        }
+
+        /* 11. BEM Alert Pill */
+        html.dark .bem-alert {
+            background-color: rgba(239, 68, 68, 0.22) !important;
+            color: #fca5a5 !important;
+            border-color: rgba(239, 68, 68, 0.4) !important;
+        }
+
+        /* 12. Toast */
+        html.dark #toast {
+            background-color: #172239 !important;
+            border: 1px solid #243552 !important;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.6) !important;
         }
 
         @media print {
@@ -2926,6 +3178,11 @@
             let subData = [1,2,3,4,5].map(d => wkStats ? wkStats.weekdays[d].V : 0);
             let restData = [1,2,3,4,5].map(d => wkStats ? wkStats.weekdays[d].R : 0);
 
+            let isDark = document.documentElement.classList.contains('dark');
+            let chartTextColor = isDark ? '#94a3b8' : '#64748b';
+            let chartGridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
+            let chartLegendColor = isDark ? '#e2e8f0' : '#475569';
+
             weekdayChartInst = new Chart(ctxWk, {
                 type: 'bar',
                 data: {
@@ -2940,10 +3197,11 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 6, font: { size: 11 } } }
+                        legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 6, font: { size: 11 }, color: chartLegendColor } }
                     },
                     scales: {
-                        y: { beginAtZero: true, ticks: { precision: 0 } }
+                        x: { ticks: { color: chartTextColor }, grid: { color: chartGridColor } },
+                        y: { beginAtZero: true, ticks: { precision: 0, color: chartTextColor }, grid: { color: chartGridColor } }
                     }
                 }
             });
@@ -3377,9 +3635,49 @@
             });
             
             let showLegend = compareYears.length > 0;
+            let isDark = document.documentElement.classList.contains('dark');
+            let chartTextColor = isDark ? '#94a3b8' : '#64748b';
+            let chartGridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
+            let chartLegendColor = isDark ? '#e2e8f0' : '#475569';
 
-            illnessChartInst = new Chart(ctxIll, { type: 'line', data: { labels: labels, datasets: datasetsIll }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: showLegend, position: 'bottom', labels: { usePointStyle: true, boxWidth: 6 } } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } } });
-            extraChartInst = new Chart(ctxExt, { type: 'bar', data: { labels: labels, datasets: datasetsExt }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: showLegend, position: 'bottom', labels: { usePointStyle: true, boxWidth: 6 } } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } } });
+            illnessChartInst = new Chart(ctxIll, { 
+                type: 'line', 
+                data: { labels: labels, datasets: datasetsIll }, 
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { 
+                        legend: { 
+                            display: showLegend, 
+                            position: 'bottom', 
+                            labels: { usePointStyle: true, boxWidth: 6, color: chartLegendColor } 
+                        } 
+                    }, 
+                    scales: { 
+                        x: { ticks: { color: chartTextColor }, grid: { color: chartGridColor } },
+                        y: { beginAtZero: true, ticks: { precision: 0, color: chartTextColor }, grid: { color: chartGridColor } } 
+                    } 
+                } 
+            });
+            extraChartInst = new Chart(ctxExt, { 
+                type: 'bar', 
+                data: { labels: labels, datasets: datasetsExt }, 
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { 
+                        legend: { 
+                            display: showLegend, 
+                            position: 'bottom', 
+                            labels: { usePointStyle: true, boxWidth: 6, color: chartLegendColor } 
+                        } 
+                    }, 
+                    scales: { 
+                        x: { ticks: { color: chartTextColor }, grid: { color: chartGridColor } },
+                        y: { beginAtZero: true, ticks: { precision: 0, color: chartTextColor }, grid: { color: chartGridColor } } 
+                    } 
+                } 
+            });
             
             // Wochentags- und Trendanalyse rendern
             renderWeekdayAnalysis();
@@ -5249,6 +5547,7 @@
             localStorage.setItem('theme_mode', isDark ? 'dark' : 'light');
             updateThemeIcons();
             showToast(isDark ? "Dunkelmodus aktiviert" : "Hellmodus aktiviert", isDark ? "moon" : "sun");
+            renderCurrentView();
         }
 
         function updateThemeIcons() {

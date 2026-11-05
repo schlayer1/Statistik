@@ -756,21 +756,20 @@
                             <!-- FORMULAR ZUM HINZUFÜGEN EINER ABMINDERUNG -->
                             <div class="bg-purple-50/50 p-3 rounded-xl border border-purple-100 flex flex-wrap sm:flex-nowrap items-center gap-2">
                                 <select id="ep-new-abm-art" onchange="onEpAbmArtChange(this.value)" class="bg-white border border-slate-200 rounded-lg p-2 text-xs font-bold text-slate-700 outline-none focus:border-purple-500 w-full sm:w-44">
-                                    <option value="KL">KL – Klassenleitung (1h)</option>
-                                    <option value="PR">PR – Personalrat (1h)</option>
-                                    <option value="SL">SL – Schulleitung (19h)</option>
-                                    <option value="ST">ST – Stellv. Schulleitung (19h)</option>
-                                    <option value="AA">AA – Anrechnungsstunde (1h)</option>
-                                    <option value="AA2">AA – Anrechnungsstunden (2h)</option>
-                                    <option value="BeratL">BeratL – Beratungslehrer (2h)</option>
-                                    <option value="päd">päd – Pädagogische Aufgaben (2h)</option>
-                                    <option value="PA">PA – Prüfungsausschuss (1h)</option>
-                                    <option value="GBA">GBA – Gleichstellung (1h)</option>
+                                    <option value="KL">KL – Klassenleitung</option>
+                                    <option value="PR">PR – Personalrat</option>
+                                    <option value="SL">SL – Schulleitung</option>
+                                    <option value="AA">AA – Altersabminderung</option>
+                                    <option value="BL">BL – Beratungslehrer</option>
+                                    <option value="päd">päd – Pädagogische Leitung</option>
+                                    <option value="PA">PA – Projektarbeit</option>
+                                    <option value="BO">BO – Berufskoordinator</option>
+                                    <option value="GBA">GBA – Gesundheitsbeauftragter</option>
                                     <option value="StS">StS – Studienseminar / Abordnung</option>
                                     <option value="UNI">UNI – Universität / Abordnung</option>
-                                    <option value="SJA">SJA – Schuljahresarbeit</option>
-                                    <option value="GK">GK – Ganztagskoordination</option>
-                                    <option value="VfA">VfA – Förderung</option>
+                                    <option value="SJA">SJA – Schuljugendarbeit</option>
+                                    <option value="GK">GK – Grünes Klassenzimmer</option>
+                                    <option value="VfA">VfA – Verantw. für Ausbildung</option>
                                     <option value="Sonstiges">Sonstige Funktion...</option>
                                 </select>
                                 <input type="text" id="ep-new-abm-text" placeholder="Zusatz / Klasse (z. B. 6a)" class="bg-white border border-slate-200 rounded-lg p-2 text-xs flex-grow outline-none focus:border-purple-500">
@@ -3771,33 +3770,11 @@
         }
 
         function onEpAbmArtChange(val) {
-            const hoursInput = document.getElementById('ep-new-abm-hours');
             const textInput = document.getElementById('ep-new-abm-text');
-            if (!hoursInput) return;
-
-            const standardHours = {
-                'KL': 1,
-                'PR': 1,
-                'SL': 19,
-                'ST': 19,
-                'AA': 1,
-                'AA2': 2,
-                'BeratL': 2,
-                'päd': 2,
-                'PA': 1,
-                'GBA': 1,
-                'StS': 8,
-                'UNI': 4,
-                'SJA': 1,
-                'GK': 1,
-                'VfA': 2
-            };
-
-            if (standardHours[val] !== undefined) {
-                hoursInput.value = standardHours[val];
-            }
             if (val === 'KL' && textInput && !textInput.value) {
                 textInput.placeholder = "Klasse (z. B. 6a)";
+            } else if (textInput && textInput.placeholder === "Klasse (z. B. 6a)") {
+                textInput.placeholder = "Zusatz / Funktion (optional)";
             }
         }
 

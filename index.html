@@ -21,6 +21,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- SheetJS zum direkten Einlesen kompletter .xlsx Excel-Dateien -->
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <!-- PDF.js zum direkten Einlesen von aSc-Stundenplan-PDFs im Browser -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     
     <!-- Firebase SDKs (v10 Compat für Standalone HTML ohne Buildschritt) -->
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
@@ -1049,6 +1051,9 @@
 
                     <!-- Export & Druck -->
                     <div class="flex items-center gap-1.5">
+                        <button onclick="openAscImportModal()" class="bg-school-600 hover:bg-school-700 text-white px-3 py-2 rounded-xl text-xs font-bold shadow-2xs transition flex items-center gap-1.5 cursor-pointer" title="aSc-Stundenplan PDF importieren oder 26/27 Daten einspielen">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg> <span>aSc-Import</span>
+                        </button>
                         <button onclick="exportEpToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl text-xs font-bold shadow-2xs transition flex items-center gap-1.5 cursor-pointer" title="Einsatzplanung als Excel-Datei exportieren (Deckblatt + alle Lehrkraftblätter)">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M8 13h2"/><path d="M14 13h2"/><path d="M8 17h2"/><path d="M14 17h2"/></svg> <span>Excel (.xlsx)</span>
                         </button>
@@ -1887,6 +1892,91 @@
         </div>
     </div>
 
+    <!-- MODAL: ASC STUNDENPLAN IMPORT & DIREKT-LADEN -->
+    <div id="modal-asc-import" class="fixed inset-0 hidden items-center justify-center z-50 modal-bg p-4 overflow-y-auto">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-2xl max-h-[92vh] flex flex-col my-auto border border-slate-200">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-10 h-10 rounded-xl bg-school-50 text-school-600 flex items-center justify-center border border-school-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-black text-slate-800">aSc Stundenplan-Import</h3>
+                        <p class="text-xs text-slate-500">Einsatzpläne aus aSc-Exporten direkt einlesen oder Schuljahr 2026/2027 aktualisieren</p>
+                    </div>
+                </div>
+                <button onclick="closeAscImportModal()" class="text-slate-400 hover:text-slate-600 font-bold text-2xl cursor-pointer p-1">&times;</button>
+            </div>
+
+            <!-- Schnell-Import für 2026/2027 -->
+            <div class="mb-4 p-4 rounded-xl bg-gradient-to-r from-school-50 via-teal-50/50 to-white border border-school-200">
+                <div class="flex flex-wrap sm:flex-nowrap items-center justify-between gap-3">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="inline-flex px-2 py-0.5 rounded text-[11px] font-black bg-school-600 text-white">Schuljahr 2026/2027</span>
+                            <h4 class="text-sm font-black text-slate-800">Vorbereiteten aSc-Plan einspielen</h4>
+                        </div>
+                        <p class="text-xs text-slate-600 mt-1">
+                            Der vollständige aSc-Stundenplan (31 aktive Lehrkräfte, 548 Wochenstunden, 16 Klassenleitungen) liegt bereit.
+                        </p>
+                    </div>
+                    <button onclick="triggerDirectAscImport()" class="shrink-0 bg-school-600 hover:bg-school-700 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-amber-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+                        <span>Jetzt 26/27 einspielen</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="relative flex items-center my-2">
+                <div class="flex-grow border-t border-slate-200"></div>
+                <span class="flex-shrink mx-3 text-slate-400 text-xs font-bold uppercase tracking-wider">Oder neue aSc PDF-Datei einlesen</span>
+                <div class="flex-grow border-t border-slate-200"></div>
+            </div>
+
+            <!-- Drag & Drop PDF Upload Zone -->
+            <div id="asc-dropzone" ondragover="handleAscDragOver(event)" ondragleave="handleAscDragLeave(event)" ondrop="handleAscDrop(event)" class="border-2 border-dashed border-slate-300 hover:border-school-500 rounded-2xl p-5 text-center transition bg-slate-50/50 cursor-pointer mb-3" onclick="document.getElementById('asc-file-input').click()">
+                <input type="file" id="asc-file-input" accept=".pdf" class="hidden" onchange="handleAscFileSelect(this.files)">
+                <div class="w-10 h-10 bg-white rounded-xl shadow-2xs border border-slate-200 flex items-center justify-center mx-auto mb-2 text-school-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" x2="12" y1="18" y2="12"/><line x1="9" x2="15" y1="15" y2="15"/></svg>
+                </div>
+                <p class="text-xs font-bold text-slate-700">Klicken oder aSc-PDF hier hineinziehen</p>
+                <p class="text-[11px] text-slate-400 mt-0.5">Unterstützt mehrseitige Stundenplan-Übersichten aller Lehrkräfte</p>
+            </div>
+
+            <!-- Import-Optionen -->
+            <div class="space-y-2 mb-3 text-xs">
+                <div class="flex flex-wrap items-center justify-between gap-2 p-2 bg-slate-50 rounded-xl border border-slate-200">
+                    <span class="font-bold text-slate-700">Ziel-Zeitraum für Import:</span>
+                    <select id="asc-target-period-select" class="bg-white border border-slate-200 rounded-lg p-1.5 font-bold text-slate-800 outline-none focus:border-school-500 text-xs">
+                    </select>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <label class="flex items-center gap-2 p-2 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer font-bold text-slate-700">
+                        <input type="checkbox" id="asc-opt-only-active" checked class="w-4 h-4 rounded text-school-600 focus:ring-school-500" onchange="if(ascParsedTeachersCache.length) renderAscParsedPreview(ascParsedTeachersCache)">
+                        <span>Nur Lehrkräfte &gt; 0 Std.</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer font-bold text-slate-700">
+                        <input type="checkbox" id="asc-opt-kl-abm" checked class="w-4 h-4 rounded text-school-600 focus:ring-school-500">
+                        <span>1h Abminderung für KL (KR)</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Status & Vorschau-Bereich -->
+            <div id="asc-preview-container" class="hidden flex-1 overflow-y-auto mb-3 border border-slate-200 rounded-xl p-3 bg-slate-50 max-h-48">
+            </div>
+
+            <!-- Footer Buttons -->
+            <div class="flex items-center justify-between pt-3 border-t border-slate-100 mt-auto">
+                <button onclick="closeAscImportModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs transition cursor-pointer">Schließen</button>
+                <button id="asc-confirm-btn" onclick="executeAscImport()" class="hidden px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Gefundene Pläne übernehmen</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL: ADMIN / MASTER-PASSWORT LOGIN -->
     <div id="modal-admin-login" class="fixed inset-0 hidden items-center justify-center z-50 modal-bg p-4">
         <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm text-center">
@@ -2082,6 +2172,7 @@
             const now = new Date();
             appData.schoolYear = getCurrentSchoolYear();
             appData.currentMonth = now.getMonth() + 1;
+            checkAndAutoSeedAscTimetable();
 
             populateYearDropdown();
             let mSelect = document.getElementById('month-select');
@@ -2491,6 +2582,7 @@
                                 appData.schoolYear = currentActiveYear;
                             }
                             localStorage.setItem(storageKey, JSON.stringify(appData));
+                            checkAndAutoSeedAscTimetable();
                             hasUnsyncedChanges = false;
                             updateSyncWarningBanner();
                             populateYearDropdown();
@@ -2652,6 +2744,7 @@
                             appData.schoolYear = currentActiveYear;
                         }
                         localStorage.setItem(storageKey, JSON.stringify(appData));
+                        checkAndAutoSeedAscTimetable();
                         hasUnsyncedChanges = false;
                         updateSyncWarningBanner();
                         populateYearDropdown();
@@ -4830,6 +4923,535 @@
                     showToast("Zeitraum gelöscht.", "trash-2");
                 }
             }, "Zeitraum löschen");
+        }
+
+        // ==============================================================================
+        // --- ASC STUNDENPLAN-IMPORT ENGINE (DIREKT-IMPORT & IN-APP PDF-PARSER) ---
+        // ==============================================================================
+
+        const ASC_INITIAL_IMPORT_DATA_2627 = [{"name": "Britt Haase", "unterrichtseinsatz": 18, "pflichtstunden": 26, "abminderungen": [], "unterricht": [{"hours": 4, "subject": "Deutsch", "class": "8a", "note": "26 SuS"}, {"hours": 4, "subject": "Deutsch", "class": "5b", "note": "28 SuS"}, {"hours": 1, "subject": "Kunst", "class": "6a", "note": "21 SuS"}, {"hours": 1, "subject": "Kunst", "class": "6b", "note": "22 SuS"}, {"hours": 1, "subject": "Kunst", "class": "6c", "note": "22 SuS"}, {"hours": 1, "subject": "Kunst", "class": "10a", "note": "26 SuS"}, {"hours": 1, "subject": "Kunst", "class": "10b", "note": "26 SuS"}, {"hours": 1, "subject": "Kunst", "class": "5a", "note": "25 SuS"}, {"hours": 2, "subject": "Darstellen und Gestalten", "class": "8a, 8b, 8c", "note": "19 SuS"}, {"hours": 2, "subject": "Darstellen und Gestalten", "class": "7a, 7b, 7c", "note": "21 SuS"}], "gts": 0}, {"name": "Sabine Herold", "unterrichtseinsatz": 6, "pflichtstunden": 26, "abminderungen": [], "unterricht": [{"hours": 2, "subject": "Werken", "class": "5a", "note": "12 SuS"}, {"hours": 2, "subject": "Werken", "class": "5b", "note": "13 SuS"}, {"hours": 2, "subject": "Wirtschaft-Recht-Technik", "class": "7c", "note": "13 SuS"}], "gts": 0}, {"name": "Katharina Kleinfeld", "unterrichtseinsatz": 16, "pflichtstunden": 26, "abminderungen": [], "unterricht": [{"hours": 1, "subject": "Englisch", "class": "7c", "note": "25 SuS"}, {"hours": 2, "subject": "Englisch", "class": "7c", "note": "25 SuS"}, {"hours": 2, "subject": "Englisch", "class": "8b", "note": "26 SuS"}, {"hours": 1, "subject": "Englisch", "class": "8b", "note": "26 SuS"}, {"hours": 1, "subject": "Englisch", "class": "5a", "note": "25 SuS"}, {"hours": 2, "subject": "Englisch", "class": "5a", "note": "25 SuS"}, {"hours": 1, "subject": "Englisch", "class": "5b", "note": "28 SuS"}, {"hours": 2, "subject": "Englisch", "class": "5b", "note": "28 SuS"}, {"hours": 1, "subject": "Ethik", "class": "7a, 7b, 7c", "note": "20 SuS"}, {"hours": 1, "subject": "Ethik", "class": "10b", "note": "17 SuS"}, {"hours": 1, "subject": "Musik", "class": "10a", "note": "26 SuS"}, {"hours": 1, "subject": "Musik", "class": "10b", "note": "26 SuS"}], "gts": 0}, {"name": "Tim Könitzer", "unterrichtseinsatz": 11, "pflichtstunden": 26, "abminderungen": [], "unterricht": [{"hours": 1, "subject": "Geschichte", "class": "8b", "note": "26 SuS"}, {"hours": 1, "subject": "Geschichte", "class": "8c", "note": "26 SuS"}, {"hours": 1, "subject": "Geschichte", "class": "7b", "note": "26 SuS"}, {"hours": 1, "subject": "Geschichte", "class": "7c", "note": "25 SuS"}, {"hours": 1, "subject": "Geschichte", "class": "6b", "note": "22 SuS"}, {"hours": 1, "subject": "Geschichte", "class": "6a", "note": "21 SuS"}, {"hours": 1, "subject": "Geschichte", "class": "6c", "note": "22 SuS"}, {"hours": 2, "subject": "Geschichte", "class": "5a", "note": "25 SuS"}, {"hours": 1, "subject": "Geografie", "class": "6c", "note": "22 SuS"}, {"hours": 1, "subject": "Sozialkunde", "class": "8c", "note": "26 SuS"}], "gts": 0}, {"name": "Anne Schmidt-Röh", "unterrichtseinsatz": 4, "pflichtstunden": 26, "abminderungen": [], "unterricht": [{"hours": 2, "subject": "Mathematik", "class": "6a", "note": "21 SuS"}, {"hours": 2, "subject": "Mathematik", "class": "6b", "note": "22 SuS"}], "gts": 0}, {"name": "Konstantin Seifert", "unterrichtseinsatz": 22, "pflichtstunden": 26, "abminderungen": [{"art": "KL", "text": "Klasse 10b", "hours": 1}], "unterricht": [{"hours": 2, "subject": "Sport", "class": "10a, 10b", "note": "18 SuS"}, {"hours": 2, "subject": "Sport", "class": "9b, 9c", "note": "28 SuS"}, {"hours": 2, "subject": "Sport", "class": "7a, 7b", "note": "30 SuS"}, {"hours": 2, "subject": "Sport", "class": "6a, 6b", "note": "26 SuS"}, {"hours": 2, "subject": "Biologie", "class": "10b", "note": "24 SuS"}, {"hours": 2, "subject": "NuT", "class": "10a, 10b", "note": "16 SuS"}, {"hours": 1, "subject": "NuT", "class": "9a, 9b, 9c", "note": "21 SuS"}, {"hours": 2, "subject": "NuT", "class": "8a, 8b, 8c", "note": "20 SuS"}, {"hours": 2, "subject": "NuT", "class": "7a, 7b, 7c", "note": "18 SuS"}, {"hours": 1, "subject": "NuT", "class": "9a, 9b, 9c", "note": "21 SuS"}, {"hours": 1, "subject": "Klassenrat", "class": "10b", "note": "24 SuS"}, {"hours": 1, "subject": "Offener Unterricht Fach", "class": "6c", "note": "19 SuS"}, {"hours": 1, "subject": "Offener Unterricht Fach", "class": "6c", "note": "19 SuS"}, {"hours": 1, "subject": "Projektarbeit", "class": "10a, 10b", "note": "52 SuS"}], "gts": 0}, {"name": "Andrea Surowy", "unterrichtseinsatz": 23, "pflichtstunden": 26, "abminderungen": [{"art": "KL", "text": "Klasse 10a", "hours": 1}], "unterricht": [{"hours": 4, "subject": "Englisch", "class": "10a", "note": "26 SuS"}, {"hours": 4, "subject": "Englisch", "class": "10b", "note": "26 SuS"}, {"hours": 1, "subject": "Englisch", "class": "8a", "note": "26 SuS"}, {"hours": 1, "subject": "Englisch", "class": "8c", "note": "26 SuS"}, {"hours": 1, "subject": "Englisch", "class": "7a", "note": "25 SuS"}, {"hours": 2, "subject": "Englisch", "class": "7a", "note": "25 SuS"}, {"hours": 2, "subject": "Englisch", "class": "7b", "note": "26 SuS"}, {"hours": 2, "subject": "Englisch", "class": "8a", "note": "26 SuS"}, {"hours": 2, "subject": "Englisch", "class": "8c", "note": "26 SuS"}, {"hours": 1, "subject": "Englisch", "class": "7b", "note": "26 SuS"}, {"hours": 1, "subject": "Klassenrat", "class": "10a", "note": "26 SuS"}, {"hours": 1, "subject": "ILZ", "class": "8a", "note": "26 SuS"}, {"hours": 1, "subject": "Projektarbeit", "class": "10a, 10b", "note": "52 SuS"}], "gts": 0}, {"name": "Marie-Christin Thum", "unterrichtseinsatz": 25, "pflichtstunden": 26, "abminderungen": [{"art": "KL", "text": "Klasse 6a", "hours": 1}], "unterricht": [{"hours": 4, "subject": "Deutsch", "class": "6a", "note": "21 SuS"}, {"hours": 1, "subject": "Ethik", "class": "9a, 9b, 9c", "note": "12 SuS"}, {"hours": 1, "subject": "Ethik", "class": "8a, 8b, 8c", "note": "19 SuS"}, {"hours": 1, "subject": "Ethik", "class": "7a, 7b, 7c", "note": "20 SuS"}, {"hours": 1, "subject": "Ethik", "class": "6a, 6b, 6c", "note": "19 SuS"}, {"hours": 2, "subject": "Wirtschaft-Recht-Technik", "class": "8a, 8b", "note": "17 SuS"}, {"hours": 1, "subject": "Wirtschaft-Recht-Technik", "class": "9b", "note": "27 SuS"}, {"hours": 1, "subject": "Sozialkunde", "class": "8b", "note": "26 SuS"}, {"hours": 2, "subject": "Französisch", "class": "10a, 10b", "note": "12 SuS"}, {"hours": 2, "subject": "Französisch", "class": "9a, 9b, 9c", "note": "11 SuS"}, {"hours": 2, "subject": "Französisch", "class": "7a, 7b, 7c", "note": "15 SuS"}, {"hours": 1, "subject": "Klassenrat", "class": "6a", "note": "21 SuS"}, {"hours": 5, "subject": "TuesDay", "class": "6a, 6b, 6c", "note": "65 SuS"}, {"hours": 1, "subject": "ILZ", "class": "7c", "note": "25 SuS"}], "gts": 0}, {"name": "Astrid Wagner", "unterrichtseinsatz": 25, "pflichtstunden": 26, "abminderungen": [], "unterricht": [{"hours": 2, "subject": "Geschichte", "class": "10a", "note": "26 SuS"}, {"hours": 2, "subject": "Geschichte", "class": "10b", "note": "26 SuS"}, {"hours": 1, "subject": "Geschichte", "class": "9b", "note": "27 SuS"}, {"hours": 2, "subject": "Sport", "class": "10a, 10b", "note": "28 SuS"}, {"hours": 1, "subject": "Sport", "class": "8b, 8c", "note": "34 SuS"}, {"hours": 2, "subject": "Sport", "class": "9b, 9c", "note": "27 SuS"}, {"hours": 2, "subject": "Sport", "class": "6a, 6b", "note": "16 SuS"}, {"hours": 2, "subject": "Sport", "class": "6c", "note": "22 SuS"}, {"hours": 2, "subject": "Sport", "class": "8b, 8c", "note": "34 SuS"}, {"hours": 2, "subject": "Sport", "class": "5a", "note": "25 SuS"}, {"hours": 1, "subject": "Offener Unterricht Fach", "class": "7a", "note": "25 SuS"}, {"hours": 1, "subject": "Offener Unterricht Fach", "class": "7a", "note": "25 SuS"}, {"hours": 1, "subject": "Offener Unterricht Fach", "class": "6a", "note": "21 SuS"}, {"hours": 1, "subject": "Offener Unterricht Fach", "class": "6a", "note": "21 SuS"}, {"hours": 1, "subject": "Offener Unterricht Fach", "class": "6b", "note": "21 SuS"}, {"hours": 1, "subject": "Offener Unterricht Fach", "class": "6b", "note": "21 SuS"}, {"hours": 1, "subject": "ILZ", "class": "8b", "note": "26 SuS"}], "gts": 0}, {"name": "Stefan Weber-Comos", "unterrichtseinsatz": 8, "pflichtstunden": 26, "abminderungen": [], "unterricht": [{"hours": 2, "subject": "Werken", "class": "6a, 6b", "note": "21 SuS"}, {"hours": 2, "subject": "Werken", "class": "6c", "note": "22 SuS"}, {"hours": 1, "subject": "Medienkunde-Informatik", "class": "6c", "note": "22 SuS"}, {"hours": 1, "subject": "Medienkunde-Informatik", "class": "6c", "note": "22 SuS"}, {"hours": 2, "subject": "Reli GS", "class": "", "note": ""}], "gts": 0}, {"name": "Franziska Meier", "unterrichtseinsatz": 4, "pflichtstunden": 26, "abminderungen": [], "unterricht": [{"hours": 2, "subject": "Sport", "class": "9a", "note": "19 SuS"}, {"hours": 2, "subject": "Wirtschaft-Recht-Technik", "class": "8c", "note": "13 SuS"}], "gts": 0}, {"name": "Max König", "unterrichtseinsatz": 24, "pflichtstunden": 26, "abminderungen": [{"art": "KL", "text": "Klasse 5b", "hours": 1}], "unterricht": [{"hours": 1, "subject": "Geschichte", "class": "9c", "note": "30 SuS"}, {"hours": 2, "subject": "Geschichte", "class": "5b", "note": "28 SuS"}, {"hours": 2, "subject": "Sport", "class": "9a", "note": "19 SuS"}, {"hours": 1, "subject": "Sport", "class": "8a", "note": "26 SuS"}, {"hours": 2, "subject": "Sport", "class": "5b", "note": "28 SuS"}, {"hours": 1, "subject": "Sozialkunde", "class": "10b", "note": "26 SuS"}, {"hours": 1, "subject": "Sozialkunde", "class": "10a", "note": "26 SuS"}, {"hours": 1, "subject": "Sozialkunde", "class": "8a", "note": "26 SuS"}, {"hours": 2, "subject": "Französisch", "class": "8a, 8b, 8c", "note": "15 SuS"}, {"hours": 2, "subject": "Französisch", "class": "6a, 6b, 6c", "note": "22 SuS"}, {"hours": 1, "subject": "Französisch", "class": "6a, 6b, 6c", "note": "22 SuS"}, {"hours": 1, "subject": "Klassenrat", "class": "5b", "note": "28 SuS"}, {"hours": 4, "subject": "TuesDay", "class": "5a, 5b", "note": "53 SuS"}, {"hours": 1, "subject": "TiP", "class": "9a", "note": "19 SuS"}, {"hours": 1, "subject": "TiP", "class": "9b", "note": "27 SuS"}, {"hours": 1, "subject": "TiP", "class": "9c", "note": "30 SuS"}], "gts": 0}, {"name": "Ines Petzold", "unterrichtseinsatz": 21, "pflichtstunden": 26, "abminderungen": [{"art": "KL", "text": "Klasse 8b", "hours": 1}], "unterricht": [{"hours": 2, "subject": "Chemie", "class": "10a", "note": "26 SuS"}, {"hours": 1, "subject": "Chemie", "class": "9a", "note": "19 SuS"}, {"hours": 1, "subject": "Chemie", "class": "9b", "note": "27 SuS"}, {"hours": 1, "subject": "Chemie", "class": "9c", "note": "30 SuS"}, {"hours": 2, "subject": "Biologie", "class": "10a", "note": "26 SuS"}, {"hours": 1, "subject": "Biologie", "class": "9a", "note": "19 SuS"}, {"hours": 1, "subject": "Biologie", "class": "9c", "note": "30 SuS"}, {"hours": 2, "subject": "Biologie", "class": "8c", "note": "26 SuS"}, {"hours": 1, "subject": "Klassenrat", "class": "8b", "note": "26 SuS"}, {"hours": 2, "subject": "Sozialwesen", "class": "9a, 9b, 9c", "note": "20 SuS"}, {"hours": 2, "subject": "Sozialwesen", "class": "8a, 8b, 8c", "note": "21 SuS"}, {"hours": 2, "subject": "Sozialwesen", "class": "7a, 7b, 7c", "note": "18 SuS"}, {"hours": 2, "subject": "Sprachwerkstatt", "class": "6a, 6b, 6c", "note": "21 SuS"}, {"hours": 1, "subject": "Sprachwerkstatt", "class": "6a, 6b, 6c", "note": "21 SuS"}], "gts": 0}, {"name": "Tobias Allerdt", "unterrichtseinsatz": 25, "pflichtstunden": 26, "abminderungen": [{"art": "KL", "text": "Klasse 7b", "hours": 1}], "unterricht": [{"hours": 4, "subject": "Mathematik", "class": "8b", "note": "26 SuS"}, {"hours": 4, "subject": "Mathematik", "class": "7a, 7b, 7c", "note": "25 SuS"}, {"hours": 2, "subject": "Physik", "class": "7a", "note": "25 SuS"}, {"hours": 2, "subject": "Physik", "class": "7b", "note": "26 SuS"}, {"hours": 2, "subject": "Physik", "class": "7c", "note": "25 SuS"}, {"hours": 1, "subject": "Klassenrat", "class": "7b", "note": "26 SuS"}, {"hours": 1, "subject": "Medienkunde-Informatik", "class": "7a", "note": "25 SuS"}, {"hours": 1, "subject": "Medienkunde-Informatik", "class": "7b", "note": "26 SuS"}, {"hours": 1, "subject": "Medienkunde-Informatik", "class": "7c", "note": "25 SuS"}, {"hours": 1, "subject": "Medienkunde-Informatik", "class": "7a", "note": "25 SuS"}, {"hours": 1, "subject": "Medienkunde-Informatik", "class": "7b", "note": "26 SuS"}, {"hours": 1, "subject": "Medienkunde-Informatik", "class": "7c", "note": "25 SuS"}, {"hours": 1, "subject": "Medienkunde-Informatik", "class": "5a", "note": "25 SuS"}, {"hours": 1, "subject": "Medienkunde-Informatik", "class": "5a", "note": "25 SuS"}, {"hours": 1, "subject": "Medienkunde-Informatik", "class": "5b", "note": "27 SuS"}, {"hours": 1, "subject": "Medienkunde-Informatik", "class": "5b", "note": "27 SuS"}], "gts": 0}, {"name": "Jennifer Keller", "unterrichtseinsatz": 20, "pflichtstunden": 26, "abminderungen": [{"art": "KL", "text": "Klasse 6b", "hours": 1}], "unterricht": [{"hours": 4, "subject": "Deutsch", "class": "7b", "note": "26 SuS"}, {"hours": 2, "subject": "Deutsch", "class": "7c", "note": "25 SuS"}, {"hours": 2, "subject": "Deutsch", "class": "9a", "note": "49 SuS"}, {"hours": 4, "subject": "Deutsch", "class": "6b", "note": "22 SuS"}, {"hours": 1, "subject": "Religion", "class": "9a, 9b, 9c", "note": "76 SuS"}, {"hours": 1, "subject": "Klassenrat", "class": "6b", "note": "22 SuS"}, {"hours": 5, "subject": "TuesDay", "class": "6a, 6b, 6c", "note": "65 SuS"}, {"hours": 1, "subject": "ILZ", "class": "9a, 9b, 9c", "note": "73 SuS"}], "gts": 0}, {"name": "Stephanie Voigt", "unterrichtseinsatz": 26, "pflichtstunden": 26, "abminderungen": [{"art": "KL", "text": "Klasse 9b", "hours": 1}], "unterricht": [{"hours": 1, "subject": "Englisch", "class": "9a", "note": "19 SuS"}, {"hours": 1, "subject": "Englisch", "class": "9b", "note": "27 SuS"}, {"hours": 1, "subject": "Englisch", "class": "9c", "note": "30 SuS"}, {"hours": 1, "subject": "Englisch", "class": "6a", "note": "21 SuS"}, {"hours": 1, "subject": "Englisch", "class": "6b", "note": "22 SuS"}, {"hours": 1, "subject": "Englisch", "class": "6c", "note": "22 SuS"}, {"hours": 2, "subject": "Englisch", "class": "6a", "note": "21 SuS"}, {"hours": 2, "subject": "Englisch", "class": "6b", "note": "22 SuS"}, {"hours": 2, "subject": "Englisch", "class": "6c", "note": "22 SuS"}, {"hours": 2, "subject": "Englisch", "class": "9a", "note": "19 SuS"}, {"hours": 2, "subject": "Englisch", "class": "9b", "note": "27 SuS"}, {"hours": 2, "subject": "Englisch", "class": "9c", "note": "30 SuS"}, {"hours": 1, "subject": "Ethik", "class": "9a, 9b, 9c", "note": "14 SuS"}, {"hours": 1, "subject": "Ethik", "class": "8a, 8b, 8c", "note": "22 SuS"}, {"hours": 1, "subject": "Ethik", "class": "7a, 7b, 7c", "note": "18 SuS"}, {"hours": 1, "subject": "Ethik", "class": "6a, 6b, 6c", "note": "20 SuS"}, {"hours": 1, "subject": "Ethik", "class": "10a", "note": "19 SuS"}, {"hours": 1, "subject": "Ethik", "class": "5a, 5b", "note": "15 SuS"}, {"hours": 1, "subject": "Klassenrat", "class": "9b", "note": "27 SuS"}, {"hours": 1, "subject": "ILZ", "class": "6b", "note": "22 SuS"}], "gts": 0}, {"name": "Romana Schirmer", "unterrichtseinsatz": 25, "pflichtstunden": 26, "abminderungen": [{"art": "KL", "text": "Klasse 9c", "hours": 1}], "unterricht": [{"hours": 2, "subject": "Mathematik", "class": "9a", "note": "19 SuS"}, {"hours": 2, "subject": "Mathematik", "class": "9b", "note": "27 SuS"}, {"hours": 2, "subject": "Mathematik", "class": "9c", "note": "30 SuS"}, {"hours": 2, "subject": "Mathematik", "class": "9a", "note": "19 SuS"}, {"hours": 2, "subject": "Mathematik", "class": "9b", "note": "27 SuS"}, {"hours": 2, "subject": "Mathematik", "class": "9c", "note": "30 SuS"}, {"hours": 1, "subject": "Mathematik", "class": "10a", "note": "26 SuS"}, {"hours": 2, "subject": "Mathematik", "class": "10a", "note": "26 SuS"}, {"hours": 1, "subject": "Mathematik", "class": "10b", "note": "26 SuS"}, {"hours": 2, "subject": "Mathematik", "class": "10b", "note": "26 SuS"}, {"hours": 1, "subject": "Mathematik", "class": "10a", "note": "26 SuS"}, {"hours": 1, "subject": "Mathematik", "class": "10b", "note": "26 SuS"}, {"hours": 2, "subject": "Geografie", "class": "5a", "note": "25 SuS"}, {"hours": 2, "subject": "Geografie", "class": "5b", "note": "28 SuS"}, {"hours": 1, "subject": "Klassenrat", "class": "9c", "note": "30 SuS"}], "gts": 0}, {"name": "Vanessa Halm", "unterrichtseinsatz": 19, "pflichtstunden": 26, "abminderungen": [{"art": "KL", "text": "Klasse 5a", "hours": 1}], "unterricht": [{"hours": 4, "subject": "Deutsch", "class": "10b", "note": "26 SuS"}, {"hours": 4, "subject": "Deutsch", "class": "8b", "note": "26 SuS"}, {"hours": 4, "subject": "Deutsch", "class": "5a", "note": "25 SuS"}, {"hours": 1, "subject": "Ethik", "class": "9a, 9b, 9c", "note": "19 SuS"}, {"hours": 1, "subject": "Ethik", "class": "8a, 8b, 8c", "note": "22 SuS"}, {"hours": 1, "subject": "Klassenrat", "class": "5a", "note": "25 SuS"}, {"hours": 4, "subject": "TuesDay", "class": "5a, 5b", "note": "53 SuS"}], "gts": 0}, {"name": "Florian Nowak", "unterrichtseinsatz": 20, "pflichtstunden": 26, "abminderungen": [{"art": "KL", "text": "Klasse 8a", "hours": 1}], "unterricht": [{"hours": 2, "subject": "Werken", "class": "6a, 6b", "note": "21 SuS"}, {"hours": 2, "subject": "Sport", "class": "8a", "note": "26 SuS"}, {"hours": 1, "subject": "Ethik", "class": "6a, 6b, 6c", "note": "13 SuS"}, {"hours": 2, "subject": "Wirtschaft-Recht-Technik", "class": "8a, 8b", "note": "16 SuS"}, {"hours": 2, "subject": "Wirtschaft-Recht-Technik", "class": "7a, 7b", "note": "18 SuS"}, {"hours": 2, "subject": "Wirtschaft-Recht-Technik", "class": "7c", "note": "11 SuS"}, {"hours": 1, "subject": "Physik", "class": "10a", "note": "26 SuS"}, {"hours": 1, "subject": "Physik", "class": "10b", "note": "24 SuS"}, {"hours": 1, "subject": "Physik", "class": "9a", "note": "18 SuS"}, {"hours": 1, "subject": "Physik", "class": "9b", "note": "27 SuS"}, {"hours": 1, "subject": "Physik", "class": "9c", "note": "29 SuS"}, {"hours": 1, "subject": "Physik", "class": "8a", "note": "26 SuS"}, {"hours": 1, "subject": "Physik", "class": "8b", "note": "25 SuS"}, {"hours": 1, "subject": "Physik", "class": "8c", "note": "26 SuS"}, {"hours": 1, "subject": "Klassenrat", "class": "8a", "note": "26 SuS"}], "gts": 0}, {"name": "Nicole Könitzer", "unterrichtseinsatz": 5, "pflichtstunden": 26, "abminderungen": [], "unterricht": [{"hours": 2, "subject": "Deutsch", "class": "9a", "note": "19 SuS"}, {"hours": 2, "subject": "Deutsch", "class": "7c", "note": "25 SuS"}, {"hours": 1, "subject": "Religion", "class": "5a, 5b", "note": "17 SuS"}], "gts": 0}, {"name": "Sebastian Schwappach", "unterrichtseinsatz": 25, "pflichtstunden": 26, "abminderungen": [{"art": "KL", "text": "Klasse 9a", "hours": 1}], "unterricht": [{"hours": 2, "subject": "Werken", "class": "5a", "note": "13 SuS"}, {"hours": 2, "subject": "Werken", "class": "5b", "note": "13 SuS"}, {"hours": 1, "subject": "Kunst", "class": "9a", "note": "18 SuS"}, {"hours": 1, "subject": "Kunst", "class": "9b", "note": "27 SuS"}, {"hours": 1, "subject": "Kunst", "class": "9c", "note": "28 SuS"}, {"hours": 1, "subject": "Kunst", "class": "8a", "note": "26 SuS"}, {"hours": 1, "subject": "Kunst", "class": "8b", "note": "25 SuS"}, {"hours": 1, "subject": "Kunst", "class": "8c", "note": "26 SuS"}, {"hours": 1, "subject": "Kunst", "class": "7a", "note": "25 SuS"}, {"hours": 1, "subject": "Kunst", "class": "7b", "note": "24 SuS"}, {"hours": 1, "subject": "Kunst", "class": "7c", "note": "24 SuS"}, {"hours": 1, "subject": "Kunst", "class": "5b", "note": ""}, {"hours": 2, "subject": "Wirtschaft-Recht-Technik", "class": "8a, 8b", "note": "18 SuS"}, {"hours": 2, "subject": "Wirtschaft-Recht-Technik", "class": "8c", "note": "14 SuS"}, {"hours": 2, "subject": "Wirtschaft-Recht-Technik", "class": "7a, 7b", "note": "17 SuS"}, {"hours": 1, "subject": "Wirtschaft-Recht-Technik", "class": "9a", "note": "18 SuS"}, {"hours": 1, "subject": "Wirtschaft-Recht-Technik", "class": "9c", "note": "29 SuS"}, {"hours": 1, "subject": "Wirtschaft-Recht-Technik", "class": "10a", "note": "22 SuS"}, {"hours": 1, "subject": "Wirtschaft-Recht-Technik", "class": "10b", "note": "24 SuS"}, {"hours": 1, "subject": "Klassenrat", "class": "9a", "note": "19 SuS"}], "gts": 0}, {"name": "Carsten Wesely", "unterrichtseinsatz": 27, "pflichtstunden": 26, "abminderungen": [], "unterricht": [{"hours": 4, "subject": "Mathematik", "class": "7a, 7b, 7c", "note": "27 SuS"}, {"hours": 2, "subject": "Chemie", "class": "10b", "note": "26 SuS"}, {"hours": 2, "subject": "Chemie", "class": "8a", "note": "26 SuS"}, {"hours": 2, "subject": "Chemie", "class": "8b", "note": "26 SuS"}, {"hours": 2, "subject": "Chemie", "class": "8c", "note": "26 SuS"}, {"hours": 2, "subject": "Chemie", "class": "7a", "note": "25 SuS"}, {"hours": 2, "subject": "Chemie", "class": "7b", "note": "26 SuS"}, {"hours": 2, "subject": "Chemie", "class": "7c", "note": "25 SuS"}, {"hours": 1, "subject": "Offener Unterricht Fach", "class": "7b", "note": "26 SuS"}, {"hours": 1, "subject": "Offener Unterricht Fach", "class": "7c", "note": "26 SuS"}, {"hours": 1, "subject": "Offener Unterricht Fach", "class": "7b", "note": "26 SuS"}, {"hours": 1, "subject": "Offener Unterricht Fach", "class": "7c", "note": "26 SuS"}, {"hours": 1, "subject": "Offener Unterricht Fach", "class": "5b", "note": "27 SuS"}, {"hours": 1, "subject": "Offener Unterricht Fach", "class": "5b", "note": "27 SuS"}, {"hours": 1, "subject": "ILZ", "class": "7a", "note": "25 SuS"}, {"hours": 1, "subject": "MatheVertiefung", "class": "5a", "note": "25 SuS"}, {"hours": 1, "subject": "MatheVertiefung", "class": "5b", "note": "28 SuS"}], "gts": 0}, {"name": "Sebastian Teubert", "unterrichtseinsatz": 25, "pflichtstunden": 26, "abminderungen": [{"art": "KL", "text": "Klasse 7c", "hours": 1}], "unterricht": [{"hours": 4, "subject": "Mathematik", "class": "7a, 7b, 7c", "note": "25 SuS"}, {"hours": 4, "subject": "Mathematik", "class": "5b", "note": "28 SuS"}, {"hours": 1, "subject": "Sport", "class": "8b, 8c", "note": "17 SuS"}, {"hours": 2, "subject": "Sport", "class": "7a, 7b", "note": "21 SuS"}, {"hours": 2, "subject": "Sport", "class": "7c", "note": "25 SuS"}, {"hours": 2, "subject": "Sport", "class": "8b, 8c", "note": "17 SuS"}, {"hours": 2, "subject": "Geografie", "class": "8a", "note": "26 SuS"}, {"hours": 2, "subject": "Geografie", "class": "8b", "note": "26 SuS"}, {"hours": 1, "subject": "Geografie", "class": "9a", "note": "19 SuS"}, {"hours": 1, "subject": "Geografie", "class": "9c", "note": "30 SuS"}, {"hours": 1, "subject": "Geografie", "class": "6a", "note": "21 SuS"}, {"hours": 1, "subject": "Geografie", "class": "6b", "note": "22 SuS"}, {"hours": 1, "subject": "Klassenrat", "class": "7c", "note": "25 SuS"}, {"hours": 1, "subject": "ILZ", "class": "5a", "note": "25 SuS"}], "gts": 0}, {"name": "Bastian Illesy", "unterrichtseinsatz": 22, "pflichtstunden": 26, "abminderungen": [{"art": "KL", "text": "Klasse 7a", "hours": 1}], "unterricht": [{"hours": 4, "subject": "Deutsch", "class": "10a", "note": "26 SuS"}, {"hours": 4, "subject": "Deutsch", "class": "9b", "note": "27 SuS"}, {"hours": 4, "subject": "Deutsch", "class": "8c", "note": "26 SuS"}, {"hours": 2, "subject": "Deutsch", "class": "7a", "note": "25 SuS"}, {"hours": 2, "subject": "Deutsch", "class": "7a", "note": "25 SuS"}, {"hours": 1, "subject": "Klassenrat", "class": "7a", "note": "25 SuS"}, {"hours": 1, "subject": "Medienkunde-Informatik", "class": "6a", "note": "21 SuS"}, {"hours": 1, "subject": "Medienkunde-Informatik", "class": "6a", "note": "21 SuS"}, {"hours": 1, "subject": "Medienkunde-Informatik", "class": "6b", "note": "21 SuS"}, {"hours": 1, "subject": "Medienkunde-Informatik", "class": "6b", "note": "21 SuS"}, {"hours": 1, "subject": "ILZ", "class": "8c", "note": "26 SuS"}], "gts": 0}, {"name": "Maximilian Keim", "unterrichtseinsatz": 26, "pflichtstunden": 26, "abminderungen": [{"art": "KL", "text": "Klasse 8c", "hours": 1}], "unterricht": [{"hours": 4, "subject": "Mathematik", "class": "8c", "note": "26 SuS"}, {"hours": 2, "subject": "Mathematik", "class": "6b", "note": "22 SuS"}, {"hours": 4, "subject": "Mathematik", "class": "6c", "note": "22 SuS"}, {"hours": 4, "subject": "Mathematik", "class": "5a", "note": "25 SuS"}, {"hours": 2, "subject": "Mathematik", "class": "6a", "note": "21 SuS"}, {"hours": 1, "subject": "Geografie", "class": "10b", "note": "26 SuS"}, {"hours": 1, "subject": "Geografie", "class": "10a", "note": "26 SuS"}, {"hours": 2, "subject": "Geografie", "class": "8c", "note": "26 SuS"}, {"hours": 1, "subject": "Geografie", "class": "9b", "note": "27 SuS"}, {"hours": 1, "subject": "Geografie", "class": "7a", "note": "25 SuS"}, {"hours": 1, "subject": "Geografie", "class": "7b", "note": "26 SuS"}, {"hours": 1, "subject": "Geografie", "class": "7c", "note": "25 SuS"}, {"hours": 1, "subject": "Klassenrat", "class": "8c", "note": "26 SuS"}, {"hours": 1, "subject": "ILZ", "class": "6a", "note": "21 SuS"}], "gts": 0}, {"name": "Richard Ottma", "unterrichtseinsatz": 12, "pflichtstunden": 26, "abminderungen": [], "unterricht": [{"hours": 4, "subject": "Mathematik", "class": "8a", "note": "26 SuS"}, {"hours": 1, "subject": "MatheVertiefung", "class": "7a", "note": "25 SuS"}, {"hours": 1, "subject": "MatheVertiefung", "class": "7b", "note": "26 SuS"}, {"hours": 1, "subject": "MatheVertiefung", "class": "7c", "note": "25 SuS"}, {"hours": 1, "subject": "MatheVertiefung", "class": "10a", "note": "26 SuS"}, {"hours": 1, "subject": "MatheVertiefung", "class": "10b", "note": "26 SuS"}, {"hours": 1, "subject": "MatheVertiefung", "class": "8a", "note": "26 SuS"}, {"hours": 1, "subject": "MatheVertiefung", "class": "8b", "note": "26 SuS"}, {"hours": 1, "subject": "MatheVertiefung", "class": "8c", "note": "26 SuS"}], "gts": 0}, {"name": "Vanessa Vogel", "unterrichtseinsatz": 13, "pflichtstunden": 26, "abminderungen": [], "unterricht": [{"hours": 1, "subject": "Religion", "class": "9a, 9b, 9c", "note": "76 SuS"}, {"hours": 1, "subject": "Religion", "class": "8a, 8b, 8c", "note": "14 SuS"}, {"hours": 1, "subject": "Religion", "class": "7a, 7b, 7c", "note": "17 SuS"}, {"hours": 1, "subject": "Religion", "class": "6a, 6b, 6c", "note": "65 SuS"}, {"hours": 1, "subject": "Religion", "class": "10a, 10b", "note": "10 SuS"}, {"hours": 2, "subject": "Biologie", "class": "8a", "note": "26 SuS"}, {"hours": 1, "subject": "Biologie", "class": "9b", "note": "27 SuS"}, {"hours": 2, "subject": "Biologie", "class": "7b", "note": "26 SuS"}, {"hours": 2, "subject": "Biologie", "class": "8b", "note": "26 SuS"}, {"hours": 1, "subject": "ILZ", "class": "7b", "note": "26 SuS"}], "gts": 0}, {"name": "Lukas Gräfe", "unterrichtseinsatz": 20, "pflichtstunden": 26, "abminderungen": [{"art": "KL", "text": "Klasse 6c", "hours": 1}], "unterricht": [{"hours": 4, "subject": "Deutsch", "class": "9c", "note": "30 SuS"}, {"hours": 4, "subject": "Deutsch", "class": "6c", "note": "22 SuS"}, {"hours": 1, "subject": "Ethik", "class": "5a, 5b", "note": "21 SuS"}, {"hours": 1, "subject": "Klassenrat", "class": "6c", "note": "22 SuS"}, {"hours": 2, "subject": "Darstellen und Gestalten", "class": "10a, 10b", "note": "17 SuS"}, {"hours": 2, "subject": "Darstellen und Gestalten", "class": "9a, 9b, 9c", "note": "19 SuS"}, {"hours": 5, "subject": "TuesDay", "class": "6a, 6b, 6c", "note": "65 SuS"}, {"hours": 1, "subject": "ILZ", "class": "9a, 9b, 9c", "note": "75 SuS"}], "gts": 0}, {"name": "Hannah Piel", "unterrichtseinsatz": 22, "pflichtstunden": 26, "abminderungen": [], "unterricht": [{"hours": 1, "subject": "Geschichte", "class": "9a", "note": ""}, {"hours": 1, "subject": "Geschichte", "class": "8a", "note": ""}, {"hours": 1, "subject": "Geschichte", "class": "7a", "note": ""}, {"hours": 1, "subject": "Mensch-Natur-Technik", "class": "6a", "note": ""}, {"hours": 1, "subject": "Mensch-Natur-Technik", "class": "6b", "note": ""}, {"hours": 1, "subject": "Mensch-Natur-Technik", "class": "6c", "note": ""}, {"hours": 2, "subject": "Mensch-Natur-Technik", "class": "5a", "note": ""}, {"hours": 2, "subject": "Mensch-Natur-Technik", "class": "5b", "note": ""}, {"hours": 2, "subject": "Biologie", "class": "7a", "note": ""}, {"hours": 2, "subject": "Biologie", "class": "7c", "note": ""}, {"hours": 2, "subject": "Sprachwerkstatt", "class": "6a, 6b, 6c", "note": ""}, {"hours": 1, "subject": "Sprachwerkstatt", "class": "6a, 6b, 6c", "note": ""}, {"hours": 1, "subject": "Offener Unterricht Fach", "class": "5a", "note": ""}, {"hours": 1, "subject": "Offener Unterricht Fach", "class": "5a", "note": ""}, {"hours": 1, "subject": "ILZ", "class": "5b", "note": ""}, {"hours": 2, "subject": "DAZ", "class": "", "note": ""}], "gts": 0}, {"name": "Karola Haak", "unterrichtseinsatz": 3, "pflichtstunden": 26, "abminderungen": [], "unterricht": [{"hours": 2, "subject": "Wirtschaft-Recht-Technik", "class": "7a, 7b", "note": "15 SuS"}, {"hours": 1, "subject": "ILZ", "class": "6c", "note": "22 SuS"}], "gts": 0}, {"name": "Tim Dengler", "unterrichtseinsatz": 6, "pflichtstunden": 26, "abminderungen": [], "unterricht": [{"hours": 1, "subject": "Mathematik", "class": "10a", "note": "26 SuS"}, {"hours": 2, "subject": "Mathematik", "class": "10a", "note": "26 SuS"}, {"hours": 1, "subject": "Mathematik", "class": "10b", "note": "26 SuS"}, {"hours": 2, "subject": "Mathematik", "class": "10b", "note": "26 SuS"}], "gts": 0}];
+
+        function findMatchingTeacher(rawName, teachersList = appData.teachers) {
+            if (!rawName || !teachersList || teachersList.length === 0) return null;
+            const clean = rawName.trim().toLowerCase();
+
+            // 1. Exakter Namensabgleich
+            let exact = teachersList.find(t => t.name.trim().toLowerCase() === clean);
+            if (exact) return exact;
+
+            // 2. Namensbestandteile (Vorname, Nachname) zerlegen
+            const parts = clean.split(/\s+/).filter(p => !['herr', 'frau', 'hr.', 'fr.', 'dr.', 'dr'].includes(p));
+            if (parts.length === 0) return null;
+            const lastName = parts[parts.length - 1];
+            const firstName = parts.length > 1 ? parts[0] : "";
+
+            // Falls Vorname und Nachname vorhanden: Suche Lehrkraft, die beide Teile enthält
+            if (firstName && lastName) {
+                let bothMatch = teachersList.find(t => {
+                    let tClean = t.name.trim().toLowerCase();
+                    return tClean.includes(firstName) && tClean.includes(lastName);
+                });
+                if (bothMatch) return bothMatch;
+            }
+
+            // 3. Nachname abgleichen (nur wenn Nachname eindeutig ist)
+            let matchesByLast = teachersList.filter(t => {
+                let tClean = t.name.trim().toLowerCase();
+                let tParts = tClean.split(/\s+/).filter(p => !['herr', 'frau', 'hr.', 'fr.', 'dr.', 'dr'].includes(p));
+                let tLast = tParts[tParts.length - 1];
+                return tClean === lastName || tLast === lastName;
+            });
+            if (matchesByLast.length === 1) return matchesByLast[0];
+
+            return null;
+        }
+
+        function applyAscTimetable2627(overwriteExisting = true) {
+            const yStr = "26/27";
+            const yd = getYearData(yStr);
+            if (!yd.einsatzplanung) yd.einsatzplanung = { periods: [], plans: {} };
+            if (!Array.isArray(yd.einsatzplanung.periods)) yd.einsatzplanung.periods = [];
+            if (!yd.einsatzplanung.plans || typeof yd.einsatzplanung.plans !== 'object') yd.einsatzplanung.plans = {};
+
+            let defaultPid = 'p_start_2627';
+            let targetPeriod = yd.einsatzplanung.periods.find(p => p.id === defaultPid || p.name.includes("Schuljahresbeginn"));
+            if (!targetPeriod) {
+                targetPeriod = {
+                    id: defaultPid,
+                    name: "Schuljahresbeginn",
+                    validFrom: "2026-08-01",
+                    note: "aSc Stundenplan (Stand 08.11.2026)"
+                };
+                yd.einsatzplanung.periods.unshift(targetPeriod);
+            } else {
+                targetPeriod.validFrom = "2026-08-01";
+                if (!targetPeriod.note) targetPeriod.note = "aSc Stundenplan (Stand 08.11.2026)";
+            }
+            const pid = targetPeriod.id;
+            if (!yd.einsatzplanung.plans[pid] || overwriteExisting) {
+                yd.einsatzplanung.plans[pid] = {};
+            }
+
+            // Mustermann bereinigen, wenn echte Lehrkräfte importiert werden
+            if (appData.teachers.length === 1 && appData.teachers[0].name === "Mustermann") {
+                appData.teachers = [];
+            }
+
+            let importedCount = 0;
+            ASC_INITIAL_IMPORT_DATA_2627.forEach(pt => {
+                let teacher = findMatchingTeacher(pt.name);
+                if (!teacher) {
+                    let tId = 't_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+                    teacher = {
+                        id: tId,
+                        name: pt.name,
+                        r: 0,
+                        v: 0,
+                        active: true,
+                        pin: generateTeacherPin()
+                    };
+                    appData.teachers.push(teacher);
+                }
+
+                if (!yd.staffStatus) yd.staffStatus = {};
+                yd.staffStatus[teacher.id] = true;
+
+                yd.einsatzplanung.plans[pid][teacher.id] = {
+                    pflichtstunden: pt.pflichtstunden || 26,
+                    abminderungen: JSON.parse(JSON.stringify(pt.abminderungen || [])),
+                    unterricht: JSON.parse(JSON.stringify(pt.unterricht || [])),
+                    gts: pt.gts || 0
+                };
+                importedCount++;
+            });
+
+            yd.einsatzplanung._ascImported2627 = true;
+            saveToLocal();
+
+            if (currentEpPeriodId !== pid) {
+                currentEpPeriodId = pid;
+            }
+            if (activeTab === 'survey') {
+                renderSurveyView();
+            }
+            return importedCount;
+        }
+
+        function triggerDirectAscImport() {
+            askConfirm("Möchten Sie den vorbereiteten aSc-Stundenplan 2026/2027 (31 Lehrkräfte, 548 Std.) jetzt einspielen? Bestehende Testdaten im Start-Zeitraum werden überschrieben.", () => {
+                let count = applyAscTimetable2627(true);
+                closeAscImportModal();
+                showToast(`${count} Einsatzpläne für 2026/2027 erfolgreich übernommen!`, "sparkles");
+            }, "Stundenplan 26/27 einspielen");
+        }
+
+        function checkAndAutoSeedAscTimetable() {
+            try {
+                let yd = getYearData("26/27");
+                if (!yd.einsatzplanung) yd.einsatzplanung = { periods: [], plans: {} };
+                if (!yd.einsatzplanung._ascImported2627) {
+                    console.log("Automatische Initialisierung des aSc-Stundenplans 2026/2027...");
+                    applyAscTimetable2627(true);
+                }
+            } catch (err) {
+                console.warn("Auto-Seed aSc Timetable:", err);
+            }
+        }
+
+        let ascParsedTeachersCache = [];
+
+        function openAscImportModal() {
+            const epData = getYearEpData(appData.schoolYear);
+            const pSelect = document.getElementById('asc-target-period-select');
+            if (pSelect) {
+                pSelect.innerHTML = '';
+                epData.periods.sort((a,b) => a.validFrom.localeCompare(b.validFrom)).forEach(p => {
+                    let opt = document.createElement('option');
+                    opt.value = p.id;
+                    let parts = p.validFrom.split('-');
+                    let dateDe = parts.length === 3 ? `${parts[2]}.${parts[1]}.${parts[0]}` : p.validFrom;
+                    opt.text = `${p.name} (ab ${dateDe})`;
+                    if (p.id === currentEpPeriodId) opt.selected = true;
+                    pSelect.appendChild(opt);
+                });
+                let optNew = document.createElement('option');
+                optNew.value = '__new__';
+                optNew.text = '➕ Neuen Zeitraum automatisch anlegen...';
+                pSelect.appendChild(optNew);
+            }
+
+            ascParsedTeachersCache = [];
+            const prev = document.getElementById('asc-preview-container');
+            if (prev) {
+                prev.innerHTML = '';
+                prev.classList.add('hidden');
+            }
+            const confirmBtn = document.getElementById('asc-confirm-btn');
+            if (confirmBtn) confirmBtn.classList.add('hidden');
+            const dropzone = document.getElementById('asc-dropzone');
+            if (dropzone) dropzone.classList.remove('hidden');
+
+            const fileIn = document.getElementById('asc-file-input');
+            if (fileIn) fileIn.value = '';
+
+            document.getElementById('modal-asc-import').classList.remove('hidden');
+            document.getElementById('modal-asc-import').classList.add('flex');
+        }
+
+        function closeAscImportModal() {
+            document.getElementById('modal-asc-import').classList.add('hidden');
+            document.getElementById('modal-asc-import').classList.remove('flex');
+        }
+
+        function handleAscDragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('asc-dropzone')?.classList.add('border-school-500', 'bg-school-50/50');
+        }
+
+        function handleAscDragLeave(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('asc-dropzone')?.classList.remove('border-school-500', 'bg-school-50/50');
+        }
+
+        function handleAscDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('asc-dropzone')?.classList.remove('border-school-500', 'bg-school-50/50');
+            if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                processAscPdfFile(e.dataTransfer.files[0]);
+            }
+        }
+
+        function handleAscFileSelect(files) {
+            if (files && files.length > 0) {
+                processAscPdfFile(files[0]);
+            }
+        }
+
+        async function processAscPdfFile(file) {
+            if (!file || !file.name.toLowerCase().endsWith('.pdf')) {
+                showToast("Bitte eine gültige PDF-Datei auswählen", "alert-triangle");
+                return;
+            }
+
+            const prev = document.getElementById('asc-preview-container');
+            if (prev) {
+                prev.classList.remove('hidden');
+                prev.innerHTML = `
+                    <div class="py-6 text-center text-slate-600">
+                        <div class="w-8 h-8 border-3 border-school-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                        <p class="text-xs font-bold">Analysiere aSc-Stundenplan PDF...</p>
+                        <p class="text-[11px] text-slate-400 mt-0.5">${file.name} (${Math.round(file.size/1024)} KB)</p>
+                    </div>
+                `;
+            }
+
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const parsed = await parseAscTimetablePdf(arrayBuffer);
+                ascParsedTeachersCache = parsed;
+                renderAscParsedPreview(parsed, file.name);
+            } catch (err) {
+                console.error("Fehler beim PDF-Parsing:", err);
+                if (prev) {
+                    prev.innerHTML = `
+                        <div class="p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs">
+                            <p class="font-bold flex items-center gap-1.5">Analyse fehlgeschlagen</p>
+                            <p class="mt-1">${err.message || 'Die PDF konnte nicht als aSc-Stundenplan gelesen werden.'}</p>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        async function parseAscTimetablePdf(arrayBuffer) {
+            if (typeof pdfjsLib === 'undefined') {
+                throw new Error("PDF.js ist noch nicht geladen. Bitte kurz warten oder Seite neu laden.");
+            }
+            if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            }
+
+            const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+            const pdf = await loadingTask.promise;
+            const teachers = [];
+
+            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                const page = await pdf.getPage(pageNum);
+                const textContent = await page.getTextContent();
+                
+                const items = textContent.items.map(it => ({
+                    str: (it.str || '').trim(),
+                    x: it.transform[4],
+                    y: it.transform[5]
+                })).filter(it => it.str.length > 0);
+
+                if (items.length === 0) continue;
+                const fullText = items.map(it => it.str).join(' ');
+
+                // 1. Lehrkraft Name
+                let teacherName = "";
+                const nameIdx = items.findIndex(it => it.str.includes("Stundenplan für:"));
+                if (nameIdx !== -1) {
+                    let parts = [];
+                    for (let i = nameIdx + 1; i < items.length && i < nameIdx + 6; i++) {
+                        if (items[i].str.includes("Unterschrift") || items[i].str.includes("Unterrichtseinsatz") || items[i].str.includes("Schuljahr")) break;
+                        parts.push(items[i].str);
+                    }
+                    teacherName = parts.join(' ').replace(/Unterschrift.*/i, '').trim();
+                }
+                if (!teacherName) {
+                    let m = fullText.match(/Stundenplan für:\s*([A-Za-zÄÖÜäöüß\-\s]+?)(?:Unterschrift|Unterrichtseinsatz|Elternsprechstunde|$)/i);
+                    if (m) teacherName = m[1].trim();
+                }
+                if (!teacherName) teacherName = `Lehrkraft (Seite ${pageNum})`;
+
+                // 2. Unterrichtseinsatz
+                let einsatz = 0;
+                let eMatch = fullText.match(/Unterrichtseinsatz:\s*(\d+)/i);
+                if (eMatch) einsatz = parseInt(eMatch[1]);
+
+                // 3. Klassenlehrer Header-Info
+                let klHeader = "";
+                let klMatch = fullText.match(/Klassenlehrperson der Klasse:\s*([^\s]+)/i);
+                if (klMatch && !klMatch[1].toLowerCase().includes("eltern") && !klMatch[1].toLowerCase().includes("sprech")) {
+                    klHeader = klMatch[1].trim();
+                }
+
+                // 4. Tabellenspalten via dynamischer X-Koordinaten
+                const hFaecher = items.find(it => it.str === "Fächer");
+                const hAnzahl = items.find(it => it.str === "Anzahl");
+                const hWert = items.find(it => it.str === "Wert");
+                const hKlasse = items.find(it => it.str === "Klasse");
+                const hSus = items.find(it => it.str.includes("SuS"));
+
+                let tableRows = [];
+
+                if (hFaecher && hAnzahl && hWert && hKlasse) {
+                    const xF = hFaecher.x;
+                    const xA = hAnzahl.x;
+                    const xW = hWert.x;
+                    const xK = hKlasse.x;
+                    const xS = hSus ? hSus.x : (xK + 250);
+
+                    const midFA = (xF + xA) / 2;
+                    const midAW = (xA + xW) / 2;
+                    const midWK = (xW + xK) / 2;
+                    const midKS = (xK + xS) / 2;
+
+                    const headerY = hFaecher.y;
+                    const rowsByY = {};
+
+                    items.forEach(it => {
+                        if (it.x >= (xF - 20) && Math.abs(it.y - headerY) > 5 && it.y > 500 && it.y < 1400) {
+                            let matchedY = Object.keys(rowsByY).find(gy => Math.abs(it.y - parseFloat(gy)) <= 5);
+                            if (!matchedY) {
+                                matchedY = it.y;
+                                rowsByY[matchedY] = [];
+                            }
+                            rowsByY[matchedY].push(it);
+                        }
+                    });
+
+                    const sortedYs = Object.keys(rowsByY).map(Number).sort((a, b) => a - b);
+                    sortedYs.forEach(gy => {
+                        const cells = rowsByY[gy].sort((a, b) => a.x - b.x);
+                        let fParts = [];
+                        let aStr = "";
+                        let kParts = [];
+                        let sStr = "";
+
+                        cells.forEach(it => {
+                            if (it.x < midFA) {
+                                fParts.push(it.str);
+                            } else if (it.x >= midFA && it.x < midAW) {
+                                aStr = it.str;
+                            } else if (it.x >= midAW && it.x < midWK) {
+                                // Wert ignorieren
+                            } else if (it.x >= midWK && it.x < midKS) {
+                                kParts.push(it.str);
+                            } else if (it.x >= midKS) {
+                                sStr = it.str;
+                            }
+                        });
+
+                        let f = fParts.join(' ').trim();
+                        let k = kParts.join(' ').trim();
+                        let anzahl = parseInt(aStr);
+
+                        if (f && !isNaN(anzahl) && anzahl > 0) {
+                            tableRows.push({
+                                hours: anzahl,
+                                subject: f,
+                                class: k,
+                                note: sStr ? `${sStr} SuS` : ''
+                            });
+                        }
+                    });
+                }
+
+                // 5. Klassenrat (KR) Erkennung
+                const krClasses = tableRows.filter(r => r.subject === 'Klassenrat' || r.subject === 'KR').map(r => r.class);
+                const klClass = krClasses.length > 0 ? krClasses[0] : klHeader;
+
+                const abminderungen = [];
+                if (klClass) {
+                    abminderungen.push({
+                        art: 'KL',
+                        text: `Klasse ${klClass}`,
+                        hours: 1
+                    });
+                }
+
+                const sumHours = tableRows.reduce((acc, r) => acc + r.hours, 0);
+
+                teachers.push({
+                    page: pageNum,
+                    name: teacherName,
+                    einsatz: einsatz,
+                    sumHours: sumHours,
+                    pflichtstunden: 26,
+                    abminderungen: abminderungen,
+                    unterricht: tableRows,
+                    klClass: klClass || null,
+                    gts: 0
+                });
+            }
+
+            return teachers;
+        }
+
+        function renderAscParsedPreview(teachers) {
+            const prev = document.getElementById('asc-preview-container');
+            const confirmBtn = document.getElementById('asc-confirm-btn');
+            if (!prev) return;
+
+            const onlyActive = document.getElementById('asc-opt-only-active')?.checked ?? true;
+            const validTeachers = onlyActive ? teachers.filter(t => t.einsatz > 0 || t.sumHours > 0) : teachers;
+            const totalHours = validTeachers.reduce((acc, t) => acc + (t.sumHours || t.einsatz), 0);
+            const totalKl = validTeachers.filter(t => t.klClass).length;
+
+            let html = `
+                <div class="mb-3 flex items-center justify-between pb-2 border-b border-slate-200">
+                    <div>
+                        <span class="font-black text-slate-800 text-xs">${validTeachers.length} Lehrkräfte erkannt</span>
+                        <span class="text-[11px] text-slate-500 ml-1">(${totalHours} Std., ${totalKl} Klassenleitungen)</span>
+                    </div>
+                    <span class="text-[11px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">PDF analysiert</span>
+                </div>
+                <div class="space-y-1.5">
+            `;
+
+            teachers.forEach(t => {
+                const isActive = t.einsatz > 0 || t.sumHours > 0;
+                if (onlyActive && !isActive) return;
+
+                html += `
+                    <div class="flex items-center justify-between p-2 rounded-lg ${isActive ? 'bg-white border border-slate-200' : 'bg-slate-100/60 opacity-60 text-slate-400'} text-xs">
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-slate-800">${t.name}</span>
+                            ${t.klClass ? `<span class="bg-purple-100 text-purple-800 text-[10px] font-black px-1.5 py-0.5 rounded">KL ${t.klClass}</span>` : ''}
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-slate-500 text-[11px]">${t.unterricht.length} Fächer</span>
+                            <span class="font-black ${isActive ? 'text-blue-700' : 'text-slate-400'}">${t.sumHours || t.einsatz} h</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `</div>`;
+            prev.innerHTML = html;
+            prev.classList.remove('hidden');
+
+            if (confirmBtn) {
+                confirmBtn.classList.remove('hidden');
+                confirmBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>${validTeachers.length} Lehrkräfte übernehmen</span>
+                `;
+            }
+        }
+
+        function executeAscImport() {
+            if (!ascParsedTeachersCache || ascParsedTeachersCache.length === 0) {
+                showToast("Keine Lehrkräfte zum Importieren vorhanden", "alert-triangle");
+                return;
+            }
+
+            const epData = getYearEpData(appData.schoolYear);
+            const pSelect = document.getElementById('asc-target-period-select');
+            let targetPid = pSelect ? pSelect.value : currentEpPeriodId;
+
+            if (targetPid === '__new__') {
+                targetPid = 'p_' + Date.now();
+                epData.periods.push({
+                    id: targetPid,
+                    name: `aSc-Import (${new Date().toLocaleDateString('de-DE')})`,
+                    validFrom: new Date().toISOString().slice(0, 10),
+                    note: "Importiert aus aSc Stundenplan PDF"
+                });
+                epData.periods.sort((a,b) => a.validFrom.localeCompare(b.validFrom));
+            }
+
+            if (!epData.plans) epData.plans = {};
+            if (!epData.plans[targetPid]) epData.plans[targetPid] = {};
+
+            const onlyActive = document.getElementById('asc-opt-only-active')?.checked ?? true;
+            const applyKl = document.getElementById('asc-opt-kl-abm')?.checked ?? true;
+
+            const validTeachers = onlyActive ? ascParsedTeachersCache.filter(t => t.einsatz > 0 || t.sumHours > 0) : ascParsedTeachersCache;
+
+            if (appData.teachers.length === 1 && appData.teachers[0].name === "Mustermann") {
+                appData.teachers = [];
+            }
+
+            let yd = getYearData(appData.schoolYear);
+            let importedCount = 0;
+
+            validTeachers.forEach(pt => {
+                let teacher = findMatchingTeacher(pt.name);
+                if (!teacher) {
+                    let tId = 't_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+                    teacher = {
+                        id: tId,
+                        name: pt.name,
+                        r: 0,
+                        v: 0,
+                        active: true,
+                        pin: generateTeacherPin()
+                    };
+                    appData.teachers.push(teacher);
+                }
+
+                if (!yd.staffStatus) yd.staffStatus = {};
+                yd.staffStatus[teacher.id] = true;
+
+                let abm = [];
+                if (applyKl && pt.klClass) {
+                    abm.push({
+                        art: 'KL',
+                        text: `Klasse ${pt.klClass}`,
+                        hours: 1
+                    });
+                }
+
+                epData.plans[targetPid][teacher.id] = {
+                    pflichtstunden: pt.pflichtstunden || 26,
+                    abminderungen: abm,
+                    unterricht: JSON.parse(JSON.stringify(pt.unterricht || [])),
+                    gts: pt.gts || 0
+                };
+                importedCount++;
+            });
+
+            currentEpPeriodId = targetPid;
+            saveToLocal();
+            closeAscImportModal();
+            renderSurveyView();
+            showToast(`${importedCount} Lehrkräfte erfolgreich in Einsatzplanung importiert!`, "sparkles");
         }
 
         // --- KOLLEGEN-PORTAL: EINSATZPLAN ANZEIGE (INKL. HISTORIE ALLER PERIODEN) ---

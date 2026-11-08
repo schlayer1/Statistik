@@ -1970,8 +1970,22 @@
             <div class="space-y-2 mb-3 text-xs">
                 <div class="flex flex-wrap items-center justify-between gap-2 p-2 bg-slate-50 rounded-xl border border-slate-200">
                     <span class="font-bold text-slate-700">Ziel-Zeitraum für Import:</span>
-                    <select id="asc-target-period-select" class="bg-white border border-slate-200 rounded-lg p-1.5 font-bold text-slate-800 outline-none focus:border-school-500 text-xs">
+                    <select id="asc-target-period-select" onchange="toggleAscNewPeriodFields()" class="bg-white border border-slate-200 rounded-lg p-1.5 font-bold text-slate-800 outline-none focus:border-school-500 text-xs">
                     </select>
+                </div>
+                <!-- Konfiguration für neuen Zeitraum (wird eingeblendet, wenn '+ Neuen Zeitraum automatisch anlegen...' gewählt ist) -->
+                <div id="asc-new-period-fields" class="hidden p-3 bg-school-50 border border-school-200 rounded-xl space-y-2">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[11px] font-bold text-school-900 mb-0.5">Startdatum (Gültig ab):</label>
+                            <input type="date" id="asc-new-period-date" class="w-full bg-white border border-school-300 rounded-lg p-1.5 text-xs font-bold text-slate-800 outline-none focus:border-school-600">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-school-900 mb-0.5">Bezeichnung des Zeitraums:</label>
+                            <input type="text" id="asc-new-period-name" placeholder="z. B. 2. Halbjahr" class="w-full bg-white border border-school-300 rounded-lg p-1.5 text-xs font-bold text-slate-800 outline-none focus:border-school-600">
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-school-700">Deputate und bestehende Abminderungen werden automatisch aus dem vorherigen Zeitraum übernommen.</p>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <label class="flex items-center gap-2 p-2 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer font-bold text-slate-700">
@@ -6272,8 +6286,38 @@ function removeEpAbminderung(idx) {
             const fileIn = document.getElementById('asc-file-input');
             if (fileIn) fileIn.value = '';
 
+            toggleAscNewPeriodFields();
+
             document.getElementById('modal-asc-import').classList.remove('hidden');
             document.getElementById('modal-asc-import').classList.add('flex');
+        }
+
+        function toggleAscNewPeriodFields() {
+            const pSelect = document.getElementById('asc-target-period-select');
+            const box = document.getElementById('asc-new-period-fields');
+            if (!pSelect || !box) return;
+            if (pSelect.value === '__new__') {
+                box.classList.remove('hidden');
+                let dateInput = document.getElementById('asc-new-period-date');
+                let nameInput = document.getElementById('asc-new-period-name');
+                if (dateInput && !dateInput.value) {
+                    let nextMon = new Date();
+                    let day = nextMon.getDay();
+                    let diff = (day === 0 ? 1 : (day === 1 ? 7 : (8 - day)));
+                    nextMon.setDate(nextMon.getDate() + diff);
+                    let y = nextMon.getFullYear();
+                    let m = String(nextMon.getMonth() + 1).padStart(2, '0');
+                    let d = String(nextMon.getDate()).padStart(2, '0');
+                    dateInput.value = `${y}-${m}-${d}`;
+                }
+                if (nameInput && !nameInput.value) {
+                    let dt = dateInput && dateInput.value ? new Date(dateInput.value + 'T00:00:00') : new Date();
+                    let monthName = dt.toLocaleDateString('de-DE', { month: 'long' });
+                    nameInput.value = `Planänderung ${monthName}`;
+                }
+            } else {
+                box.classList.add('hidden');
+            }
         }
 
         function closeAscImportModal() {
@@ -6598,10 +6642,14 @@ function removeEpAbminderung(idx) {
 
             if (targetPid === '__new__') {
                 targetPid = 'p_' + Date.now();
+                let customDate = document.getElementById('asc-new-period-date')?.value;
+                let customName = document.getElementById('asc-new-period-name')?.value?.trim();
+                let vFrom = customDate || new Date().toISOString().slice(0, 10);
+                let pName = customName || `aSc-Import (${new Date(vFrom + 'T00:00:00').toLocaleDateString('de-DE')})`;
                 epData.periods.push({
                     id: targetPid,
-                    name: `aSc-Import (${new Date().toLocaleDateString('de-DE')})`,
-                    validFrom: new Date().toISOString().slice(0, 10),
+                    name: pName,
+                    validFrom: vFrom,
                     note: "Importiert aus aSc Stundenplan PDF"
                 });
                 epData.periods.sort((a,b) => a.validFrom.localeCompare(b.validFrom));

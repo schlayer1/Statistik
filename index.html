@@ -4455,6 +4455,111 @@
             return match || sorted[sorted.length - 1];
         }
 
+        function getPreviousEpPeriod(targetPid, targetDate, yStr = appData.schoolYear) {
+            const epData = getYearEpData(yStr);
+            if (!epData || !epData.periods || epData.periods.length === 0) return null;
+
+            let otherPeriods = epData.periods.filter(p => p.id !== targetPid);
+            if (otherPeriods.length === 0) return null;
+
+            otherPeriods.sort((a, b) => a.validFrom.localeCompare(b.validFrom));
+
+            if (targetDate) {
+                let before = otherPeriods.filter(p => p.validFrom <= targetDate);
+                if (before.length > 0) {
+                    return before[before.length - 1];
+                }
+                return otherPeriods[0];
+            }
+            return otherPeriods[otherPeriods.length - 1];
+        }
+
+        function getTeacherBaselinePlan(tId, targetPid, targetDate, yStr = appData.schoolYear) {
+            const epData = getYearEpData(yStr);
+            const prevPeriod = getPreviousEpPeriod(targetPid, targetDate, yStr);
+            
+            let dep = null;
+            let gts = 0;
+            let abm = [];
+
+            // 1. Aus direkt vorherigem Gültigkeitszeitraum übernehmen
+            if (prevPeriod && epData.plans && epData.plans[prevPeriod.id] && epData.plans[prevPeriod.id][tId]) {
+                let p = epData.plans[prevPeriod.id][tId];
+                if (p.pflichtstunden !== undefined && p.pflichtstunden !== null) dep = p.pflichtstunden;
+                if (p.gts !== undefined && p.gts !== null) gts = p.gts;
+                if (p.abminderungen) abm = JSON.parse(JSON.stringify(p.abminderungen));
+            }
+
+            // 2. Falls noch nicht gefunden: Suche rückwärts in anderen Zeiträumen des Schuljahres
+            if (dep === null && epData.periods && epData.plans) {
+                let sorted = [...epData.periods].filter(p => p.id !== targetPid).sort((a, b) => b.validFrom.localeCompare(a.validFrom));
+                for (let p of sorted) {
+                    let plan = epData.plans[p.id]?.[tId];
+                    if (plan && plan.pflichtstunden !== undefined && plan.pflichtstunden !== null) {
+                        dep = plan.pflichtstunden;
+                        if (plan.gts !== undefined && plan.gts !== null) gts = plan.gts;
+                        if (plan.abminderungen && abm.length === 0) abm = JSON.parse(JSON.stringify(plan.abminderungen));
+                        break;
+                    }
+                }
+            }
+
+            // 3. Falls noch nicht gefunden: Vorheriges Schuljahr prüfen
+            if (dep === null) {
+                let parts = String(yStr).split('/');
+                if (parts.length === 2) {
+                    let prevY1 = parseInt(parts[0]) - 1;
+                    let prevY2 = parseInt(parts[1]) - 1;
+                    let prevYStr = `${String(prevY1).padStart(2, '0')}/${String(prevY2).padStart(2, '0')}`;
+                    let prevYd = appData.years?.[prevYStr];
+                    if (prevYd && prevYd.einsatzplanung && prevYd.einsatzplanung.periods && prevYd.einsatzplanung.plans) {
+                        let sortedPrev = [...prevYd.einsatzplanung.periods].sort((a, b) => b.validFrom.localeCompare(a.validFrom));
+                        for (let p of sortedPrev) {
+                            let plan = prevYd.einsatzplanung.plans[p.id]?.[tId];
+                            if (plan && plan.pflichtstunden !== undefined && plan.pflichtstunden !== null) {
+                                dep = plan.pflichtstunden;
+                                if (plan.gts !== undefined && plan.gts !== null) gts = plan.gts;
+                                if (plan.abminderungen && abm.length === 0) abm = JSON.parse(JSON.stringify(plan.abminderungen));
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 4. Fallback: t.r falls > 15, ansonsten Standard 26
+            if (dep === null) {
+                let tObj = appData.teachers.find(t => t.id === tId);
+                if (tObj && tObj.r && tObj.r > 15) {
+                    dep = tObj.r;
+                } else {
+                    dep = 26;
+                }
+            }
+
+            return {
+                pflichtstunden: dep,
+                gts: gts,
+                abminderungen: abm
+            };
+        }
+
+        function ensureTeacherEpPlan(epData, pId, tId) {
+            if (!epData.plans) epData.plans = {};
+            if (!epData.plans[pId]) epData.plans[pId] = {};
+            if (!epData.plans[pId][tId]) {
+                let period = (epData.periods || []).find(p => p.id === pId);
+                let baseline = getTeacherBaselinePlan(tId, pId, period?.validFrom, appData.schoolYear);
+                epData.plans[pId][tId] = {
+                    pflichtstunden: baseline.pflichtstunden,
+                    abminderungen: JSON.parse(JSON.stringify(baseline.abminderungen || [])),
+                    unterricht: [],
+                    gts: baseline.gts || 0
+                };
+            }
+            return epData.plans[pId][tId];
+        }
+
         function getTeacherWeeklyRSoll(tId, mondayDate, yStr = appData.schoolYear) {
             const period = getTeacherActiveEpPeriod(mondayDate, yStr);
             if (!period) {
@@ -4465,14 +4570,7 @@
             }
 
             const epData = getYearEpData(yStr);
-            const plan = epData.plans?.[period.id]?.[tId];
-            if (!plan) {
-                let yd = getYearData(yStr);
-                let m = (mondayDate instanceof Date) ? mondayDate.getMonth() + 1 : new Date().getMonth() + 1;
-                let t = appData.teachers.find(teacher => teacher.id === tId);
-                return yd.monthConfigs?.[m]?.[tId]?.r !== undefined ? yd.monthConfigs[m][tId].r : (t?.r || 0);
-            }
-
+            const plan = epData.plans?.[period.id]?.[tId] || ensureTeacherEpPlan(epData, period.id, tId);
             const calc = calculateTeacherEp(plan);
             return calc.rSoll;
         }
@@ -4565,7 +4663,7 @@
 
             let html = '';
             activeTeachers.forEach((t, idx) => {
-                let plan = epData.plans?.[activePeriod.id]?.[t.id];
+                let plan = epData.plans?.[activePeriod.id]?.[t.id] || ensureTeacherEpPlan(epData, activePeriod.id, t.id);
                 let calc = calculateTeacherEp(plan);
 
                 sumDep += calc.pflichtstunden;
@@ -4778,19 +4876,8 @@ function renderEpTeacherEditor(epData, activePeriod) {
 
             if (!currentEpTeacherId) currentEpTeacherId = activeTeachers[0].id;
 
-            // Plan abrufen oder anlegen
-            if (!epData.plans[activePeriod.id]) epData.plans[activePeriod.id] = {};
-            if (!epData.plans[activePeriod.id][currentEpTeacherId]) {
-                let tObj = appData.teachers.find(t => t.id === currentEpTeacherId);
-                epData.plans[activePeriod.id][currentEpTeacherId] = {
-                    pflichtstunden: (tObj && tObj.r && tObj.r > 15) ? tObj.r : 26,
-                    abminderungen: [],
-                    unterricht: [],
-                    gts: 0
-                };
-            }
-
-            let plan = epData.plans[activePeriod.id][currentEpTeacherId];
+            // Plan abrufen oder mit vererbter Baseline anlegen
+            let plan = ensureTeacherEpPlan(epData, activePeriod.id, currentEpTeacherId);
             let calc = calculateTeacherEp(plan);
 
             // Inputs befüllen
@@ -4909,10 +4996,9 @@ function renderEpTeacherEditor(epData, activePeriod) {
             let epData = getYearEpData(appData.schoolYear);
             let pId = currentEpPeriodId;
             let tId = currentEpTeacherId;
-            if (!epData.plans[pId]) epData.plans[pId] = {};
-            if (!epData.plans[pId][tId]) epData.plans[pId][tId] = { pflichtstunden: 26, abminderungen: [], unterricht: [], gts: 0 };
+            let plan = ensureTeacherEpPlan(epData, pId, tId);
             
-            epData.plans[pId][tId].pflichtstunden = parseInt(val) || 0;
+            plan.pflichtstunden = parseInt(val) || 0;
             saveToLocal();
             renderEpTeacherEditor(epData, epData.periods.find(p => p.id === pId));
             showToast("Pflichtstunden aktualisiert");
@@ -4922,10 +5008,9 @@ function renderEpTeacherEditor(epData, activePeriod) {
             let epData = getYearEpData(appData.schoolYear);
             let pId = currentEpPeriodId;
             let tId = currentEpTeacherId;
-            if (!epData.plans[pId]) epData.plans[pId] = {};
-            if (!epData.plans[pId][tId]) epData.plans[pId][tId] = { pflichtstunden: 26, abminderungen: [], unterricht: [], gts: 0 };
+            let plan = ensureTeacherEpPlan(epData, pId, tId);
             
-            epData.plans[pId][tId].gts = parseInt(val) || 0;
+            plan.gts = parseInt(val) || 0;
             saveToLocal();
             renderEpTeacherEditor(epData, epData.periods.find(p => p.id === pId));
         }
@@ -4952,11 +5037,10 @@ function renderEpTeacherEditor(epData, activePeriod) {
             let epData = getYearEpData(appData.schoolYear);
             let pId = currentEpPeriodId;
             let tId = currentEpTeacherId;
-            if (!epData.plans[pId]) epData.plans[pId] = {};
-            if (!epData.plans[pId][tId]) epData.plans[pId][tId] = { pflichtstunden: 26, abminderungen: [], unterricht: [], gts: 0 };
-            if (!epData.plans[pId][tId].abminderungen) epData.plans[pId][tId].abminderungen = [];
+            let plan = ensureTeacherEpPlan(epData, pId, tId);
+            if (!plan.abminderungen) plan.abminderungen = [];
 
-            epData.plans[pId][tId].abminderungen.push({
+            plan.abminderungen.push({
                 art: art,
                 text: text,
                 hours: hours
@@ -5098,18 +5182,17 @@ function removeEpAbminderung(idx) {
             let epData = getYearEpData(appData.schoolYear);
             let pId = currentEpPeriodId;
             let tId = currentEpTeacherId;
-            if (!epData.plans[pId]) epData.plans[pId] = {};
-            if (!epData.plans[pId][tId]) epData.plans[pId][tId] = { pflichtstunden: 26, abminderungen: [], unterricht: [], gts: 0 };
-            if (!epData.plans[pId][tId].unterricht) epData.plans[pId][tId].unterricht = [];
+            let plan = ensureTeacherEpPlan(epData, pId, tId);
+            if (!plan.unterricht) plan.unterricht = [];
 
-            epData.plans[pId][tId].unterricht.push({
+            plan.unterricht.push({
                 hours: hours,
                 subject: subject,
                 class: klass,
                 note: note
             });
 
-            sortEpUnterrichtList(epData.plans[pId][tId].unterricht, currentEpUntSort.col, currentEpUntSort.dir);
+            sortEpUnterrichtList(plan.unterricht, currentEpUntSort.col, currentEpUntSort.dir);
 
             saveToLocal();
             document.getElementById('ep-new-unt-subject').value = '';
@@ -5227,29 +5310,24 @@ function removeEpAbminderung(idx) {
                 });
 
                 if (!epData.plans) epData.plans = {};
+                epData.plans[newId] = {};
 
-                let prevPid = currentEpPeriodId || (epData.periods[epData.periods.length - 1]?.id);
-                let prevPlans = prevPid ? (epData.plans[prevPid] || {}) : {};
+                let prevPeriod = getPreviousEpPeriod(newId, validFrom, appData.schoolYear);
+                let prevPlans = prevPeriod ? (epData.plans[prevPeriod.id] || {}) : {};
 
-                if (shouldClone && prevPlans && Object.keys(prevPlans).length > 0) {
-                    // 1:1 Klon aller bisherigen Pläne (inkl. Unterricht)
-                    epData.plans[newId] = JSON.parse(JSON.stringify(prevPlans));
-                } else {
-                    // Neuer Zeitraum ohne Unterricht: Deputat und Abminderungen aus vorherigem Zeitraum übernehmen!
-                    epData.plans[newId] = {};
-                    appData.teachers.forEach(t => {
-                        let prevP = prevPlans[t.id];
-                        let dep = (prevP && prevP.pflichtstunden !== undefined) ? prevP.pflichtstunden : ((t.r && t.r > 15) ? t.r : 26);
-                        let abm = prevP ? JSON.parse(JSON.stringify(prevP.abminderungen || [])) : [];
-                        let gts = prevP ? (prevP.gts || 0) : 0;
-                        epData.plans[newId][t.id] = {
-                            pflichtstunden: dep,
-                            abminderungen: abm,
-                            unterricht: [],
-                            gts: gts
-                        };
-                    });
-                }
+                appData.teachers.forEach(t => {
+                    let baseline = getTeacherBaselinePlan(t.id, newId, validFrom, appData.schoolYear);
+                    let unt = [];
+                    if (shouldClone && prevPlans[t.id]?.unterricht) {
+                        unt = JSON.parse(JSON.stringify(prevPlans[t.id].unterricht));
+                    }
+                    epData.plans[newId][t.id] = {
+                        pflichtstunden: baseline.pflichtstunden,
+                        abminderungen: JSON.parse(JSON.stringify(baseline.abminderungen || [])),
+                        unterricht: unt,
+                        gts: baseline.gts || 0
+                    };
+                });
                 currentEpPeriodId = newId;
             }
 
@@ -6668,12 +6746,13 @@ function removeEpAbminderung(idx) {
             const epData = getYearEpData(appData.schoolYear);
             const pSelect = document.getElementById('asc-target-period-select');
             let targetPid = pSelect ? pSelect.value : currentEpPeriodId;
+            let vFrom = new Date().toISOString().slice(0, 10);
 
             if (targetPid === '__new__') {
                 targetPid = 'p_' + Date.now();
                 let customDate = document.getElementById('asc-new-period-date')?.value;
                 let customName = document.getElementById('asc-new-period-name')?.value?.trim();
-                let vFrom = customDate || new Date().toISOString().slice(0, 10);
+                vFrom = customDate || new Date().toISOString().slice(0, 10);
                 let pName = customName || `aSc-Import (${new Date(vFrom + 'T00:00:00').toLocaleDateString('de-DE')})`;
                 epData.periods.push({
                     id: targetPid,
@@ -6682,10 +6761,26 @@ function removeEpAbminderung(idx) {
                     note: "Importiert aus aSc Stundenplan PDF"
                 });
                 epData.periods.sort((a,b) => a.validFrom.localeCompare(b.validFrom));
+            } else {
+                let existingP = (epData.periods || []).find(p => p.id === targetPid);
+                if (existingP && existingP.validFrom) vFrom = existingP.validFrom;
             }
 
             if (!epData.plans) epData.plans = {};
             if (!epData.plans[targetPid]) epData.plans[targetPid] = {};
+
+            // Vorab: Alle bestehenden Lehrkräfte mit ihrem vorherigen Deputat & Abminderungen initialisieren
+            appData.teachers.forEach(t => {
+                if (!epData.plans[targetPid][t.id]) {
+                    let baseline = getTeacherBaselinePlan(t.id, targetPid, vFrom, appData.schoolYear);
+                    epData.plans[targetPid][t.id] = {
+                        pflichtstunden: baseline.pflichtstunden,
+                        abminderungen: JSON.parse(JSON.stringify(baseline.abminderungen || [])),
+                        unterricht: [],
+                        gts: baseline.gts || 0
+                    };
+                }
+            });
 
             const onlyActive = document.getElementById('asc-opt-only-active')?.checked ?? true;
             const applyKl = document.getElementById('asc-opt-kl-abm')?.checked ?? true;
@@ -6717,15 +6812,23 @@ function removeEpAbminderung(idx) {
                 if (!yd.staffStatus) yd.staffStatus = {};
                 yd.staffStatus[teacher.id] = true;
 
-                let prevPlan = epData.plans[targetPid]?.[teacher.id] || (currentEpPeriodId ? epData.plans[currentEpPeriodId]?.[teacher.id] : null);
-                
-                // Deputat: Übernehme bestehendes gepflegtes Deputat, sonst Standard 26
-                let targetDep = (prevPlan && prevPlan.pflichtstunden !== undefined) ? prevPlan.pflichtstunden : (pt.pflichtstunden || 26);
-                let targetGts = (prevPlan && prevPlan.gts !== undefined) ? prevPlan.gts : (pt.gts || 0);
+                // Baseline Deputat & Abminderungen aus vorherigem Zeitraum holen
+                let baseline = getTeacherBaselinePlan(teacher.id, targetPid, vFrom, appData.schoolYear);
+                let currentPlanInTarget = epData.plans[targetPid]?.[teacher.id];
 
-                // Abminderungen: Alle bisherigen Abminderungen (PR, SL, AA, PA etc.) übernehmen!
-                // Nur Klassenleitung (KL) wird mit der neuen Klasse aus dem aSc-Plan aktualisiert.
-                let existingNonKl = (prevPlan?.abminderungen || []).filter(a => a.art !== 'KL');
+                // Deputat: Falls im Zielzeitraum bereits gepflegt, behalten, ansonsten exakt vorheriges Deputat
+                let targetDep = (currentPlanInTarget && currentPlanInTarget.pflichtstunden !== undefined && currentPlanInTarget.pflichtstunden !== null) 
+                    ? currentPlanInTarget.pflichtstunden 
+                    : baseline.pflichtstunden;
+                let targetGts = (currentPlanInTarget && currentPlanInTarget.gts !== undefined && currentPlanInTarget.gts !== null) 
+                    ? currentPlanInTarget.gts 
+                    : baseline.gts;
+
+                // Abminderungen: Alle bisherigen Abminderungen (PR, SL, AA, PA etc.) aus baseline übernehmen
+                let sourceAbm = (currentPlanInTarget && currentPlanInTarget.abminderungen && currentPlanInTarget.abminderungen.length > 0)
+                    ? currentPlanInTarget.abminderungen
+                    : baseline.abminderungen;
+                let existingNonKl = (sourceAbm || []).filter(a => a.art !== 'KL');
                 let abm = JSON.parse(JSON.stringify(existingNonKl));
 
                 if (applyKl && pt.klClass) {
@@ -6734,8 +6837,8 @@ function removeEpAbminderung(idx) {
                         text: `Klasse ${pt.klClass}`,
                         hours: 1
                     });
-                } else if (!applyKl && prevPlan) {
-                    let prevKl = (prevPlan.abminderungen || []).filter(a => a.art === 'KL');
+                } else if (!applyKl) {
+                    let prevKl = (sourceAbm || []).filter(a => a.art === 'KL');
                     abm = abm.concat(JSON.parse(JSON.stringify(prevKl)));
                 }
 
@@ -6809,7 +6912,7 @@ function removeEpAbminderung(idx) {
             const container = document.getElementById('portal-ep-container');
             if (!container || !selectedPeriod) return;
 
-            let plan = epData.plans?.[selectedPeriod.id]?.[portalUser.id];
+            let plan = epData.plans?.[selectedPeriod.id]?.[portalUser.id] || ensureTeacherEpPlan(epData, selectedPeriod.id, portalUser.id);
             let calc = calculateTeacherEp(plan);
 
             let todayIso = new Date().toISOString().slice(0, 10);
@@ -6934,7 +7037,7 @@ function removeEpAbminderung(idx) {
             let sumDep = 0, sumUnt = 0, sumAbm = 0, sumRest = 0, sumGts = 0;
 
             activeTeachers.forEach(t => {
-                let plan = epData.plans?.[activePeriod.id]?.[t.id];
+                let plan = epData.plans?.[activePeriod.id]?.[t.id] || ensureTeacherEpPlan(epData, activePeriod.id, t.id);
                 let calc = calculateTeacherEp(plan);
                 sumDep += calc.pflichtstunden;
                 sumUnt += calc.unterrichtTotal;
@@ -6967,7 +7070,7 @@ function removeEpAbminderung(idx) {
 
             // 2. Einzelseiten je Lehrkraft (genau wie in der Original-Excel!)
             activeTeachers.forEach(t => {
-                let plan = epData.plans?.[activePeriod.id]?.[t.id];
+                let plan = epData.plans?.[activePeriod.id]?.[t.id] || ensureTeacherEpPlan(epData, activePeriod.id, t.id);
                 let calc = calculateTeacherEp(plan);
 
                 let tSheetData = [
@@ -7054,7 +7157,7 @@ function removeEpAbminderung(idx) {
             let sumDep = 0, sumUnt = 0, sumAbm = 0, sumRSoll = 0, sumRest = 0;
 
             activeTeachers.forEach((t, idx) => {
-                let plan = epData.plans?.[period.id]?.[t.id];
+                let plan = epData.plans?.[period.id]?.[t.id] || ensureTeacherEpPlan(epData, period.id, t.id);
                 let calc = calculateTeacherEp(plan);
                 sumDep += calc.pflichtstunden;
                 sumUnt += calc.unterrichtTotal;
@@ -7112,7 +7215,7 @@ function removeEpAbminderung(idx) {
             const period = epData.periods.find(p => p.id === periodId) || epData.periods[0];
             if (!period) return;
 
-            let plan = epData.plans?.[period.id]?.[tId];
+            let plan = epData.plans?.[period.id]?.[tId] || ensureTeacherEpPlan(epData, period.id, tId);
             let calc = calculateTeacherEp(plan);
 
             let parts = period.validFrom.split('-');

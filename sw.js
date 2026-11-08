@@ -1,5 +1,5 @@
 // Service Worker für Vertretungsstatistik Heimbürgeschule Kahla
-const CACHE_NAME = 'vertretung-hbs-v1.6';
+const CACHE_NAME = 'vertretung-hbs-v1.7';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

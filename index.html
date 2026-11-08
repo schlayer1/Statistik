@@ -1904,9 +1904,14 @@
             </div>
 
             <div class="flex items-center justify-between gap-2 mt-6 pt-4 border-t border-slate-100">
-                <button type="button" id="ep-modal-delete-btn" onclick="deleteEpPeriod()" class="hidden px-3.5 py-2 text-rose-600 hover:bg-rose-50 border border-rose-200 rounded-xl font-bold text-xs transition cursor-pointer flex items-center gap-1.5">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg> <span>Zeitraum löschen</span>
-                </button>
+                <div class="flex items-center gap-1.5">
+                    <button type="button" id="ep-modal-delete-btn" onclick="deleteEpPeriod()" class="hidden px-3.5 py-2 text-rose-600 hover:bg-rose-50 border border-rose-200 rounded-xl font-bold text-xs transition cursor-pointer flex items-center gap-1.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg> <span>Zeitraum löschen</span>
+                    </button>
+                    <button type="button" id="ep-modal-clear-lessons-btn" onclick="clearEpPeriodLessons()" class="hidden px-3 py-2 text-amber-700 hover:bg-amber-50 border border-amber-200 rounded-xl font-bold text-xs transition cursor-pointer flex items-center gap-1.5" title="Alle Unterrichtsstunden in diesem Zeitraum leeren (Deputate & Abminderungen bleiben erhalten)">
+                        <span>Unterricht leeren</span>
+                    </button>
+                </div>
                 <div class="flex items-center gap-2 ml-auto">
                     <button type="button" onclick="closeEpPeriodModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold text-xs cursor-pointer">Abbrechen</button>
                     <button type="button" onclick="saveEpPeriod()" class="px-5 py-2 bg-school-600 hover:bg-school-700 text-white rounded-xl font-bold text-xs shadow-xs transition cursor-pointer">Speichern</button>
@@ -5150,6 +5155,8 @@ function removeEpAbminderung(idx) {
             document.getElementById('ep-modal-clone-container').classList.remove('hidden');
             document.getElementById('ep-modal-clone-check').checked = true;
             document.getElementById('ep-modal-delete-btn').classList.add('hidden');
+            let clearBtn = document.getElementById('ep-modal-clear-lessons-btn');
+            if (clearBtn) clearBtn.classList.add('hidden');
 
             document.getElementById('modal-ep-period').classList.remove('hidden');
             document.getElementById('modal-ep-period').classList.add('flex');
@@ -5175,6 +5182,8 @@ function removeEpAbminderung(idx) {
                     delBtn.classList.add('hidden');
                 }
             }
+            let clearBtn = document.getElementById('ep-modal-clear-lessons-btn');
+            if (clearBtn) clearBtn.classList.remove('hidden');
 
             document.getElementById('modal-ep-period').classList.remove('hidden');
             document.getElementById('modal-ep-period').classList.add('flex');
@@ -5250,6 +5259,22 @@ function removeEpAbminderung(idx) {
             closeEpPeriodModal();
             renderSurveyView();
             showToast("Gültigkeitszeitraum gespeichert!", "check-circle");
+        }
+
+        function clearEpPeriodLessons() {
+            let pId = document.getElementById('ep-modal-period-id').value;
+            let epData = getYearEpData(appData.schoolYear);
+            if (!epData.plans || !epData.plans[pId]) return;
+
+            askConfirm("Möchten Sie alle Unterrichtseinträge in diesem Zeitraum wirklich leeren? (Deputate und Abminderungen bleiben erhalten)", () => {
+                Object.keys(epData.plans[pId]).forEach(tId => {
+                    epData.plans[pId][tId].unterricht = [];
+                });
+                saveToLocal();
+                closeEpPeriodModal();
+                renderSurveyView();
+                showToast("Unterrichtseinträge im Zeitraum geleert.", "trash-2");
+            }, "Unterricht leeren");
         }
 
         function deleteEpPeriod() {
@@ -6464,11 +6489,14 @@ function removeEpAbminderung(idx) {
                     const midKS = (xK + xS) / 2;
 
                     const headerY = hFaecher.y;
+                    const footer = items.find(it => it.str.includes("Std. in eigener") || it.str.includes("Std. fremder") || it.str.includes("Anrechnung"));
+                    const footY = footer ? footer.y : (headerY - 220);
                     const rowsByY = {};
 
                     items.forEach(it => {
-                        if (it.x >= (xF - 20) && Math.abs(it.y - headerY) > 5 && it.y > 500 && it.y < 1400) {
-                            let matchedY = Object.keys(rowsByY).find(gy => Math.abs(it.y - parseFloat(gy)) <= 5);
+                        // Zeilen befinden sich rechts ab 'Fächer' (xF - 20) und vertikal zwischen Tabellen-Header und Footer
+                        if (it.x >= (xF - 20) && it.y < (headerY - 4) && it.y > (footY + 2)) {
+                            let matchedY = Object.keys(rowsByY).find(gy => Math.abs(it.y - parseFloat(gy)) <= 4.5);
                             if (!matchedY) {
                                 matchedY = it.y;
                                 rowsByY[matchedY] = [];
@@ -6477,7 +6505,8 @@ function removeEpAbminderung(idx) {
                         }
                     });
 
-                    const sortedYs = Object.keys(rowsByY).map(Number).sort((a, b) => a - b);
+                    // Von oben nach unten sortieren (in PDF-Koordinaten: größeres Y = weiter oben)
+                    const sortedYs = Object.keys(rowsByY).map(Number).sort((a, b) => b - a);
                     sortedYs.forEach(gy => {
                         const cells = rowsByY[gy].sort((a, b) => a.x - b.x);
                         let fParts = [];

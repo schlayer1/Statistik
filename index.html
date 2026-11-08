@@ -1897,9 +1897,9 @@
                 <div id="ep-modal-clone-container" class="bg-school-50 p-3 rounded-xl border border-school-100">
                     <label class="flex items-center gap-2 text-xs font-bold text-school-900 cursor-pointer select-none">
                         <input type="checkbox" id="ep-modal-clone-check" checked class="w-4 h-4 rounded text-school-600 focus:ring-school-500">
-                        <span>Bestehende Pläne aller Lehrkräfte 1:1 übernehmen (Klon)</span>
+                        <span>Bestehenden Unterricht 1:1 mit übernehmen</span>
                     </label>
-                    <p class="text-[11px] text-school-700 ml-6 mt-0.5">Empfohlen: Alle bisherigen Lehrkraft-Pläne werden kopiert, sodass nur Änderungen gepflegt werden müssen.</p>
+                    <p class="text-[11px] text-school-700 ml-6 mt-0.5">Empfohlen: Deputate und Abminderungen werden immer automatisch aus dem vorherigen Zeitraum übernommen (Klassenleitungen können bei Bedarf angepasst werden).</p>
                 </div>
             </div>
 
@@ -2061,13 +2061,20 @@
                     <label class="block text-xs font-bold text-slate-600 mb-1">Art der Entlastung:</label>
                     <select id="ep-edit-abm-art" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-bold text-slate-800 outline-none focus:border-purple-500">
                         <option value="KL">KL – Klassenleitung</option>
-                        <option value="PA">PA – Projektarbeit</option>
                         <option value="PR">PR – Personalrat</option>
                         <option value="SL">SL – Schulleitung</option>
                         <option value="AA">AA – Altersabminderung</option>
                         <option value="BL">BL – Beratungslehrer</option>
                         <option value="päd">päd – Pädagogische Leitung</option>
-                        <option value="Sonst">Sonst – Sonstige Entlastung</option>
+                        <option value="PA">PA – Projektarbeit</option>
+                        <option value="BO">BO – Berufskoordinator</option>
+                        <option value="GBA">GBA – Gesundheitsbeauftragter</option>
+                        <option value="StS">StS – Studienseminar / Abordnung</option>
+                        <option value="UNI">UNI – Universität / Abordnung</option>
+                        <option value="SJA">SJA – Schuljugendarbeit</option>
+                        <option value="GK">GK – Grünes Klassenzimmer</option>
+                        <option value="VfA">VfA – Verantw. für Ausbildung</option>
+                        <option value="Sonstiges">Sonstige Funktion...</option>
                     </select>
                 </div>
                 <div>
@@ -2154,6 +2161,9 @@
             "minus": `<line x1="5" x2="19" y1="12" y2="12"/>`,
             "trash-2": `<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>`,
             "edit-3": `<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>`,
+            "edit-2": `<path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>`,
+            "edit": `<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>`,
+
             "search": `<circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/>`,
             "lock": `<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>`,
             "unlock": `<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/>`,
@@ -4986,7 +4996,15 @@ function renderEpTeacherEditor(epData, activePeriod) {
 
             let item = plan.abminderungen[idx];
             document.getElementById('ep-edit-abm-idx').value = idx;
-            document.getElementById('ep-edit-abm-art').value = item.art || 'KL';
+            let artSelect = document.getElementById('ep-edit-abm-art');
+            let hasOpt = Array.from(artSelect.options).some(o => o.value === item.art);
+            if (!hasOpt && item.art) {
+                let opt = document.createElement('option');
+                opt.value = item.art;
+                opt.text = `${item.art} – Sonstige`;
+                artSelect.add(opt);
+            }
+            artSelect.value = item.art || 'KL';
             document.getElementById('ep-edit-abm-text').value = item.text || '';
             document.getElementById('ep-edit-abm-hours').value = item.hours;
 
@@ -5178,14 +5196,26 @@ function removeEpAbminderung(idx) {
 
                 if (!epData.plans) epData.plans = {};
 
-                if (shouldClone && currentEpPeriodId && epData.plans[currentEpPeriodId]) {
-                    // 1:1 Klon aller bisherigen Pläne
-                    epData.plans[newId] = JSON.parse(JSON.stringify(epData.plans[currentEpPeriodId]));
+                let prevPid = currentEpPeriodId || (epData.periods[epData.periods.length - 1]?.id);
+                let prevPlans = prevPid ? (epData.plans[prevPid] || {}) : {};
+
+                if (shouldClone && prevPlans && Object.keys(prevPlans).length > 0) {
+                    // 1:1 Klon aller bisherigen Pläne (inkl. Unterricht)
+                    epData.plans[newId] = JSON.parse(JSON.stringify(prevPlans));
                 } else {
+                    // Neuer Zeitraum ohne Unterricht: Deputat und Abminderungen aus vorherigem Zeitraum übernehmen!
                     epData.plans[newId] = {};
                     appData.teachers.forEach(t => {
-                        let dep = (t.r && t.r > 15) ? t.r : 26;
-                        epData.plans[newId][t.id] = { pflichtstunden: dep, abminderungen: [], unterricht: [], gts: 0 };
+                        let prevP = prevPlans[t.id];
+                        let dep = (prevP && prevP.pflichtstunden !== undefined) ? prevP.pflichtstunden : ((t.r && t.r > 15) ? t.r : 26);
+                        let abm = prevP ? JSON.parse(JSON.stringify(prevP.abminderungen || [])) : [];
+                        let gts = prevP ? (prevP.gts || 0) : 0;
+                        epData.plans[newId][t.id] = {
+                            pflichtstunden: dep,
+                            abminderungen: abm,
+                            unterricht: [],
+                            gts: gts
+                        };
                     });
                 }
                 currentEpPeriodId = newId;
@@ -5787,20 +5817,42 @@ function removeEpAbminderung(idx) {
                 if (!yd.staffStatus) yd.staffStatus = {};
                 yd.staffStatus[teacher.id] = true;
 
-                let abm = [];
+                let prevPlan = epData.plans[targetPid]?.[teacher.id] || (currentEpPeriodId ? epData.plans[currentEpPeriodId]?.[teacher.id] : null);
+                
+                // Deputat: Übernehme bestehendes gepflegtes Deputat, sonst Standard 26
+                let targetDep = (prevPlan && prevPlan.pflichtstunden !== undefined) ? prevPlan.pflichtstunden : (pt.pflichtstunden || 26);
+                let targetGts = (prevPlan && prevPlan.gts !== undefined) ? prevPlan.gts : (pt.gts || 0);
+
+                // Abminderungen: Alle bisherigen Abminderungen (PR, SL, AA, PA etc.) übernehmen!
+                // Nur Klassenleitung (KL) wird mit der neuen Klasse aus dem aSc-Plan aktualisiert.
+                let existingNonKl = (prevPlan?.abminderungen || []).filter(a => a.art !== 'KL');
+                let abm = JSON.parse(JSON.stringify(existingNonKl));
+
                 if (applyKl && pt.klClass) {
                     abm.push({
                         art: 'KL',
                         text: `Klasse ${pt.klClass}`,
                         hours: 1
                     });
+                } else if (!applyKl && prevPlan) {
+                    let prevKl = (prevPlan.abminderungen || []).filter(a => a.art === 'KL');
+                    abm = abm.concat(JSON.parse(JSON.stringify(prevKl)));
+                }
+
+                // Regel: Projektarbeit bei Seifert erhalten falls noch nicht in abm
+                if (pt.name.toLowerCase().includes('seifert') && !abm.some(a => a.art === 'PA')) {
+                    abm.push({
+                        art: 'PA',
+                        text: 'Projektarbeit',
+                        hours: 1
+                    });
                 }
 
                 epData.plans[targetPid][teacher.id] = {
-                    pflichtstunden: pt.pflichtstunden || 26,
+                    pflichtstunden: targetDep,
                     abminderungen: abm,
                     unterricht: JSON.parse(JSON.stringify(pt.unterricht || [])),
-                    gts: pt.gts || 0
+                    gts: targetGts
                 };
                 importedCount++;
             });

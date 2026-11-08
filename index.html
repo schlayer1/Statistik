@@ -2283,6 +2283,7 @@
             initTheme();
             loadFromLocal();
             cleanupDuplicateIllesy();
+            cleanupAndConsolidateKoenitzer();
             if(appData.teachers.length === 0) appData.teachers = [{ id: "t1", name: "Mustermann", r: 0, v: 3, active: true, pin: "1234" }];
             appData.masterPin = 'Year2003?!%';
             appData.teachers.forEach(t => {
@@ -2700,6 +2701,7 @@
                             const currentActiveYear = appData.schoolYear;
                             appData = remoteData;
                             cleanupDuplicateIllesy();
+                            cleanupAndConsolidateKoenitzer();
                             if (currentActiveYear && appData.years && appData.years[currentActiveYear]) {
                                 appData.schoolYear = currentActiveYear;
                             }
@@ -4522,6 +4524,7 @@
         // --- SUBVIEW 1: SCHUL-DASHBOARD (ANALOG EXCEL DECKBLATT) ---
         function renderEpDashboard(epData, activePeriod) {
             cleanupDuplicateIllesy();
+            cleanupAndConsolidateKoenitzer();
             if (!activePeriod) return;
 
             let activeTeachers = appData.teachers.filter(t => isTeacherActiveInYear(t.id, appData.schoolYear))
@@ -5369,31 +5372,199 @@ function removeEpAbminderung(idx) {
             }
         }
 
+                function cleanupAndConsolidateKoenitzer() {
+            try {
+                if (!appData || !Array.isArray(appData.teachers) || appData.teachers.length === 0) return;
+
+                function isNicoleTeacher(name) {
+                    if (!name) return false;
+                    let tw = name.toLowerCase().replace(/[,.]/g, ' ').split(/\s+/).filter(Boolean);
+                    if (!tw.some(w => w.includes('könitzer') || w.includes('koenitzer'))) return false;
+                    return tw.includes('nicole') || tw.includes('n') || tw.includes('fr') || tw.includes('frau');
+                }
+
+                function isTimTeacher(name) {
+                    if (!name) return false;
+                    let tw = name.toLowerCase().replace(/[,.]/g, ' ').split(/\s+/).filter(Boolean);
+                    if (!tw.some(w => w.includes('könitzer') || w.includes('koenitzer'))) return false;
+                    if (isNicoleTeacher(name)) return false;
+                    return true;
+                }
+
+                let timTeachers = appData.teachers.filter(t => isTimTeacher(t.name));
+                let didChange = false;
+
+                let primaryTim = null;
+                if (timTeachers.length > 0) {
+                    primaryTim = timTeachers.find(t => {
+                        let tw = t.name.toLowerCase().replace(/[,.]/g, ' ').split(/\s+/);
+                        return tw.includes('t') || tw.includes('tim');
+                    }) || timTeachers[0];
+
+                    // Wenn die Lehrkraft bisher nur "Könitzer" hieß, Name auf "Könitzer T" präzisieren
+                    let pClean = primaryTim.name.trim().toLowerCase();
+                    if (pClean === 'könitzer' || pClean === 'koenitzer') {
+                        primaryTim.name = "Könitzer T";
+                        didChange = true;
+                    }
+
+                    let primId = primaryTim.id;
+
+                    // Mehrfacheinträge für Tim (z.B. "Könitzer" aus alten Schuljahren und "Könitzer T") zusammenführen
+                    timTeachers.forEach(dup => {
+                        let dupId = dup.id;
+                        if (dupId === primId) return;
+
+                        if (appData.years) {
+                            Object.keys(appData.years).forEach(yKey => {
+                                let yd = appData.years[yKey];
+                                if (!yd) return;
+
+                                // 1. Einsatzplanung
+                                if (yd.einsatzplanung && yd.einsatzplanung.plans) {
+                                    Object.keys(yd.einsatzplanung.plans).forEach(pid => {
+                                        let periodPlans = yd.einsatzplanung.plans[pid];
+                                        if (periodPlans && periodPlans[dupId]) {
+                                            let dupPlan = periodPlans[dupId];
+                                            let primPlan = periodPlans[primId];
+                                            if (!primPlan || !primPlan.unterricht || primPlan.unterricht.length === 0) {
+                                                periodPlans[primId] = JSON.parse(JSON.stringify(dupPlan));
+                                            } else if (dupPlan && dupPlan.unterricht && dupPlan.unterricht.length > (primPlan.unterricht || []).length) {
+                                                periodPlans[primId] = JSON.parse(JSON.stringify(dupPlan));
+                                            }
+                                            delete periodPlans[dupId];
+                                            didChange = true;
+                                        }
+                                    });
+                                }
+
+                                // 2. StaffStatus
+                                if (yd.staffStatus) {
+                                    if (yd.staffStatus[dupId]) {
+                                        yd.staffStatus[primId] = true;
+                                        delete yd.staffStatus[dupId];
+                                        didChange = true;
+                                    }
+                                }
+
+                                // 3. Fehlzeiten und Vertretungsaufzeichnungen (records[m][tId][d])
+                                if (yd.records) {
+                                    Object.keys(yd.records).forEach(m => {
+                                        if (yd.records[m] && yd.records[m][dupId]) {
+                                            if (!yd.records[m][primId]) yd.records[m][primId] = {};
+                                            Object.keys(yd.records[m][dupId]).forEach(d => {
+                                                if (!yd.records[m][primId][d]) {
+                                                    yd.records[m][primId][d] = yd.records[m][dupId][d];
+                                                }
+                                            });
+                                            delete yd.records[m][dupId];
+                                            didChange = true;
+                                        }
+                                    });
+                                }
+
+                                // 4. AZV
+                                if (Array.isArray(yd.azv)) {
+                                    yd.azv.forEach(a => {
+                                        if (a && a.tId === dupId) {
+                                            a.tId = primId;
+                                            didChange = true;
+                                        }
+                                    });
+                                }
+                            });
+                        }
+
+                        if (appData.einsatzplanung && appData.einsatzplanung.selectedTeacherId === dupId) {
+                            appData.einsatzplanung.selectedTeacherId = primId;
+                            didChange = true;
+                        }
+                        if (typeof currentEpTeacherId !== 'undefined' && currentEpTeacherId === dupId) {
+                            currentEpTeacherId = primId;
+                        }
+
+                        appData.teachers = appData.teachers.filter(t => t.id !== dupId);
+                        didChange = true;
+                    });
+                }
+
+                // 2026/2027 Stundenplan für Könitzer T sicherstellen (11 Stunden)
+                if (primaryTim) {
+                    let primId = primaryTim.id;
+                    let yd26 = appData.years && appData.years["26/27"];
+                    if (yd26 && yd26.einsatzplanung && yd26.einsatzplanung.plans) {
+                        if (!yd26.staffStatus) yd26.staffStatus = {};
+                        yd26.staffStatus[primId] = true;
+
+                        const timSchedule = [
+                            {"hours": 2, "subject": "Geschichte", "class": "5a", "note": ""},
+                            {"hours": 1, "subject": "Geschichte", "class": "6a", "note": ""},
+                            {"hours": 1, "subject": "Geschichte", "class": "6b", "note": ""},
+                            {"hours": 1, "subject": "Geografie", "class": "6c", "note": ""},
+                            {"hours": 1, "subject": "Geschichte", "class": "6c", "note": ""},
+                            {"hours": 1, "subject": "Geschichte", "class": "7b", "note": ""},
+                            {"hours": 1, "subject": "Geschichte", "class": "7c", "note": ""},
+                            {"hours": 1, "subject": "Geschichte", "class": "8b", "note": ""},
+                            {"hours": 1, "subject": "Geschichte", "class": "8c", "note": ""},
+                            {"hours": 1, "subject": "Sozialkunde", "class": "8c", "note": ""}
+                        ];
+
+                        Object.keys(yd26.einsatzplanung.plans).forEach(pid => {
+                            let plan = yd26.einsatzplanung.plans[pid][primId];
+                            if (!plan || !plan.unterricht || plan.unterricht.length === 0) {
+                                yd26.einsatzplanung.plans[pid][primId] = {
+                                    pflichtstunden: 26,
+                                    abminderungen: (plan && plan.abminderungen) ? plan.abminderungen : [],
+                                    unterricht: JSON.parse(JSON.stringify(timSchedule)),
+                                    gts: (plan && plan.gts) ? plan.gts : 0
+                                };
+                                didChange = true;
+                                console.log("cleanupAndConsolidateKoenitzer: 11 Stunden für Könitzer T in Periode", pid, "nachgetragen.");
+                            }
+                        });
+                    }
+                }
+
+                // Nicole Könitzers Plan überprüfen: Falls Tim's Fächer (Geschichte/Sozialkunde) versehentlich bei ihr lagen, bereinigen
+                let nicoleTeachers = appData.teachers.filter(t => isNicoleTeacher(t.name));
+                if (nicoleTeachers.length > 0) {
+                    let nicoleId = nicoleTeachers[0].id;
+                    let yd26 = appData.years && appData.years["26/27"];
+                    if (yd26 && yd26.einsatzplanung && yd26.einsatzplanung.plans) {
+                        const nicoleSchedule = [
+                            {"hours": 1, "subject": "Religion", "class": "5a, 5b", "note": ""},
+                            {"hours": 2, "subject": "Deutsch", "class": "7c", "note": ""},
+                            {"hours": 2, "subject": "Deutsch", "class": "9a", "note": ""}
+                        ];
+                        Object.keys(yd26.einsatzplanung.plans).forEach(pid => {
+                            let nPlan = yd26.einsatzplanung.plans[pid][nicoleId];
+                            if (nPlan && nPlan.unterricht && nPlan.unterricht.some(u => u.subject === 'Geschichte' || u.subject === 'Sozialkunde')) {
+                                nPlan.unterricht = JSON.parse(JSON.stringify(nicoleSchedule));
+                                didChange = true;
+                                console.log("cleanupAndConsolidateKoenitzer: Nicole Könitzers Stundenplan von Geschichte/Sozialkunde bereinigt.");
+                            }
+                        });
+                    }
+                }
+
+                if (didChange) {
+                    console.log("cleanupAndConsolidateKoenitzer: Daten für Könitzer T erfolgreich konsolidiert.");
+                    saveToLocal();
+                    if (typeof syncDataToFirebase === 'function') {
+                        syncDataToFirebase(appData);
+                    }
+                }
+            } catch (e) {
+                console.warn("cleanupAndConsolidateKoenitzer error:", e);
+            }
+        }
+
         function findMatchingTeacher(rawName, teachersList = appData.teachers) {
             if (!rawName || !teachersList || teachersList.length === 0) return null;
             const clean = rawName.trim().toLowerCase().replace(/[,.]/g, ' ').replace(/\s+/g, ' ');
 
             // 0. Spezifische Namens- und Heiratsaliase (Heimbürgeschule Kahla)
-            const isNicoleK = (clean.includes('könitzer') || clean.includes('koenitzer')) && (clean.includes('n') || clean.includes('nicole') || clean.includes('fr'));
-            const isTimK = (clean.includes('könitzer') || clean.includes('koenitzer')) && (clean.includes('t') || clean.includes('tim') || clean.includes('hr'));
             const isKottwitzGruchmann = clean.includes('kottwitz') || clean.includes('gruchmann');
-
-            if (isNicoleK) {
-                let match = teachersList.find(t => {
-                    let tc = t.name.toLowerCase();
-                    return (tc.includes('könitzer') || tc.includes('koenitzer')) && (tc.includes('nicole') || tc.includes('n') || tc.includes('fr'));
-                });
-                if (match) return match;
-            }
-
-            if (isTimK) {
-                let match = teachersList.find(t => {
-                    let tc = t.name.toLowerCase();
-                    return (tc.includes('könitzer') || tc.includes('koenitzer')) && (tc.includes('tim') || tc.includes('t') || tc.includes('hr'));
-                });
-                if (match) return match;
-            }
-
             if (isKottwitzGruchmann) {
                 let match = teachersList.find(t => {
                     let tc = t.name.toLowerCase();
@@ -5407,6 +5578,33 @@ function removeEpAbminderung(idx) {
                 let match = teachersList.find(t => t.name.toLowerCase().includes('illessy')) ||
                             teachersList.find(t => t.name.toLowerCase().includes('illesy'));
                 if (match) return match;
+            }
+
+            // Könitzer-Differenzierung:
+            // "Könitzer N" / "Nicole Könitzer" vs. "Könitzer T" / "Tim Könitzer" / "Könitzer" (in älteren Schuljahren = Könitzer T)
+            if (clean.includes('könitzer') || clean.includes('koenitzer')) {
+                const words = clean.split(' ').filter(Boolean);
+                const isNicole = words.includes('nicole') || words.includes('n') || words.includes('fr') || words.includes('frau');
+                const isTim = words.includes('tim') || words.includes('t') || words.includes('hr') || words.includes('herr');
+
+                if (isNicole && !isTim) {
+                    let match = teachersList.find(t => {
+                        let tw = t.name.toLowerCase().replace(/[,.]/g, ' ').split(/\s+/).filter(Boolean);
+                        return (tw.some(w => w.includes('könitzer') || w.includes('koenitzer'))) &&
+                               (tw.includes('nicole') || tw.includes('n') || tw.includes('fr') || tw.includes('frau'));
+                    });
+                    if (match) return match;
+                } else {
+                    let match = teachersList.find(t => {
+                        let tw = t.name.toLowerCase().replace(/[,.]/g, ' ').split(/\s+/).filter(Boolean);
+                        let isK = tw.some(w => w.includes('könitzer') || w.includes('koenitzer'));
+                        if (!isK) return false;
+                        let isN = tw.includes('nicole') || tw.includes('n') || tw.includes('fr') || tw.includes('frau');
+                        if (isN) return false;
+                        return true;
+                    });
+                    if (match) return match;
+                }
             }
 
             // 1. Exakter Namensabgleich
@@ -7263,6 +7461,7 @@ function removeEpAbminderung(idx) {
 
         function renderStaffView() {
             cleanupDuplicateIllesy();
+            cleanupAndConsolidateKoenitzer();
             let { tStats } = calculateStatsForYear(appData.schoolYear) || { tStats: {} };
             const tbody = document.getElementById('staff-table-body'); 
             if (!tbody) return;

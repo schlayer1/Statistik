@@ -7,6 +7,9 @@
     <title>Statistik HBS Kahla</title>
     
     <!-- PWA & Apple Web App Meta Tags -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <link rel="manifest" href="manifest.webmanifest">
     <meta name="theme-color" content="#0284c7">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -54,6 +57,7 @@
     </script>
 
     <style>
+        #cloud-sync-gate.hidden { display: none !important; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
@@ -2234,7 +2238,8 @@
 
     <!-- CLOUD SYNC INITIAL GATE / SPERRBILDSCHIRM BEIM START -->
     <div id="cloud-sync-gate" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity duration-300">
-        <div class="bg-white rounded-2xl shadow-2xl p-6 md:p-8 max-w-sm w-full text-center border border-slate-200">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 md:p-8 max-w-sm w-full text-center border border-slate-200 relative">
+            <button onclick="hideSyncGate()" class="absolute top-3.5 right-3.5 text-slate-400 hover:text-slate-600 text-xl font-bold cursor-pointer" title="Schließen">&times;</button>
             <div id="sync-gate-spinner-container">
                 <div class="w-14 h-14 bg-teal-50 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                 <h3 class="text-xl font-black text-slate-800 mb-1">Schul-Cloud Abgleich</h3>
@@ -2464,7 +2469,8 @@
             if (spinnerBox) spinnerBox.classList.remove('hidden');
             if (offlineBox) offlineBox.classList.add('hidden');
             if (gate) {
-                gate.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+                gate.style.removeProperty('display');
+                gate.classList.remove('hidden');
                 gate.classList.add('flex');
             }
         }
@@ -2472,11 +2478,9 @@
         function hideSyncGate() {
             let gate = document.getElementById('cloud-sync-gate');
             if (gate) {
-                gate.classList.add('opacity-0', 'pointer-events-none');
-                setTimeout(() => {
-                    gate.classList.add('hidden');
-                    gate.classList.remove('flex');
-                }, 250);
+                gate.style.setProperty('display', 'none', 'important');
+                gate.classList.add('hidden');
+                gate.classList.remove('flex');
             }
             if (syncGateTimeoutTimer) {
                 clearTimeout(syncGateTimeoutTimer);
@@ -2550,10 +2554,13 @@
             showSyncGate("Verbinde mit Schul-Cloud...");
             initFirebaseFromStorage();
 
-            // PWA Service Worker registrieren (falls unterstützt)
+            // PWA Service Worker registrieren (falls unterstützt, mit automatischer Cache-Aktualisierung)
             if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log("PWA Service Worker registriert:", reg.scope))
+                navigator.serviceWorker.register('./sw.js?v=3.0')
+                    .then(reg => {
+                        console.log("PWA Service Worker registriert (v3.0):", reg.scope);
+                        reg.update();
+                    })
                     .catch(err => console.log("PWA Service Worker Status:", err.message));
             }
             
@@ -2920,32 +2927,39 @@
             }
 
             const docRef = fbDb.collection("schools").doc(schoolId);
-            
-            // 8-Sekunden Sicherheits-Timeout für den initialen Verbindungsaufbau
-            if (syncGateTimeoutTimer) clearTimeout(syncGateTimeoutTimer);
-            syncGateTimeoutTimer = setTimeout(() => {
-                if (!isInitialSyncCompleted) {
-                    console.warn("Firestore Erstabgleich Timeout (8s).");
-                    showSyncGateOfflineChoice();
-                }
-            }, 8000);
+            let initialSyncHandled = false;
 
-            // 1. ZWINGEND BLOCKIERENDER SERVER-FIRST ABGLEICH BEIM START
-            docRef.get({ source: 'server' }).then((docSnap) => {
+            function finishInitialSync(docSnap, sourceLabel) {
+                if (initialSyncHandled) return;
+                initialSyncHandled = true;
                 if (syncGateTimeoutTimer) {
                     clearTimeout(syncGateTimeoutTimer);
                     syncGateTimeoutTimer = null;
                 }
+                console.log(`[Cloud-Sync] Erstabgleich erfolgreich abgeschlossen via: ${sourceLabel}`);
                 handleAuthoritativeServerSync(docSnap, schoolId);
+            }
+            
+            // 6-Sekunden Sicherheits-Timeout für den initialen Verbindungsaufbau
+            if (syncGateTimeoutTimer) clearTimeout(syncGateTimeoutTimer);
+            syncGateTimeoutTimer = setTimeout(() => {
+                if (!isInitialSyncCompleted && !initialSyncHandled) {
+                    console.warn("Firestore Erstabgleich Timeout (6s). Fallback auf lokalen Stand.");
+                    showSyncGateOfflineChoice();
+                }
+            }, 6000);
+
+            // 1. ZWINGEND BLOCKIERENDER SERVER-FIRST ABGLEICH BEIM START
+            docRef.get({ source: 'server' }).then((docSnap) => {
+                finishInitialSync(docSnap, 'Server-Fetch');
             }).catch(err => {
                 console.warn("Server-Fetch nicht sofort möglich, prüfe Cache/Netzwerk:", err.message);
                 docRef.get().then((cachedSnap) => {
-                    if (!isInitialSyncCompleted) {
-                        if (syncGateTimeoutTimer) clearTimeout(syncGateTimeoutTimer);
-                        handleAuthoritativeServerSync(cachedSnap, schoolId);
+                    if (!initialSyncHandled) {
+                        finishInitialSync(cachedSnap, 'Cache-Fallback');
                     }
                 }).catch(e => {
-                    if (!isInitialSyncCompleted) {
+                    if (!initialSyncHandled) {
                         showSyncGateOfflineChoice();
                     }
                 });
@@ -2960,8 +2974,11 @@
 
                     if (!docSnap.exists) return;
 
-                    // Vor Abschluss des Erstabgleichs keine unkontrollierten Snapshot-Eingriffe zulassen
-                    if (!isInitialSyncCompleted) return;
+                    // Vor Abschluss des Erstabgleichs: Wenn Snapshot eintrifft, sofort initial synchronisieren!
+                    if (!isInitialSyncCompleted && !initialSyncHandled) {
+                        finishInitialSync(docSnap, 'Snapshot-First');
+                        return;
+                    }
 
                     // Eigene ausstehende lokale Schreibvorgänge im Snapshot nicht als 'neue Remote-Daten' behandeln
                     if (docSnap.metadata && docSnap.metadata.hasPendingWrites) return;

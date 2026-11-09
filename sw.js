@@ -1,5 +1,5 @@
 // Service Worker für Vertretungsstatistik Heimbürgeschule Kahla
-const CACHE_NAME = 'vertretung-hbs-v2.9';
+const CACHE_NAME = 'vertretung-hbs-v3.0';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -7,12 +7,21 @@ const ASSETS_TO_CACHE = [
   './logo.png'
 ];
 
-// Installation: Cache befüllen
+// Installation: Cache befüllen (mit cache: 'reload' gegen veraltete HTTP-Caches)
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    }).then(() => self.skipWaiting())
+      return Promise.all(
+        ASSETS_TO_CACHE.map((url) => {
+          return fetch(url, { cache: 'reload' })
+            .then((res) => {
+              if (res.ok) return cache.put(url, res);
+            })
+            .catch((err) => console.warn("SW Precache Warnung für:", url, err));
+        })
+      );
+    })
   );
 });
 

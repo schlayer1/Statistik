@@ -830,6 +830,7 @@
                 <div id="mobile-portal-status" class="flex items-center gap-1.5 bg-school-900/70 border border-white/15 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold text-sky-100 shadow-xs cursor-pointer" onclick="manualSyncWithCloud(this)" title="Status der Datenbankverbindung">
                     <span id="mobile-portal-dot" class="w-2 h-2 rounded-full bg-emerald-400"></span>
                     <span id="mobile-portal-label">Live verbunden</span>
+                    <span id="mobile-portal-timestamp" class="text-[10px] text-sky-200 border-l border-white/20 pl-1.5 opacity-90">Stand: --:--</span>
                 </div>
                 <div id="mobile-admin-actions" class="hidden flex gap-1.5 items-center">
                     <button onclick="toggleDarkMode()" class="bg-school-700 hover:bg-school-600 p-1.5 rounded-lg text-xs shadow" title="Dunkelmodus umschalten">
@@ -843,6 +844,7 @@
                         <span id="mobile-cloud-dot" class="w-2 h-2 rounded-full bg-amber-400"></span>
                         <span class="text-[11px]">Cloud</span>
                     </button>
+                    <button onclick="openSafetyBackupsModal()" class="bg-school-700 hover:bg-school-600 p-1.5 rounded-lg text-xs shadow flex items-center justify-center text-teal-300 border border-school-500/50" title="Sicherheits-Backups einsehen"><svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg></button>
                     <button onclick="exportData()" class="bg-school-600 hover:bg-school-500 p-1.5 rounded-lg text-xs shadow flex items-center justify-center text-white" title="Datensicherung (Backup)"><svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg></button>
                     <label class="bg-slate-600 hover:bg-slate-500 p-1.5 rounded-lg text-xs shadow cursor-pointer flex items-center justify-center text-white" title="Datensicherung laden"><svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2"/></svg><input type="file" class="hidden" accept=".json" onchange="importData(event)"></label>
                 </div>
@@ -875,10 +877,12 @@
             <button onclick="openCloudModal()" id="cloud-sync-btn" class="bg-school-700 hover:bg-school-600 border border-school-500/50 px-3 py-2 rounded-lg text-xs font-bold shadow flex items-center gap-2 transition cursor-pointer" title="Cloud-Synchronisation & Einstellungen">
                 <span id="cloud-sync-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
                 <span id="cloud-sync-label">Lokal (Offline)</span>
+                <span id="cloud-sync-timestamp" class="text-[11px] text-sky-200 font-medium hidden sm:inline border-l border-white/20 pl-2 opacity-90">Stand: --:--</span>
             </button>
             
             <span id="save-indicator" class="text-xs text-school-100 font-medium"></span>
-            <button onclick="exportData()" class="bg-school-600 hover:bg-school-500 px-3 py-2 rounded-lg text-xs font-semibold shadow flex items-center gap-1.5 text-white" title="Datensicherung als JSON"><svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg> Backup</button>
+            <button onclick="openSafetyBackupsModal()" class="bg-school-700 hover:bg-school-600 px-3 py-2 rounded-lg text-xs font-semibold shadow flex items-center gap-1.5 text-white border border-school-500/50 transition cursor-pointer" title="Rollierende Sicherheits-Snapshots (1-Klick-Wiederherstellung)"><svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-teal-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg> <span class="hidden lg:inline">Sicherheits-Backups</span><span class="lg:hidden">Backups</span></button>
+            <button onclick="exportData()" class="bg-school-600 hover:bg-school-500 px-3 py-2 rounded-lg text-xs font-semibold shadow flex items-center gap-1.5 text-white" title="Datensicherung als JSON"><svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg> JSON-Export</button>
             <label class="bg-slate-600 hover:bg-slate-500 px-3 py-2 rounded-lg text-xs font-semibold shadow cursor-pointer flex items-center gap-1.5 text-white" title="Datensicherung laden"><svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2"/></svg> Laden<input type="file" class="hidden" accept=".json" onchange="importData(event)"></label>
         </div>
     </nav>
@@ -1608,13 +1612,18 @@
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <button onclick="forcePushToCloud()" class="border-2 border-school-600 text-school-700 hover:bg-school-50 font-bold py-2 px-3 rounded-lg text-xs transition flex items-center justify-center gap-1.5" title="Überschreibt die Cloud mit dem aktuellen lokalen Stand">
+                    <button onclick="forcePushToCloud()" class="border-2 border-school-600 text-school-700 hover:bg-school-50 font-bold py-2 px-3 rounded-lg text-xs transition flex items-center justify-center gap-1.5 cursor-pointer" title="Überschreibt die Cloud mit dem aktuellen lokalen Stand">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg> <span>Lokalen Stand in Cloud hochladen</span>
                     </button>
-                    <button onclick="forcePullFromCloud()" class="border-2 border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-2 px-3 rounded-lg text-xs transition flex items-center justify-center gap-1.5" title="Lädt den Stand aus der Cloud herunter">
+                    <button onclick="forcePullFromCloud()" class="border-2 border-slate-300 text-slate-700 hover:bg-slate-50 font-bold py-2 px-3 rounded-lg text-xs transition flex items-center justify-center gap-1.5 cursor-pointer" title="Lädt den Stand aus der Cloud herunter">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg> <span>Aus Cloud neu laden</span>
                     </button>
                 </div>
+
+                <button onclick="openSafetyBackupsModal()" class="w-full bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-300 font-bold py-2.5 px-4 rounded-lg transition flex items-center justify-center gap-2 mt-2 cursor-pointer shadow-xs">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-teal-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+                    <span>🛡️ Rollierende Sicherheits-Backups (1-Klick-Wiederherstellung)</span>
+                </button>
             </div>
 
             <!-- Hilfe Akkordeon / Kurzanleitung -->
@@ -1627,6 +1636,102 @@
                     <p><b>4.</b> Füge den Code hier in das Textfeld ein und klicke auf <i>Verbinden & Speichern</i>. Fertig!</p>
                 </div>
             </details>
+        </div>
+    </div>
+
+    <!-- MODAL: ROLLIERENDE SICHERHEITS-BACKUPS -->
+    <div id="modal-safety-backups" class="fixed inset-0 hidden items-center justify-center z-50 modal-bg p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-xl max-h-[90vh] overflow-y-auto hide-scrollbar">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h3 class="text-xl font-black text-slate-800 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-teal-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+                        Rollierende Sicherheits-Backups
+                    </h3>
+                    <p class="text-xs text-slate-500">Automatische lokale Schnappschüsse vor jedem Cloud-Abgleich auf diesem Gerät</p>
+                </div>
+                <button onclick="closeSafetyBackupsModal()" class="text-slate-400 hover:text-slate-800 text-2xl font-bold cursor-pointer">&times;</button>
+            </div>
+
+            <div class="bg-teal-50 border border-teal-200 rounded-xl p-3 mb-4 text-xs text-teal-900 leading-relaxed">
+                💡 <b>100% Sicherheit:</b> Vor jedem Herunterladen oder Hochladen in die Cloud speichert die App hier automatisch eine lokale Sicherungskopie ab. Falls an einem anderen Rechner etwas überschrieben wurde, kannst du den gewünschten Stand mit 1 Klick wiederherstellen.
+            </div>
+
+            <div id="safety-backups-list" class="space-y-2.5 mb-5">
+                <!-- Dynamisch generierte Snapshots -->
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-3 pt-3 border-t border-slate-100">
+                <button onclick="createManualSafetySnapshot()" class="w-full sm:w-auto px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5 cursor-pointer">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                    <span>Jetzt manuellen Snapshot erstellen</span>
+                </button>
+                <button onclick="closeSafetyBackupsModal()" class="w-full sm:w-auto px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-lg transition cursor-pointer">
+                    Schließen
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: SYNCHRONISATIONS-KONFLIKT -->
+    <div id="modal-conflict" class="fixed inset-0 hidden items-center justify-center z-50 modal-bg p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-lg">
+            <div class="flex items-center gap-3 mb-3 text-amber-600">
+                <div class="p-2.5 bg-amber-100 rounded-xl">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+                </div>
+                <div>
+                    <h3 class="text-xl font-black text-slate-800">Synchronisations-Konflikt</h3>
+                    <p class="text-xs text-slate-500">Unterschiedliche Stände auf diesem Gerät und in der Schul-Cloud</p>
+                </div>
+            </div>
+
+            <p class="text-xs text-slate-600 mb-4 leading-relaxed">
+                Auf diesem Gerät existieren ungespeicherte Offline-Änderungen, aber in der Schul-Cloud liegt ebenfalls ein neuerer Stand (z. B. von einem anderen Rechner) vor. Wie möchten Sie verfahren?
+            </p>
+
+            <div class="grid grid-cols-2 gap-3 mb-5">
+                <div class="p-3 bg-sky-50 border border-sky-200 rounded-xl text-xs">
+                    <div class="font-bold text-sky-900 mb-1 flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-sky-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
+                        <span>Cloud-Stand (Server)</span>
+                    </div>
+                    <div id="conflict-remote-info" class="font-mono text-[11px] text-sky-800">Stand: --</div>
+                </div>
+                <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs">
+                    <div class="font-bold text-amber-900 mb-1 flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>
+                        <span>Lokaler Stand (Gerät)</span>
+                    </div>
+                    <div id="conflict-local-info" class="font-mono text-[11px] text-amber-800">Stand: --</div>
+                </div>
+            </div>
+
+            <div class="space-y-2.5">
+                <button onclick="resolveConflictAdoptCloud()" class="w-full p-3 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold shadow transition flex items-center justify-between cursor-pointer">
+                    <div class="text-left">
+                        <div class="font-extrabold flex items-center gap-1.5">
+                            <span>Cloud-Stand übernehmen (Empfohlen)</span>
+                            <span class="text-[10px] bg-teal-500 px-1.5 py-0.5 rounded uppercase tracking-wider">Sicher</span>
+                        </div>
+                        <div class="text-[11px] text-teal-100 font-normal mt-0.5">Ihr lokaler Stand wird vorher automatisch als Sicherheits-Backup archiviert.</div>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 ml-2 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </button>
+
+                <button onclick="resolveConflictPushLocal()" class="w-full p-3 bg-white hover:bg-rose-50 text-rose-700 border-2 border-rose-300 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer">
+                    <div class="text-left">
+                        <div class="font-extrabold">Lokalen Stand in die Cloud hochladen</div>
+                        <div class="text-[11px] text-rose-500 font-normal mt-0.5">Überschreibt den Stand in der Cloud mit Ihren lokalen Eintragungen.</div>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 ml-2 shrink-0 text-rose-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+                </button>
+
+                <button onclick="downloadConflictDumps()" class="w-full p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                    <span>Beide Stände jetzt als Notfall-JSON sichern</span>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -2130,14 +2235,42 @@
     <!-- CLOUD SYNC INITIAL GATE / SPERRBILDSCHIRM BEIM START -->
     <div id="cloud-sync-gate" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity duration-300">
         <div class="bg-white rounded-2xl shadow-2xl p-6 md:p-8 max-w-sm w-full text-center border border-slate-200">
-            <div class="w-14 h-14 bg-teal-50 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <h3 class="text-xl font-black text-slate-800 mb-1">Schul-Cloud Abgleich</h3>
-            <p class="text-xs text-slate-500 mb-4">Lade aktuellen Datenstand der Schule vor Arbeitsbeginn...</p>
-            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex items-center justify-center gap-2 text-xs font-mono text-teal-700">
-                <span class="w-2 h-2 rounded-full bg-teal-500 animate-ping"></span>
-                <span id="sync-gate-status">Synchronisiere mit Firestore...</span>
+            <div id="sync-gate-spinner-container">
+                <div class="w-14 h-14 bg-teal-50 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <h3 class="text-xl font-black text-slate-800 mb-1">Schul-Cloud Abgleich</h3>
+                <p id="sync-gate-subtext" class="text-xs text-slate-500 mb-4">Lade aktuellen Datenstand der Schule vor Arbeitsbeginn...</p>
+                <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex items-center justify-center gap-2 text-xs font-mono text-teal-700">
+                    <span class="w-2 h-2 rounded-full bg-teal-500 animate-ping"></span>
+                    <span id="sync-gate-status">Verbinde mit Firestore...</span>
+                </div>
             </div>
-            <button id="sync-gate-skip-btn" onclick="hideSyncGate(true)" class="mt-4 text-[11px] text-slate-400 hover:text-slate-600 underline">Direkt ohne Sync starten (Offline)</button>
+
+            <!-- Offline Fallback Container (wird bei Timeout oder Verbindungsfehler eingeblendet) -->
+            <div id="sync-gate-offline-box" class="hidden text-left mt-1">
+                <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl mb-3 text-xs text-amber-900">
+                    <div class="font-bold flex items-center gap-1.5 mb-1 text-amber-800">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-amber-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+                        <span>Cloud-Server antwortet nicht</span>
+                    </div>
+                    <p class="text-[11px] leading-relaxed text-amber-800">
+                        Keine Serververbindung möglich (evtl. offline oder instabiles Netz). Vorhandener lokaler Stand auf diesem Gerät:
+                    </p>
+                    <div id="sync-gate-local-info" class="mt-2 font-mono font-bold text-[11px] bg-white/90 p-2 rounded border border-amber-200 text-amber-950">
+                        Stand: --
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <button onclick="acceptOfflineMode()" class="w-full py-2.5 px-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer">
+                        <span>Offline weiterarbeiten</span>
+                    </button>
+                    <button onclick="retryInitialSync()" class="w-full py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+                        <span>Erneut versuchen</span>
+                    </button>
+                </div>
+            </div>
+
+            <button id="sync-gate-skip-btn" onclick="acceptOfflineMode()" class="mt-4 text-[11px] text-slate-400 hover:text-slate-600 underline cursor-pointer">Direkt im Offline-Modus starten</button>
         </div>
     </div>
 
@@ -2250,15 +2383,54 @@
         let compareYears = [];
         let activeTab = 'month';
 
-        // --- FIREBASE CLOUD SYNC STATE ---
+        // --- FIREBASE CLOUD SYNC STATE & SICHERHEITSMATRIX ---
         let fbApp = null;
         let fbDb = null;
         let fbUnsubscribe = null;
         let isSyncingFromRemote = false;
+        let isInitialSyncCompleted = false;
+        let syncGateTimeoutTimer = null;
         let cloudSaveTimer = null;
         let cloudStatus = 'local'; // 'local' | 'connecting' | 'connected' | 'saving' | 'error'
         let hasUnsyncedChanges = false;
         let isBannerDismissed = false;
+
+        const SAFETY_BACKUP_KEY = 'hbs_rolling_safety_backups_v1';
+        const PENDING_OFFLINE_EDITS_KEY = 'hbs_has_pending_offline_edits';
+        let pendingConflictRemoteData = null;
+
+        // Prüft, ob der aktuelle Benutzer Schreibrechte für die Cloud besitzt (Schulleitung mit Masterpasswort)
+        function canWriteToCloud() {
+            return sessionStorage.getItem('admin_unlocked') === 'true';
+        }
+
+        function formatDataTimestamp(ts) {
+            if (!ts || ts === 0) return "Keine Angabe";
+            const d = new Date(ts);
+            const now = new Date();
+            const isToday = d.toDateString() === now.toDateString();
+            const yesterday = new Date(now);
+            yesterday.setDate(now.getDate() - 1);
+            const isYesterday = d.toDateString() === yesterday.toDateString();
+            const timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            if (isToday) return `Heute ${timeStr} Uhr`;
+            if (isYesterday) return `Gestern ${timeStr} Uhr`;
+            return `${d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}., ${timeStr} Uhr`;
+        }
+
+        function updateCloudHeaderTimestamp() {
+            const dtEl = document.getElementById('cloud-sync-timestamp');
+            const mdtEl = document.getElementById('mobile-portal-timestamp');
+            const tsStr = formatDataTimestamp(appData.lastModified || 0);
+            if (dtEl) dtEl.textContent = `Stand: ${tsStr}`;
+            if (mdtEl) mdtEl.textContent = `Stand: ${tsStr}`;
+            
+            const modalLastSync = document.getElementById('cloud-last-sync');
+            if (modalLastSync) {
+                modalLastSync.textContent = `Datenstand: ${tsStr}`;
+            }
+        }
 
         function getCurrentSchoolYear() {
             const now = new Date(); let y1 = now.getMonth() + 1 >= 8 ? now.getFullYear() : now.getFullYear() - 1;
@@ -2282,11 +2454,23 @@
             return String(Math.floor(1000 + Math.random() * 9000));
         }
 
-        let isInitialSyncDone = false;
+        // --- CLOUD SYNC GATE LOGIK (BLOCKIERENDER ERSTABGLEICH BEIM START) ---
+        function showSyncGate(msg = "Synchronisiere mit Schul-Cloud...") {
+            let gate = document.getElementById('cloud-sync-gate');
+            let spinnerBox = document.getElementById('sync-gate-spinner-container');
+            let offlineBox = document.getElementById('sync-gate-offline-box');
+            let statusEl = document.getElementById('sync-gate-status');
+            if (statusEl) statusEl.textContent = msg;
+            if (spinnerBox) spinnerBox.classList.remove('hidden');
+            if (offlineBox) offlineBox.classList.add('hidden');
+            if (gate) {
+                gate.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+                gate.classList.add('flex');
+            }
+        }
 
         function hideSyncGate(forced = false) {
-            if (isInitialSyncDone && !forced) return;
-            isInitialSyncDone = true;
+            if (isInitialSyncCompleted && !forced) return;
             let gate = document.getElementById('cloud-sync-gate');
             if (gate) {
                 gate.classList.add('opacity-0', 'pointer-events-none');
@@ -2295,15 +2479,58 @@
                     gate.classList.remove('flex');
                 }, 300);
             }
+            if (syncGateTimeoutTimer) {
+                clearTimeout(syncGateTimeoutTimer);
+                syncGateTimeoutTimer = null;
+            }
+        }
+
+        function showSyncGateOfflineChoice() {
+            let spinnerBox = document.getElementById('sync-gate-spinner-container');
+            let offlineBox = document.getElementById('sync-gate-offline-box');
+            let localInfo = document.getElementById('sync-gate-local-info');
+            if (spinnerBox) spinnerBox.classList.add('hidden');
+            if (offlineBox) offlineBox.classList.remove('hidden');
+            if (localInfo) {
+                localInfo.textContent = `Stand: ${formatDataTimestamp(appData.lastModified || 0)}`;
+            }
+            updateCloudUIStatus('local', 'Offline (Kein Server)', 'Verbindung zum Firestore-Server konnte nicht hergestellt werden.');
+        }
+
+        function acceptOfflineMode() {
+            isInitialSyncCompleted = true;
+            hideSyncGate(true);
+            updateCloudUIStatus('local', 'Lokal (Offline-Modus)', 'Sie arbeiten mit dem lokalen Stand dieses Rechners.');
+            updateSyncWarningBanner();
+            runPostSyncCleanups();
+            renderCurrentView();
+            updateCloudHeaderTimestamp();
+            showToast("Offline-Modus aktiv: Stand vom " + formatDataTimestamp(appData.lastModified), "cloud");
+        }
+
+        function retryInitialSync() {
+            showSyncGate("Verbindung wird erneut versucht...");
+            initFirebaseFromStorage();
+        }
+
+        function runPostSyncCleanups() {
+            try {
+                cleanupDuplicateIllesy();
+                cleanupAndConsolidateKoenitzer();
+                cleanupAndConsolidateMeierAndSchmidt();
+                checkAndAutoSeedAscTimetable();
+            } catch (e) {
+                console.warn("runPostSyncCleanups Hinweis:", e);
+            }
         }
 
         // --- INITIALISIERUNG ---
         function init() {
             initTheme();
             loadFromLocal();
-            cleanupDuplicateIllesy();
-            cleanupAndConsolidateKoenitzer();
-            cleanupAndConsolidateMeierAndSchmidt();
+            
+            // WICHTIG: Vor dem Cloud-Sync KEINE Auto-Saves oder Datenänderungen ausführen,
+            // damit der Zeitstempel des lokalen Caches unberührt bleibt!
             if(appData.teachers.length === 0) appData.teachers = [{ id: "t1", name: "Mustermann", r: 0, v: 3, active: true, pin: "1234" }];
             appData.masterPin = 'Year2003?!%';
             appData.teachers.forEach(t => {
@@ -2314,13 +2541,14 @@
             const now = new Date();
             appData.schoolYear = getCurrentSchoolYear();
             appData.currentMonth = now.getMonth() + 1;
-            checkAndAutoSeedAscTimetable();
 
             populateYearDropdown();
             let mSelect = document.getElementById('month-select');
             if (mSelect) mSelect.value = String(appData.currentMonth);
+            updateCloudHeaderTimestamp();
             
-            // Firebase automatisch verbinden, falls Konfiguration hinterlegt ist
+            // Sync Gate aktivieren und Verbindung zur Schul-Cloud aufbauen
+            showSyncGate("Verbinde mit Schul-Cloud...");
             initFirebaseFromStorage();
 
             // PWA Service Worker registrieren (falls unterstützt)
@@ -2329,16 +2557,6 @@
                     .then(reg => console.log("PWA Service Worker registriert:", reg.scope))
                     .catch(err => console.log("PWA Service Worker Status:", err.message));
             }
-
-            // Sicherheits-Timeout: Falls Cloud offline ist, nach 2 Sekunden freigeben
-            setTimeout(() => {
-                if (!isInitialSyncDone) {
-                    hideSyncGate(true);
-                    if (cloudStatus === 'local' || cloudStatus === 'error') {
-                        showToast("Offline-Modus aktiv (Lokal)", "cloud");
-                    }
-                }
-            }, 2000);
             
             // Standardmäßig IMMER im geschützten Kollegenzugang (Portal) starten,
             // außer die Schulleitung hat sich in diesem Browser-Tab bereits mit dem Masterpasswort entsperrt.
@@ -2395,15 +2613,25 @@
         function formatAzvDate(day, month) { return String(day).padStart(2, '0') + '.' + String(month).padStart(2, '0') + '.'; }
 
         // --- DATEN SPEICHERN (LOKAL + CLOUD) ---
-        function saveToLocal() {
+        function saveToLocal(options = { markUnsynced: true }) {
+            // Schutz vor unbemerktem Stempeln des Caches vor dem Erstabgleich
+            if (!isInitialSyncCompleted) {
+                console.log("saveToLocal vor Abschluss des Cloud-Syncs unterdrückt.");
+                return;
+            }
             appData.lastModified = Date.now();
             localStorage.setItem(storageKey, JSON.stringify(appData));
-            hasUnsyncedChanges = true;
-            updateSyncWarningBanner();
+            
+            // Nur wenn Schulleitungs-Admin eingeloggt ist, dürfen Cloud-Änderungen angestoßen werden
+            if (options.markUnsynced && canWriteToCloud()) {
+                hasUnsyncedChanges = true;
+                localStorage.setItem(PENDING_OFFLINE_EDITS_KEY, 'true');
+                updateSyncWarningBanner();
+            }
             
             let ind = document.getElementById('save-indicator');
             if (ind) {
-                if (fbDb && cloudStatus === 'connected') {
+                if (fbDb && cloudStatus === 'connected' && canWriteToCloud()) {
                     ind.innerHTML = `${uiIcon("check-circle", "w-3.5 h-3.5 inline mr-1 text-emerald-500")} Gespeichert (Lokal & Cloud)`;
                     queueCloudSync();
                 } else {
@@ -2411,6 +2639,7 @@
                 }
                 setTimeout(() => { if (ind) ind.innerHTML = ""; }, 2500);
             }
+            updateCloudHeaderTimestamp();
         }
 
         function loadFromLocal() {
@@ -2621,6 +2850,7 @@
             if (typeof firebase === 'undefined') {
                 console.warn("Firebase SDK nicht geladen.");
                 updateCloudUIStatus('error', 'SDK fehlt', 'Firebase SDK konnte nicht aus dem CDN geladen werden.');
+                showSyncGateOfflineChoice();
                 return;
             }
 
@@ -2635,7 +2865,7 @@
 
                 fbDb = firebase.firestore(fbApp);
 
-                // Persistence optional aktivieren, ohne Verbindungsaufbau zu blockieren
+                // Persistence aktivieren für schnellere Ladezeiten & Offline-Verfügbarkeit
                 try {
                     fbDb.enablePersistence({ synchronizeTabs: true }).catch(err => {
                         console.log("Firestore Persistence Info:", err.message);
@@ -2647,6 +2877,7 @@
             } catch (err) {
                 console.error("Fehler beim Starten von Firebase:", err);
                 updateCloudUIStatus('error', 'Fehler', err.message || 'Verbindung fehlgeschlagen');
+                showSyncGateOfflineChoice();
             }
         }
 
@@ -2691,95 +2922,174 @@
 
             const docRef = fbDb.collection("schools").doc(schoolId);
             
-            // Sofortiger Schnell-Test der Serververbindung zur direkten Status-Aktivierung
-            docRef.get().then((docSnap) => {
-                if (cloudStatus === 'connecting') {
-                    updateCloudUIStatus('connected', 'Live-Sync aktiv', `Echtzeit-Synchronisation aktiv für Mandant: "${schoolId}"`);
-                    hideSyncGate();
+            // 8-Sekunden Sicherheits-Timeout für den initialen Verbindungsaufbau
+            if (syncGateTimeoutTimer) clearTimeout(syncGateTimeoutTimer);
+            syncGateTimeoutTimer = setTimeout(() => {
+                if (!isInitialSyncCompleted) {
+                    console.warn("Firestore Erstabgleich Timeout (8s).");
+                    showSyncGateOfflineChoice();
                 }
+            }, 8000);
+
+            // 1. ZWINGEND BLOCKIERENDER SERVER-FIRST ABGLEICH BEIM START
+            docRef.get({ source: 'server' }).then((docSnap) => {
+                if (syncGateTimeoutTimer) {
+                    clearTimeout(syncGateTimeoutTimer);
+                    syncGateTimeoutTimer = null;
+                }
+                handleAuthoritativeServerSync(docSnap, schoolId);
             }).catch(err => {
-                console.warn("Firestore Verbindungstest:", err);
+                console.warn("Server-Fetch nicht sofort möglich, prüfe Cache/Netzwerk:", err.message);
+                docRef.get().then((cachedSnap) => {
+                    if (!isInitialSyncCompleted) {
+                        if (syncGateTimeoutTimer) clearTimeout(syncGateTimeoutTimer);
+                        handleAuthoritativeServerSync(cachedSnap, schoolId);
+                    }
+                }).catch(e => {
+                    if (!isInitialSyncCompleted) {
+                        showSyncGateOfflineChoice();
+                    }
+                });
             });
 
+            // 2. LIVE-SNAPSHOT LISTENER FÜR NACHFOLGENDE ECHTZEIT-ÄNDERUNGEN
             fbUnsubscribe = docRef.onSnapshot((docSnap) => {
                 try {
                     const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
                     const lastSyncEl = document.getElementById('cloud-last-sync');
                     if (lastSyncEl) lastSyncEl.textContent = `Letzter Sync: ${nowStr}`;
 
-                    if (docSnap.exists) {
-                        const rawRemote = docSnap.data();
-                        const remoteData = parseDataFromCloud(rawRemote);
-                        const remoteTs = remoteData.lastModified || 0;
-                        const localTs = appData.lastModified || 0;
+                    if (!docSnap.exists) return;
 
-                        let remoteHasRealData = remoteData.teachers && (remoteData.teachers.length > 1 || (remoteData.teachers.length === 1 && remoteData.teachers[0].name !== "Mustermann"));
-                        let localHasRealData = appData.teachers && (appData.teachers.length > 1 || (appData.teachers.length === 1 && appData.teachers[0].name !== "Mustermann"));
+                    // Vor Abschluss des Erstabgleichs keine unkontrollierten Snapshot-Eingriffe zulassen
+                    if (!isInitialSyncCompleted) return;
 
-                        if (remoteHasRealData && (!localHasRealData || remoteTs >= localTs)) {
-                            isSyncingFromRemote = true;
-                            const currentActiveYear = appData.schoolYear;
-                            appData = remoteData;
-                            cleanupDuplicateIllesy();
-                            cleanupAndConsolidateKoenitzer();
-                            cleanupAndConsolidateMeierAndSchmidt();
-                            if (currentActiveYear && appData.years && appData.years[currentActiveYear]) {
-                                appData.schoolYear = currentActiveYear;
-                            }
-                            localStorage.setItem(storageKey, JSON.stringify(appData));
-                            checkAndAutoSeedAscTimetable();
-                            hasUnsyncedChanges = false;
+                    // Eigene ausstehende lokale Schreibvorgänge im Snapshot nicht als 'neue Remote-Daten' behandeln
+                    if (docSnap.metadata && docSnap.metadata.hasPendingWrites) return;
+
+                    const remoteData = parseDataFromCloud(docSnap.data());
+                    const remoteTs = remoteData.lastModified || 0;
+                    const localTs = appData.lastModified || 0;
+
+                    let remoteHasRealData = remoteData.teachers && (remoteData.teachers.length > 1 || (remoteData.teachers.length === 1 && remoteData.teachers[0].name !== "Mustermann"));
+
+                    if (remoteHasRealData && remoteTs > localTs) {
+                        if (!hasUnsyncedChanges) {
+                            createSafetyBackup("Vor Echtzeit-Aktualisierung im Hintergrund");
+                            applyRemoteDataToApp(remoteData, "Aktualisiert aus der Cloud");
+                        } else {
+                            showToast("Achtung: Neuerer Stand in der Cloud verfügbar!", "alert-triangle");
                             updateSyncWarningBanner();
-                            populateYearDropdown();
-                            renderCurrentView();
-                            isSyncingFromRemote = false;
-                            showToast(`Daten mit Cloud synchronisiert (${nowStr})`, "cloud");
-                        } else if (localHasRealData && !remoteHasRealData) {
-                            // Lokaler Stand hat echte Daten (z. B. auf dem Mac), Cloud war noch leer -> In Cloud hochladen!
-                            console.log("Lokale Daten sind vollständiger als Cloud-Stand. Synchronisiere zur Cloud...");
-                            appData.lastModified = Date.now();
-                            docRef.set(prepareDataForCloud(appData), { merge: true });
-                            hasUnsyncedChanges = false;
-                            updateSyncWarningBanner();
-                            showToast(`Lokaler Stand in Cloud übertragen!`, "cloud");
-                        } else if (remoteTs > localTs) {
-                            isSyncingFromRemote = true;
-                            const currentActiveYear = appData.schoolYear;
-                            appData = remoteData;
-                            if (currentActiveYear && appData.years && appData.years[currentActiveYear]) {
-                                appData.schoolYear = currentActiveYear;
-                            }
-                            localStorage.setItem(storageKey, JSON.stringify(appData));
-                            hasUnsyncedChanges = false;
-                            updateSyncWarningBanner();
-                            populateYearDropdown();
-                            renderCurrentView();
-                            isSyncingFromRemote = false;
-                        }
-                    } else {
-                        console.log("Schul-Dokument existiert noch nicht in Firestore. Erstelle neu...");
-                        let localHasRealData = appData.teachers && (appData.teachers.length > 1 || (appData.teachers.length === 1 && appData.teachers[0].name !== "Mustermann"));
-                        if (localHasRealData) {
-                            appData.lastModified = Date.now();
-                            docRef.set(prepareDataForCloud(appData), { merge: true });
                         }
                     }
 
                     updateCloudUIStatus('connected', 'Live-Sync aktiv', `Echtzeit-Synchronisation aktiv für Mandant: "${schoolId}"`);
-                    hideSyncGate(); // Entsperre Oberfläche nach erfolgreichem Erstabgleich
+                    updateCloudHeaderTimestamp();
                 } catch (snapErr) {
                     console.error("Fehler bei der Snapshot-Verarbeitung:", snapErr);
-                    updateCloudUIStatus('connected', 'Live-Sync aktiv', `Echtzeit-Synchronisation aktiv`);
-                    hideSyncGate();
                 }
             }, (error) => {
                 console.error("Firestore Snapshot Fehler:", error);
                 updateCloudUIStatus('error', 'Berechtigungsfehler', 'Kein Zugriff auf Firestore: ' + (error.message || 'Bitte Verbindung prüfen'));
-                hideSyncGate(true);
             });
         }
 
+        // --- AUTORITATIVER SERVER-ABGLEICH (SERVER-FIRST) ---
+        function handleAuthoritativeServerSync(docSnap, schoolId) {
+            try {
+                if (docSnap && docSnap.exists) {
+                    const rawRemote = docSnap.data();
+                    const remoteData = parseDataFromCloud(rawRemote);
+                    const remoteTs = remoteData.lastModified || 0;
+                    const localTs = appData.lastModified || 0;
+                    const hasPendingOffline = localStorage.getItem(PENDING_OFFLINE_EDITS_KEY) === 'true';
+
+                    let remoteHasRealData = remoteData.teachers && (remoteData.teachers.length > 1 || (remoteData.teachers.length === 1 && remoteData.teachers[0].name !== "Mustermann"));
+                    let localHasRealData = appData.teachers && (appData.teachers.length > 1 || (appData.teachers.length === 1 && appData.teachers[0].name !== "Mustermann"));
+
+                    // REGEL 1: Kollegium (Kioskmodus / Read-Only) lädt IMMER bedingungslos den Cloud-Stand herunter!
+                    if (!canWriteToCloud()) {
+                        if (remoteHasRealData) {
+                            applyRemoteDataToApp(remoteData);
+                        }
+                    } 
+                    // REGEL 2: Schulleitungs-Admin OHNE ungespeicherte Offline-Änderungen -> Cloud ist autoritativ!
+                    else if (!hasPendingOffline) {
+                        if (remoteHasRealData) {
+                            createSafetyBackup("Vor Cloud-Aktualisierung beim Start");
+                            applyRemoteDataToApp(remoteData);
+                        } else if (localHasRealData && !remoteHasRealData) {
+                            // Cloud war noch leer -> Erster initialer Upload
+                            createSafetyBackup("Vor initialer Cloud-Befüllung");
+                            appData.lastModified = Date.now();
+                            fbDb.collection("schools").doc(schoolId).set(prepareDataForCloud(appData), { merge: true });
+                        }
+                    }
+                    // REGEL 3: Schulleitungs-Admin HAT ungespeicherte Offline-Änderungen
+                    else {
+                        if (remoteTs > localTs) {
+                            // Echter Konflikt: Cloud wurde an anderem Rechner geändert UND lokaler Rechner war offline geändert!
+                            pendingConflictRemoteData = remoteData;
+                            showConflictModal(remoteData, appData);
+                            return; // Gate bleibt aktiv bis Konflikt gelöst ist
+                        } else {
+                            // Lokale Offline-Änderungen sind neuer -> in Cloud übertragen
+                            createSafetyBackup("Vor Cloud-Upload ungespeicherter Offline-Daten");
+                            fbDb.collection("schools").doc(schoolId).set(prepareDataForCloud(appData), { merge: true });
+                            hasUnsyncedChanges = false;
+                            localStorage.removeItem(PENDING_OFFLINE_EDITS_KEY);
+                            showToast("Lokale Offline-Änderungen synchronisiert!", "cloud");
+                        }
+                    }
+                } else if (canWriteToCloud()) {
+                    let localHasRealData = appData.teachers && (appData.teachers.length > 1 || (appData.teachers.length === 1 && appData.teachers[0].name !== "Mustermann"));
+                    if (localHasRealData) {
+                        appData.lastModified = Date.now();
+                        fbDb.collection("schools").doc(schoolId).set(prepareDataForCloud(appData), { merge: true });
+                    }
+                }
+
+                isInitialSyncCompleted = true;
+                hideSyncGate();
+                runPostSyncCleanups();
+                updateCloudUIStatus('connected', 'Live-Sync aktiv', `Echtzeit-Synchronisation aktiv für Mandant: "${schoolId}"`);
+                updateCloudHeaderTimestamp();
+                showToast("Daten erfolgreich mit Cloud synchronisiert!", "check-circle");
+            } catch (err) {
+                console.error("Fehler in handleAuthoritativeServerSync:", err);
+                isInitialSyncCompleted = true;
+                hideSyncGate();
+                runPostSyncCleanups();
+                updateCloudUIStatus('connected', 'Live-Sync aktiv', `Echtzeit-Synchronisation aktiv`);
+            }
+        }
+
+        function applyRemoteDataToApp(remoteData, toastMsg = "") {
+            isSyncingFromRemote = true;
+            const currentActiveYear = appData.schoolYear;
+            appData = remoteData;
+            if (currentActiveYear && appData.years && appData.years[currentActiveYear]) {
+                appData.schoolYear = currentActiveYear;
+            }
+            localStorage.setItem(storageKey, JSON.stringify(appData));
+            hasUnsyncedChanges = false;
+            localStorage.removeItem(PENDING_OFFLINE_EDITS_KEY);
+            updateSyncWarningBanner();
+            populateYearDropdown();
+            renderCurrentView();
+            isSyncingFromRemote = false;
+            updateCloudHeaderTimestamp();
+            if (toastMsg) {
+                showToast(`${toastMsg} (${formatDataTimestamp(appData.lastModified)})`, "cloud");
+            }
+        }
+
+        // --- CLOUD QUEUE & SPEICHER-FUNKTIONEN ---
         function queueCloudSync() {
+            // Kollegium / Kioskmodus darf NIEMALS in die Cloud schreiben
+            if (!canWriteToCloud()) {
+                return;
+            }
             if (!fbDb || cloudStatus === 'local' || isSyncingFromRemote) {
                 updateSyncWarningBanner();
                 return;
@@ -2795,9 +3105,11 @@
                     await fbDb.collection("schools").doc(schoolId).set(prepareDataForCloud(appData), { merge: true });
                     
                     hasUnsyncedChanges = false;
+                    localStorage.removeItem(PENDING_OFFLINE_EDITS_KEY);
                     cloudSaveTimer = null;
                     updateSyncWarningBanner();
                     updateCloudUIStatus('connected', 'Live-Sync aktiv', `Echtzeit-Synchronisation aktiv für Mandant: "${schoolId}"`);
+                    updateCloudHeaderTimestamp();
                 } catch (err) {
                     console.error("Cloud-Save fehlgeschlagen:", err);
                     updateCloudUIStatus('error', 'Sync-Fehler', 'Speichern in Cloud fehlgeschlagen: ' + err.message);
@@ -2807,13 +3119,15 @@
         }
 
         async function flushCloudSync() {
-            if (!fbDb || cloudStatus === 'local' || isSyncingFromRemote) return;
+            if (!canWriteToCloud() || !fbDb || cloudStatus === 'local' || isSyncingFromRemote) return;
             try {
                 const schoolId = getSchoolDocId();
                 appData.lastModified = Date.now();
                 await fbDb.collection("schools").doc(schoolId).set(prepareDataForCloud(appData), { merge: true });
                 hasUnsyncedChanges = false;
+                localStorage.removeItem(PENDING_OFFLINE_EDITS_KEY);
                 cloudSaveTimer = null;
+                updateCloudHeaderTimestamp();
             } catch (e) {
                 console.error("Fehler beim Flush-Speichern:", e);
             }
@@ -2838,7 +3152,7 @@
             showToast("Internetverbindung aktiv! Prüfe Cloud-Sync...", "cloud");
             if (!fbDb) {
                 initFirebaseFromStorage();
-            } else if (hasUnsyncedChanges) {
+            } else if (hasUnsyncedChanges && canWriteToCloud()) {
                 queueCloudSync();
             } else {
                 manualSyncWithCloud();
@@ -2850,6 +3164,61 @@
             updateCloudUIStatus('local', 'Offline (Kein Internet)', 'Keine aktive Internetverbindung.');
             showToast("Internet getrennt (Offline-Modus)", "cloud");
             updateSyncWarningBanner();
+        });
+
+        // --- AUTOMATISCHER ABGLEICH BEI TAB-FOKUS & SICHTBARKEIT (GERÄTEWECHSEL) ---
+        function checkCloudOnTabFocus() {
+            if (!fbDb || cloudStatus !== 'connected' || !isInitialSyncCompleted) return;
+            
+            // Wenn der Nutzer gerade ungespeicherte Änderungen hat, nicht im Schreibfluss stören
+            if (hasUnsyncedChanges) return;
+
+            try {
+                const schoolId = getSchoolDocId();
+                fbDb.collection("schools").doc(schoolId).get({ source: 'server' }).then(docSnap => {
+                    if (docSnap.exists) {
+                        const remoteData = parseDataFromCloud(docSnap.data());
+                        const remoteTs = remoteData.lastModified || 0;
+                        const localTs = appData.lastModified || 0;
+                        
+                        if (remoteTs > localTs) {
+                            console.log(`[Focus-Sync] Neuerer Cloud-Stand erkannt: Remote (${remoteTs}) > Local (${localTs})`);
+                            createSafetyBackup("Vor Tab-Fokus-Aktualisierung");
+                            applyRemoteDataToApp(remoteData, "Cloud-Stand aktualisiert");
+                        } else {
+                            updateCloudHeaderTimestamp();
+                        }
+                    }
+                }).catch(e => {
+                    console.log("Tab focus ping:", e.message);
+                });
+            } catch (err) {
+                console.warn("checkCloudOnTabFocus Fehler:", err);
+            }
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                checkCloudOnTabFocus();
+            }
+        });
+
+        window.addEventListener('focus', () => {
+            checkCloudOnTabFocus();
+        });
+
+        window.addEventListener('storage', (e) => {
+            if (e.key === storageKey && e.newValue) {
+                try {
+                    const updated = JSON.parse(e.newValue);
+                    if (updated && (updated.lastModified || 0) > (appData.lastModified || 0)) {
+                        appData = updated;
+                        renderCurrentView();
+                        updateCloudHeaderTimestamp();
+                        showToast("Daten aus anderem Browser-Tab übernommen", "check-circle");
+                    }
+                } catch(err) {}
+            }
         });
 
         // --- MANUELLER CLOUD-ABGLEICH (BUTTON REFRESH) ---
@@ -2877,29 +3246,27 @@
                     const remoteData = parseDataFromCloud(rawRemote);
                     const remoteTs = remoteData.lastModified || 0;
                     const localTs = appData.lastModified || 0;
+                    const hasPendingOffline = localStorage.getItem(PENDING_OFFLINE_EDITS_KEY) === 'true';
 
                     let remoteHasRealData = remoteData.teachers && (remoteData.teachers.length > 1 || (remoteData.teachers.length === 1 && remoteData.teachers[0].name !== "Mustermann"));
                     let localHasRealData = appData.teachers && (appData.teachers.length > 1 || (appData.teachers.length === 1 && appData.teachers[0].name !== "Mustermann"));
 
-                    if (remoteHasRealData && (!localHasRealData || remoteTs >= localTs)) {
-                        isSyncingFromRemote = true;
-                        const currentActiveYear = appData.schoolYear;
-                        appData = remoteData;
-                        if (currentActiveYear && appData.years && appData.years[currentActiveYear]) {
-                            appData.schoolYear = currentActiveYear;
+                    // Kollegenzugang / Read-Only lädt IMMER nur herunter
+                    if (!canWriteToCloud()) {
+                        if (remoteHasRealData) {
+                            applyRemoteDataToApp(remoteData, "Daten frisch aus der Cloud geladen");
+                        } else {
+                            showToast("Datenbestand ist aktuell", "check-circle");
                         }
-                        localStorage.setItem(storageKey, JSON.stringify(appData));
-                        checkAndAutoSeedAscTimetable();
-                        hasUnsyncedChanges = false;
-                        updateSyncWarningBanner();
-                        populateYearDropdown();
-                        renderCurrentView();
-                        isSyncingFromRemote = false;
-                        showToast("Daten erfolgreich aus Cloud aktualisiert!", "check-circle");
-                    } else if (localHasRealData && (localTs > remoteTs || !remoteHasRealData)) {
+                    } else if (remoteHasRealData && (!hasPendingOffline || remoteTs >= localTs)) {
+                        createSafetyBackup("Vor manuellem Sync (Download)");
+                        applyRemoteDataToApp(remoteData, "Daten frisch aus Cloud aktualisiert!");
+                    } else if (canWriteToCloud() && hasPendingOffline && localHasRealData && localTs > remoteTs) {
+                        createSafetyBackup("Vor manuellem Sync (Upload)");
                         appData.lastModified = Date.now();
                         await fbDb.collection("schools").doc(schoolId).set(prepareDataForCloud(appData), { merge: true });
                         hasUnsyncedChanges = false;
+                        localStorage.removeItem(PENDING_OFFLINE_EDITS_KEY);
                         updateSyncWarningBanner();
                         showToast("Lokaler Stand in Cloud hochgeladen!", "cloud");
                     } else {
@@ -2907,20 +3274,225 @@
                         updateSyncWarningBanner();
                         showToast("Datenbestand ist auf dem neuesten Stand!", "sparkles");
                     }
-                } else {
+                } else if (canWriteToCloud()) {
                     appData.lastModified = Date.now();
                     await fbDb.collection("schools").doc(schoolId).set(prepareDataForCloud(appData), { merge: true });
                     hasUnsyncedChanges = false;
+                    localStorage.removeItem(PENDING_OFFLINE_EDITS_KEY);
                     updateSyncWarningBanner();
                     showToast("Datenbestand in Cloud angelegt!", "cloud");
                 }
                 updateCloudUIStatus('connected', 'Live-Sync aktiv', `Echtzeit-Synchronisation aktiv`);
+                updateCloudHeaderTimestamp();
             } catch (err) {
                 console.error("Manueller Sync Fehler:", err);
                 showToast("Sync-Fehler: " + (err.message || 'Server nicht erreichbar'), "x");
             } finally {
                 if (icon) icon.classList.remove('animate-spin');
             }
+        }
+
+        // --- ROLLIERENDE SICHERHEITS-BACKUPS ENGINE ---
+        function createSafetyBackup(reason = "Automatischer Sicherungspunkt") {
+            try {
+                if (!appData || !Array.isArray(appData.teachers) || appData.teachers.length === 0) return;
+                let backups = getSafetyBackups();
+                const now = new Date();
+                const snapshot = {
+                    id: 'bak_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                    timestamp: Date.now(),
+                    dateStr: now.toLocaleDateString('de-DE') + ', ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+                    reason: reason,
+                    schoolYear: appData.schoolYear || getCurrentSchoolYear(),
+                    dataTs: appData.lastModified || 0,
+                    dataTsFormatted: formatDataTimestamp(appData.lastModified || 0),
+                    teacherCount: (appData.teachers || []).length,
+                    data: JSON.parse(JSON.stringify(appData))
+                };
+                backups.unshift(snapshot);
+                if (backups.length > 5) backups = backups.slice(0, 5);
+                localStorage.setItem(SAFETY_BACKUP_KEY, JSON.stringify(backups));
+                console.log(`[SafetyBackup] Gesichert: "${reason}" (${snapshot.dateStr})`);
+            } catch (e) {
+                console.warn("Fehler beim Erstellen des Sicherheits-Backups:", e);
+            }
+        }
+
+        function getSafetyBackups() {
+            try {
+                let raw = localStorage.getItem(SAFETY_BACKUP_KEY);
+                return raw ? JSON.parse(raw) : [];
+            } catch (e) { return []; }
+        }
+
+        function openSafetyBackupsModal() {
+            renderSafetyBackupsList();
+            const modal = document.getElementById('modal-safety-backups');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+        }
+
+        function closeSafetyBackupsModal() {
+            const modal = document.getElementById('modal-safety-backups');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function renderSafetyBackupsList() {
+            const listEl = document.getElementById('safety-backups-list');
+            if (!listEl) return;
+            const backups = getSafetyBackups();
+            if (backups.length === 0) {
+                listEl.innerHTML = `
+                    <div class="text-center p-6 bg-slate-50 border border-slate-200 rounded-xl text-slate-400 text-xs">
+                        Noch keine Sicherheits-Backups vorhanden. Diese werden automatisch vor jedem Cloud-Sync angelegt.
+                    </div>
+                `;
+                return;
+            }
+            let html = '';
+            backups.forEach((b, idx) => {
+                html += `
+                    <div class="p-3 bg-slate-50 hover:bg-slate-100/80 border border-slate-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs transition">
+                        <div>
+                            <div class="font-bold text-slate-800 flex items-center gap-1.5">
+                                <span class="bg-teal-100 text-teal-800 text-[10px] font-extrabold px-1.5 py-0.5 rounded">Slot ${idx + 1}</span>
+                                <span>${b.reason}</span>
+                            </div>
+                            <div class="text-[11px] text-slate-500 mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5">
+                                <span>🕒 Gesichert: <b>${b.dateStr}</b></span>
+                                <span>📅 Datenstand: <b>${b.dataTsFormatted || formatDataTimestamp(b.dataTs)}</b></span>
+                                <span>🧑‍🏫 ${b.teacherCount} Lehrkräfte (SJ ${b.schoolYear})</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 self-end sm:self-auto shrink-0">
+                            <button onclick="downloadSafetyBackup('${b.id}')" class="p-1.5 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-semibold shadow-xs flex items-center gap-1 cursor-pointer" title="Als JSON herunterladen">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                                <span>JSON</span>
+                            </button>
+                            <button onclick="restoreSafetyBackup('${b.id}')" class="px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-bold shadow-xs transition cursor-pointer flex items-center gap-1" title="Diesen Stand auf diesem Gerät wiederherstellen">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+                                <span>Wiederherstellen</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            listEl.innerHTML = html;
+        }
+
+        function restoreSafetyBackup(bakId) {
+            const backups = getSafetyBackups();
+            const b = backups.find(item => item.id === bakId);
+            if (!b) return alert("Backup nicht gefunden.");
+            askConfirm(
+                `Möchten Sie den Stand vom ${b.dateStr} ("${b.reason}") wiederherstellen? Der aktuelle lokale Zustand wird zuvor als separater Snapshot gesichert.`,
+                () => {
+                    createSafetyBackup("Vor Wiederherstellung von " + b.dateStr);
+                    appData = JSON.parse(JSON.stringify(b.data));
+                    saveToLocal();
+                    populateYearDropdown();
+                    renderCurrentView();
+                    updateCloudHeaderTimestamp();
+                    closeSafetyBackupsModal();
+                    showToast(`Stand vom ${b.dateStr} erfolgreich wiederhergestellt!`, "check-circle");
+                },
+                `${uiIcon("check", "w-4 h-4 inline mr-1 text-white")} Jetzt wiederherstellen`,
+                "bg-teal-600 hover:bg-teal-700 text-white",
+                "Stand wiederherstellen?"
+            );
+        }
+
+        function downloadSafetyBackup(bakId) {
+            const backups = getSafetyBackups();
+            const b = backups.find(item => item.id === bakId);
+            if (!b) return alert("Backup nicht gefunden.");
+            const dl = document.createElement('a');
+            dl.setAttribute("href", "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(b.data, null, 2)));
+            dl.setAttribute("download", `HBS_Sicherheits_Snapshot_${b.dateStr.replace(/[^0-9]/g, '_')}.json`);
+            document.body.appendChild(dl);
+            dl.click();
+            dl.remove();
+        }
+
+        function createManualSafetySnapshot() {
+            createSafetyBackup("Manueller Schnappschuss durch Schulleitung");
+            renderSafetyBackupsList();
+            showToast("Manueller Snapshot erfolgreich gesichert!", "check-circle");
+        }
+
+        // --- KONFLIKT-BEHANDLUNG ENGINE ---
+        function showConflictModal(remoteData, localData) {
+            const modal = document.getElementById('modal-conflict');
+            const rInfo = document.getElementById('conflict-remote-info');
+            const lInfo = document.getElementById('conflict-local-info');
+            if (rInfo) rInfo.textContent = `Stand: ${formatDataTimestamp(remoteData.lastModified || 0)}`;
+            if (lInfo) lInfo.textContent = `Stand: ${formatDataTimestamp(localData.lastModified || 0)}`;
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+        }
+
+        function closeConflictModal() {
+            const modal = document.getElementById('modal-conflict');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function resolveConflictAdoptCloud() {
+            if (!pendingConflictRemoteData) return closeConflictModal();
+            createSafetyBackup("Vor Auflösung des Konflikts (Lokaler Stand)");
+            applyRemoteDataToApp(pendingConflictRemoteData, "Cloud-Stand erfolgreich übernommen!");
+            closeConflictModal();
+            isInitialSyncCompleted = true;
+            hideSyncGate();
+            runPostSyncCleanups();
+        }
+
+        async function resolveConflictPushLocal() {
+            if (!fbDb || !canWriteToCloud()) return;
+            try {
+                createSafetyBackup("Vor Auflösung des Konflikts (Cloud-Stand überschrieben)");
+                const schoolId = getSchoolDocId();
+                appData.lastModified = Date.now();
+                await fbDb.collection("schools").doc(schoolId).set(prepareDataForCloud(appData), { merge: true });
+                hasUnsyncedChanges = false;
+                localStorage.removeItem(PENDING_OFFLINE_EDITS_KEY);
+                closeConflictModal();
+                isInitialSyncCompleted = true;
+                hideSyncGate();
+                runPostSyncCleanups();
+                updateSyncWarningBanner();
+                updateCloudHeaderTimestamp();
+                showToast("Lokaler Stand verbindlich in Cloud hochgeladen!", "cloud");
+            } catch (e) {
+                alert("Upload-Fehler: " + e.message);
+            }
+        }
+
+        function downloadConflictDumps() {
+            if (pendingConflictRemoteData) {
+                const dl1 = document.createElement('a');
+                dl1.setAttribute("href", "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(pendingConflictRemoteData, null, 2)));
+                dl1.setAttribute("download", `HBS_Konflikt_CLOUD_STAND_${Date.now()}.json`);
+                document.body.appendChild(dl1);
+                dl1.click();
+                dl1.remove();
+            }
+            const dl2 = document.createElement('a');
+            dl2.setAttribute("href", "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2)));
+            dl2.setAttribute("download", `HBS_Konflikt_LOKALER_STAND_${Date.now()}.json`);
+            document.body.appendChild(dl2);
+            dl2.click();
+            dl2.remove();
+            showToast("Beide Stände als JSON-Dateien gesichert!", "download");
         }
 
         // --- CLOUD MODAL FUNKTIONEN ---
@@ -2987,16 +3559,23 @@
         }
 
         async function forcePushToCloud() {
+            if (!canWriteToCloud()) {
+                alert("Nur die Schulleitung mit Masterpasswort kann Daten in die Cloud hochladen (Kollegenzugang ist Read-Only).");
+                return;
+            }
             if (!fbDb) return alert("Bitte zuerst Firebase verbinden!");
             askConfirm(
-                "Möchten Sie den aktuellen lokalen Datenbestand verbindlich in die Cloud hochladen? Der bisherige Cloud-Stand wird mit Ihren lokalen Daten aktualisiert.",
+                "Möchten Sie den aktuellen lokalen Datenbestand verbindlich in die Cloud hochladen? Der bisherige Cloud-Stand wird mit Ihren lokalen Daten aktualisiert. Ein automatisches Sicherheits-Backup wird zuvor erstellt.",
                 async () => {
                     try {
+                        createSafetyBackup("Vor manuellem 'Lokalen Stand hochladen'");
                         const schoolId = getSchoolDocId();
                         appData.lastModified = Date.now();
                         await fbDb.collection("schools").doc(schoolId).set(prepareDataForCloud(appData), { merge: true });
                         hasUnsyncedChanges = false;
+                        localStorage.removeItem(PENDING_OFFLINE_EDITS_KEY);
                         updateSyncWarningBanner();
+                        updateCloudHeaderTimestamp();
                         showToast("Lokaler Stand erfolgreich in Cloud hochgeladen!", "cloud");
                         closeCloudModal();
                     } catch (err) {
@@ -3012,19 +3591,14 @@
         async function forcePullFromCloud() {
             if (!fbDb) return alert("Bitte zuerst Firebase verbinden!");
             askConfirm(
-                "Möchten Sie alle Daten aus der Cloud herunterladen? Lokale ungespeicherte Änderungen werden überschrieben.",
+                "Möchten Sie alle Daten aus der Cloud herunterladen? Ein automatisches Sicherheits-Backup des aktuellen lokalen Stands wird zuvor erstellt.",
                 async () => {
                     try {
                         const schoolId = getSchoolDocId();
-                        const docSnap = await fbDb.collection("schools").doc(schoolId).get();
+                        const docSnap = await fbDb.collection("schools").doc(schoolId).get({ source: 'server' });
                         if (docSnap.exists) {
-                            appData = parseDataFromCloud(docSnap.data());
-                            localStorage.setItem(storageKey, JSON.stringify(appData));
-                            hasUnsyncedChanges = false;
-                            updateSyncWarningBanner();
-                            populateYearDropdown();
-                            renderCurrentView();
-                            showToast("Daten frisch aus der Cloud geladen!", "download");
+                            createSafetyBackup("Vor manuellem 'Aus Cloud neu laden'");
+                            applyRemoteDataToApp(parseDataFromCloud(docSnap.data()), "Frisch aus Cloud geladen");
                             closeCloudModal();
                         } else {
                             alert("In der Cloud existiert noch kein Datenbestand für diese Schul-ID.");
@@ -8906,6 +9480,8 @@ function removeEpAbminderung(idx) {
                 sessionStorage.setItem('admin_unlocked', 'true');
                 closeAdminLoginModal();
                 closePortalView();
+                updateCloudHeaderTimestamp();
+                checkCloudOnTabFocus();
                 showToast("Schulleitungs-Bereich entsperrt", "unlock");
             } else {
                 showToast("Falsches Masterpasswort!", "x");

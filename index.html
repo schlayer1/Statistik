@@ -2469,15 +2469,14 @@
             }
         }
 
-        function hideSyncGate(forced = false) {
-            if (isInitialSyncCompleted && !forced) return;
+        function hideSyncGate() {
             let gate = document.getElementById('cloud-sync-gate');
             if (gate) {
                 gate.classList.add('opacity-0', 'pointer-events-none');
                 setTimeout(() => {
                     gate.classList.add('hidden');
                     gate.classList.remove('flex');
-                }, 300);
+                }, 250);
             }
             if (syncGateTimeoutTimer) {
                 clearTimeout(syncGateTimeoutTimer);

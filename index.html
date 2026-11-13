@@ -1787,7 +1787,22 @@
     <div id="modal-teacher" class="fixed inset-0 hidden items-center justify-center z-50 modal-bg p-4">
         <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm">
             <h3 class="text-xl font-bold text-slate-800 mb-4">Lehrkraft anlegen</h3>
-            <input type="text" id="new-teacher-name" class="w-full border-2 border-slate-200 rounded-lg p-3 mb-4 font-bold" placeholder="z.B. Müller">
+            <div class="space-y-3 mb-5">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nachname / Kürzel:</label>
+                    <input type="text" id="new-teacher-name" class="w-full border-2 border-slate-200 rounded-lg p-3 font-bold outline-none focus:border-school-500" placeholder="z.B. Müller">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Anrede / Geschlecht:</label>
+                    <select id="new-teacher-gender" class="w-full border-2 border-slate-200 rounded-lg p-3 font-bold bg-slate-50 text-slate-800 outline-none focus:border-school-500">
+                        <option value="">Keine Angabe (neutral)</option>
+                        <option value="f">Weiblich (Frau ...)</option>
+                        <option value="m">Männlich (Herr ...)</option>
+                        <option value="d">Divers (ohne Herr/Frau)</option>
+                    </select>
+                    <p class="text-[11px] text-slate-400 mt-1">Eine eindeutige 4-stellige PIN wird automatisch generiert und ins Appportal synchronisiert.</p>
+                </div>
+            </div>
             <div class="flex justify-end space-x-3"><button onclick="closeTeacherModal()" class="px-4 py-2 bg-slate-100 rounded font-semibold">Abbruch</button><button onclick="saveTeacher()" class="px-4 py-2 bg-school-600 text-white rounded font-bold">Speichern</button></div>
         </div>
     </div>
@@ -2455,7 +2470,34 @@
             return yd;
         }
 
+        function formatTeacherName(teacher) {
+            if (!teacher || !teacher.name) return "";
+            const raw = String(teacher.name).trim();
+            if (!raw) return "";
+            const lower = raw.toLowerCase();
+            if (
+                lower.startsWith('frau ') ||
+                lower.startsWith('herr ') ||
+                lower.startsWith('fr. ') ||
+                lower.startsWith('hr. ') ||
+                lower.includes('schulleitung') ||
+                lower.startsWith('gast') ||
+                lower === 'nn'
+            ) {
+                return raw;
+            }
+            if (teacher.gender === 'f') return `Frau ${raw}`;
+            if (teacher.gender === 'm') return `Herr ${raw}`;
+            return raw;
+        }
+
         function generateTeacherPin() {
+            const usedPins = new Set((appData.teachers || []).map(t => String(t.pin || '').trim()).filter(Boolean));
+            usedPins.add('1234');
+            for (let i = 0; i < 200; i++) {
+                const candidate = String(Math.floor(1000 + Math.random() * 9000));
+                if (!usedPins.has(candidate)) return candidate;
+            }
             return String(Math.floor(1000 + Math.random() * 9000));
         }
 
@@ -5276,7 +5318,7 @@
                     <tr class="hover:bg-slate-50 transition cursor-pointer" onclick="openTeacherEp('${t.id}')">
                         <td class="p-3 text-center font-bold text-slate-400">${idx + 1}</td>
                         <td class="p-3 font-extrabold text-slate-800 flex items-center gap-2">
-                            <span class="flex items-center gap-1.5">${uiIcon('user', 'w-4 h-4 text-slate-400')} ${t.name}</span>
+                            <span class="flex items-center gap-1.5">${uiIcon('user', 'w-4 h-4 text-slate-400')} ${formatTeacherName(t)}</span>
                         </td>
                         <td class="p-3 text-center font-bold bg-slate-50/50 text-slate-700">${calc.pflichtstunden} h</td>
                         <td class="p-3 text-center font-black bg-blue-50/30 text-blue-700">${calc.unterrichtTotal} h</td>
@@ -5457,7 +5499,7 @@ function renderEpTeacherEditor(epData, activePeriod) {
                 activeTeachers.forEach(t => {
                     let opt = document.createElement('option');
                     opt.value = t.id;
-                    opt.text = t.name;
+                    opt.text = formatTeacherName(t);
                     if (!currentEpTeacherId) currentEpTeacherId = t.id;
                     if (t.id === currentEpTeacherId) opt.selected = true;
                     select.appendChild(opt);
@@ -7664,7 +7706,7 @@ function removeEpAbminderung(idx) {
                 let calc = calculateTeacherEp(plan);
 
                 let tSheetData = [
-                    [`Hr./Fr. ${t.name}`, "", "Gültig ab:", activePeriod.validFrom, ""],
+                    [formatTeacherName(t), "", "Gültig ab:", activePeriod.validFrom, ""],
                     ["Schuljahr:", yStr, "Zeitraum:", activePeriod.name, ""],
                     ["Pflichtstunden", calc.pflichtstunden, "", "", ""],
                 ];
@@ -7758,7 +7800,7 @@ function removeEpAbminderung(idx) {
                 printHtml += `
                     <tr>
                         <td class="print-num" style="text-align: center;">${idx + 1}</td>
-                        <td style="font-weight: bold;">${t.name}</td>
+                        <td style="font-weight: bold;">${formatTeacherName(t)}</td>
                         <td class="print-num">${calc.pflichtstunden} h</td>
                         <td class="print-num" style="color: #1d4ed8; font-weight: bold;">${calc.unterrichtTotal} h</td>
                         <td class="print-num" style="color: #6b21a8;">${calc.abminderungenTotal} h</td>
@@ -7815,7 +7857,7 @@ function removeEpAbminderung(idx) {
                 <div class="print-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
                     <div>
                         <h1 style="font-size: 15pt; font-weight: 800; color: #0284c7; margin: 0 0 2px 0;">Staatliche Regelschule Heimbürgeschule Kahla</h1>
-                        <h2 style="font-size: 11pt; font-weight: 700; color: #0f172a; margin: 2px 0 4px 0;">Einsatzplan für Lehrkraft: ${t.name}</h2>
+                        <h2 style="font-size: 11pt; font-weight: 700; color: #0f172a; margin: 2px 0 4px 0;">Einsatzplan für Lehrkraft: ${formatTeacherName(t)}</h2>
                         <div style="font-size: 8.5pt; color: #64748b;">Schuljahr ${yStr} | Version: <b>${period.name}</b> (Gültig ab ${dateDe}) | Druckdatum: ${new Date().toLocaleDateString('de-DE')}</div>
                     </div>
                     <img src="logo.png" alt="Logo HBS" style="height: 60px; width: 60px; object-fit: contain;" onerror="this.src='image.png'; this.onerror=null;">
@@ -7958,7 +8000,7 @@ function removeEpAbminderung(idx) {
                 let isActive = isTeacherActiveInYear(t.id, appData.schoolYear);
                 let opt = document.createElement('option'); 
                 opt.value = t.id; 
-                opt.text = t.name + (isActive ? "" : " (Inaktiv im SJ)"); 
+                opt.text = formatTeacherName(t) + (isActive ? "" : " (Inaktiv im SJ)"); 
                 select.appendChild(opt); 
             });
         }
@@ -8490,7 +8532,7 @@ function removeEpAbminderung(idx) {
                     <div>
                         <h1 style="font-size: 15pt; font-weight: 800; color: #0284c7; margin: 0 0 2px 0;">Staatliche Regelschule Heimbürgeschule Kahla</h1>
                         <h2 style="font-size: 11pt; font-weight: 700; color: #0f172a; margin: 2px 0 4px 0;">Persönlicher Jahresbericht – Schuljahr ${yStr}</h2>
-                        <div style="font-size: 10.5pt; font-weight: bold; color: #008e94; margin-top: 2px; margin-bottom: 2px;">Lehrkraft: ${teacher.name}</div>
+                        <div style="font-size: 10.5pt; font-weight: bold; color: #008e94; margin-top: 2px; margin-bottom: 2px;">Lehrkraft: ${formatTeacherName(teacher)}</div>
                         <div style="font-size: 8.5pt; color: #64748b;">Druckdatum: ${new Date().toLocaleDateString('de-DE')}</div>
                     </div>
                     <img src="logo.png" alt="Logo HBS" style="height: 60px; width: 60px; object-fit: contain;" onerror="this.src='image.png'; this.onerror=null;">
@@ -8654,7 +8696,7 @@ function removeEpAbminderung(idx) {
         function openAzvForm() { 
             const select = document.getElementById('azv-teacher'); select.innerHTML = ''; 
             appData.teachers.filter(t => isTeacherActiveInYear(t.id, appData.schoolYear)).sort((a,b) => a.name.localeCompare(b.name)).forEach(t => { 
-                let opt = document.createElement('option'); opt.value = t.id; opt.text = t.name; select.appendChild(opt); 
+                let opt = document.createElement('option'); opt.value = t.id; opt.text = formatTeacherName(t); select.appendChild(opt); 
             }); 
             document.getElementById('azv-date-from').value = ''; 
             document.getElementById('azv-date-to').value = ''; 
@@ -8756,16 +8798,25 @@ function removeEpAbminderung(idx) {
             });
 
             if (list.length === 0) {
-                html = `<tr><td colspan="5" class="p-8 text-center text-slate-400 italic">Keine aktiven Lehrkräfte für SJ ${appData.schoolYear} gefunden. Klicken Sie oben auf "Alle (inkl. Archiv)" oder auf "+ Neu".</td></tr>`;
+                html = `<tr><td colspan="6" class="p-8 text-center text-slate-400 italic">Keine aktiven Lehrkräfte für SJ ${appData.schoolYear} gefunden. Klicken Sie oben auf "Alle (inkl. Archiv)" oder auf "+ Neu".</td></tr>`;
             } else {
-                html += `<thead><tr class="text-slate-500 bg-slate-50 border-b border-slate-200 text-xs font-bold uppercase"><th class="p-2.5">Name der Lehrkraft</th><th class="p-2.5 text-center">Basis R / Wo</th><th class="p-2.5 text-center">Basis V / Mo</th><th class="p-2.5 text-center">PIN (Portal)</th><th class="p-2.5 text-center">Status in SJ ${appData.schoolYear}</th></tr></thead><tbody>`;
+                html += `<thead><tr class="text-slate-500 bg-slate-50 border-b border-slate-200 text-xs font-bold uppercase"><th class="p-2.5">Name der Lehrkraft</th><th class="p-2.5 text-center">Anrede / Geschlecht</th><th class="p-2.5 text-center">Basis R / Wo</th><th class="p-2.5 text-center">Basis V / Mo</th><th class="p-2.5 text-center">PIN (Portal)</th><th class="p-2.5 text-center">Status in SJ ${appData.schoolYear}</th></tr></thead><tbody>`;
                 list.forEach(t => {
                     let isActive = isTeacherActiveInYear(t.id, appData.schoolYear);
                     let bemFlag = tStats[t.id]?.bem ? `<span class="bem-alert inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-red-100 text-red-700 text-[10px] font-black border border-red-200 shadow-2xs ml-1" title="Achtung: >30 Kranktage. BEM!">${uiIcon('shield-alert', 'w-3 h-3')} BEM</span>` : '';
                     let teacherPin = t.pin || '1234';
+                    let gVal = t.gender || '';
                     html += `<tr class="hover:bg-slate-50 transition ${!isActive ? 'opacity-60 bg-slate-50/60' : ''}">
                         <td class="p-2 flex items-center gap-2">
                             <input type="text" value="${t.name}" class="bg-transparent outline-none w-full border-b-2 border-transparent focus:border-school-500 font-bold text-slate-700 p-2 transition" onchange="updateStaff('${t.id}', 'name', this.value)"> ${bemFlag}
+                        </td>
+                        <td class="p-2 text-center w-44">
+                            <select class="bg-white rounded border border-slate-200 outline-none w-full text-xs font-bold text-slate-700 p-1.5 transition shadow-sm focus:border-school-500" onchange="updateStaff('${t.id}', 'gender', this.value)" title="Anrede / Geschlecht für Kollegenzugang, Appportal & verknüpfte Apps">
+                                <option value="" ${gVal === '' ? 'selected' : ''}>— Keine Angabe</option>
+                                <option value="f" ${gVal === 'f' ? 'selected' : ''}>Frau (Weiblich)</option>
+                                <option value="m" ${gVal === 'm' ? 'selected' : ''}>Herr (Männlich)</option>
+                                <option value="d" ${gVal === 'd' ? 'selected' : ''}>Divers (ohne Herr/Frau)</option>
+                            </select>
                         </td>
                         <td class="p-2 text-center w-28">
                             <input type="number" min="0" value="${t.r}" class="bg-white rounded border border-slate-200 outline-none w-16 text-center focus:border-school-500 font-bold p-1.5 transition shadow-sm" onchange="updateStaff('${t.id}', 'r', this.value)" title="Basis R pro Woche">
@@ -8788,13 +8839,20 @@ function removeEpAbminderung(idx) {
             tbody.innerHTML = html;
         }
 
-        function openTeacherForm() { document.getElementById('new-teacher-name').value = ''; document.getElementById('modal-teacher').classList.remove('hidden'); document.getElementById('modal-teacher').classList.add('flex'); }
+        function openTeacherForm() {
+            document.getElementById('new-teacher-name').value = '';
+            const genderEl = document.getElementById('new-teacher-gender');
+            if (genderEl) genderEl.value = '';
+            document.getElementById('modal-teacher').classList.remove('hidden');
+            document.getElementById('modal-teacher').classList.add('flex');
+        }
         function closeTeacherModal() { document.getElementById('modal-teacher').classList.add('hidden'); document.getElementById('modal-teacher').classList.remove('flex'); }
         function saveTeacher() { 
             let name = document.getElementById('new-teacher-name').value.trim(); 
+            let gender = document.getElementById('new-teacher-gender')?.value || '';
             if(name) { 
                 let tId = 't_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
-                let newT = { id: tId, name: name, r: 0, v: 0, active: true, pin: generateTeacherPin() };
+                let newT = { id: tId, name: name, gender: gender, r: 0, v: 0, active: true, pin: generateTeacherPin() };
                 appData.teachers.push(newT); 
                 let yd = getYearData();
                 if (!yd.staffStatus) yd.staffStatus = {};
@@ -8802,7 +8860,7 @@ function removeEpAbminderung(idx) {
                 saveToLocal(); 
                 renderStaffView(); 
                 closeTeacherModal(); 
-                showToast(name + ` für SJ ${appData.schoolYear} hinzugefügt.`); 
+                showToast(`${formatTeacherName(newT)} für SJ ${appData.schoolYear} hinzugefügt (PIN: ${newT.pin}).`); 
             } 
         }
         function updateStaff(id, field, value) { 
@@ -8812,6 +8870,8 @@ function removeEpAbminderung(idx) {
                     t.pin = value.trim() || '1234';
                 } else if (field === 'name') {
                     t.name = value;
+                } else if (field === 'gender') {
+                    t.gender = value || '';
                 } else {
                     t[field] = value === "" ? 0 : parseInt(value);
                 }
@@ -9133,7 +9193,7 @@ function removeEpAbminderung(idx) {
             sorted.forEach(t => {
                 let opt = document.createElement('option');
                 opt.value = t.id;
-                opt.text = t.name;
+                opt.text = formatTeacherName(t);
                 select.appendChild(opt);
             });
 
@@ -9160,7 +9220,7 @@ function removeEpAbminderung(idx) {
             if (pin === teacherPin || pin === masterPin) {
                 portalUser = teacher;
                 portalYear = chosenYear;
-                showToast(`Willkommen, ${teacher.name}!`, "user");
+                showToast(`Willkommen, ${formatTeacherName(teacher)}!`, "user");
                 renderPortalDashboard();
             } else {
                 showToast("Falsche PIN. Bitte erneut versuchen.", "x");
@@ -9268,7 +9328,7 @@ function removeEpAbminderung(idx) {
             document.getElementById('portal-dashboard-screen').classList.remove('hidden');
             document.getElementById('portal-dashboard-screen').classList.add('flex');
 
-            document.getElementById('portal-greeting-name').innerText = portalUser.name;
+            document.getElementById('portal-greeting-name').innerText = formatTeacherName(portalUser);
             document.getElementById('portal-year-label').innerText = portalYear;
 
             // Dynamische Schuljahres-Auswahl: Nur Schuljahre anzeigen, in denen diese Lehrkraft aktiv war!
@@ -9537,7 +9597,7 @@ function removeEpAbminderung(idx) {
                 html += `
                     <tr>
                         <td class="print-num">${idx + 1}</td>
-                        <td style="font-weight: bold;">${t.name}</td>
+                        <td style="font-weight: bold;">${formatTeacherName(t)}</td>
                         <td class="print-num font-mono" style="font-size: 11pt; font-weight: bold; letter-spacing: 2px;">${pin}</td>
                     </tr>
                 `;
